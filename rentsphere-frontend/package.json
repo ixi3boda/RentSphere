@@ -1,23 +1,14 @@
 {
   "name": "rentsphere-frontend",
   "version": "0.1.0",
-  "private": true,
+  "proxy": "http://localhost:8080",
   "dependencies": {
-    "@testing-library/dom": "^10.4.1",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^13.5.0",
-    "autoprefixer": "^10.5.0",
-    "axios": "^1.15.2",
-    "framer-motion": "^12.38.0",
-    "postcss": "^8.5.12",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
-    "react-hook-form": "^7.74.0",
-    "react-router-dom": "^7.14.2",
-    "react-scripts": "5.0.1",
-    "tailwindcss": "^3.4.19",
-    "web-vitals": "^2.1.4"
+    "axios": "^1.4.0",
+    "framer-motion": "^10.16.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.14.0",
+    "react-scripts": "5.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -27,8 +18,7 @@
   },
   "eslintConfig": {
     "extends": [
-      "react-app",
-      "react-app/jest"
+      "react-app"
     ]
   },
   "browserslist": {
