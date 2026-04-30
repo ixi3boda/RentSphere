@@ -4,41 +4,60 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="074c0a9e-75b9-4769-b464-88ddf06ab1d3" name="Changes" comment="" />
+    <list default="true" id="074c0a9e-75b9-4769-b464-88ddf06ab1d3" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Controller/PropertyController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Controller/PropertyController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Repository/PropertyRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Repository/PropertyRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Service/PropertyService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Service/PropertyService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Controller/PropertyController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Controller/PropertyController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Repository/PropertyRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Repository/PropertyRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Service/PropertyService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Service/PropertyService.class" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 8,
-  "fromUser": false
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8,
+  &quot;fromUser&quot;: false
+}</component>
   <component name="ProjectId" id="3Co8bqvWet7WFqU2ztTN3GQ8ovA" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "Backend",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/abdelrahmanessam/Downloads/RentSphere",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;backend__properties&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/abdelrahmanessam/Downloads/RentSphere&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="074c0a9e-75b9-4769-b464-88ddf06ab1d3" name="Changes" comment="" />
@@ -47,6 +66,10 @@
       <option name="presentableId" value="Default" />
       <updated>1777040636605</updated>
       <workItem from="1777040637619" duration="36000" />
+      <workItem from="1777467750142" duration="611000" />
+      <workItem from="1777477817045" duration="15611000" />
+      <workItem from="1777563262162" duration="2078000" />
+      <workItem from="1777573790249" duration="2309000" />
     </task>
     <servers />
   </component>

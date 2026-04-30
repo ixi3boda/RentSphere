@@ -18,6 +18,7 @@ CREATE TABLE users (
     full_name       VARCHAR(120)          NOT NULL,
     email           VARCHAR(180)          NOT NULL,
     username        VARCHAR(200)          NOT NULL,
+    role_name       VARCHAR(50)           NOT NULL,
     password_hash   VARCHAR(255)          NOT NULL,   -- BCrypt hash, never plain-text
     mobile_number   VARCHAR(20)           NULL,
     avatar_url      VARCHAR(500)          NULL,       -- Cloudinary URL
@@ -25,16 +26,8 @@ CREATE TABLE users (
     created_at      DATETIME              NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      DATETIME              NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id),
-    CONSTRAINT uq_users_email UNIQUE (email)
-);
-
--- user_roles 
-CREATE TABLE user_roles (
-    user_id INT  UNSIGNED NOT NULL,
-    role_name VARCHAR(50)  NOT NULL,
-    PRIMARY KEY (user_id, role_name),
-    CONSTRAINT chk_role_name CHECK (role_name IN ('OWNER', 'TENANT', 'ADMIN', 'VISITOR')),
-    CONSTRAINT fk_user_roles_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
+    CONSTRAINT uq_users_email UNIQUE (email),
+    CONSTRAINT chk_role_name CHECK (role_name IN ('TENANT', 'ADMIN', 'VISITOR')),
 );
 
 -- properties

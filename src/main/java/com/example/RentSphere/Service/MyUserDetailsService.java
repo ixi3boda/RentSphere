@@ -20,6 +20,7 @@ public class MyUserDetailsService implements UserDetailsService {
                 .map(userDto -> org.springframework.security.core.userdetails.User
                         .withUsername(userDto.getEmail())
                         .password(userDto.getPassword_hash())
+                        .roles(userDto.getRole_name())
                         .build())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     }
