@@ -32,8 +32,21 @@ public class PropertyService {
         propertyRepository.saveImage(property_id, image_url, is_cover);
     }
 
-    public void update(Property dto) {
-        propertyRepository.update(dto);
+    public void update(Long property_id,
+                       String property_type,
+                       String title,
+                       String property_description,
+                       Double price_per_month,
+                       String city,
+                       String district,
+                       String address,
+                       Double latitude,
+                       Double longitude,
+                       Integer num_rooms,
+                       Double area_sqm,
+                       Boolean is_available) {
+        propertyRepository.update(property_id, property_type, title, property_description,
+                price_per_month, city, district, address, latitude, longitude, num_rooms, area_sqm, is_available);
     }
 
     public void delete(Long id) {
