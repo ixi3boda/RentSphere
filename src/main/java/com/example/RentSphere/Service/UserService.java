@@ -32,10 +32,11 @@ public class UserService {
                 .created_at(LocalDateTime.now())
                 .updated_at(LocalDateTime.now())
                 .mobile_number(request.getMobile_number())
+                .role_name("VISITOR")
                 .is_active(true)
                 .build();
         userRepository.save(user);
-        String token = jwtService.generateToken(user.getEmail());
+        String token = jwtService.generateToken(user.getEmail(),"VISITOR");
         return AuthResponse.builder().token(token).build();
     }
 
@@ -50,15 +51,17 @@ public class UserService {
                 .orElseThrow(() ->
                         new RuntimeException("User not found with email: " + request.getEmail())
                 );
-        String token = jwtService.generateToken(request.getEmail());
+        String token = jwtService.generateToken(request.getEmail(),user.getRole_name());
         return AuthResponse.builder().token(token).build();
     }
 
-    public UserDetails getCurrentUser(String email){
+    public User getCurrentUser(String email){
         if (email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException("Email is required");
         }
-        return userRepository.getCurrentUser(email);
+        return userRepository.findByEmail(email).orElseThrow(() ->
+                new RuntimeException("User not found with email: " + email)
+        );
     }
 
 }

@@ -23,6 +23,8 @@ public class User {
 
     private String username;
 
+    private String role_name;
+
     private String full_name;
 
     private String avatar_url;
