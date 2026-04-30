@@ -5,32 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="074c0a9e-75b9-4769-b464-88ddf06ab1d3" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Controller/PropertyController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/Favorite.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/Property.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/PropertyDetails.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Repository/PropertyRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Service/PropertyService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/Schema.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/Role.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/UserDetails.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Repository/UserRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/SecurityConfig/JwtService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/SecurityConfig/JwtService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Service/MyUserDetailsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Service/MyUserDetailsService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Service/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Controller/UserController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Controller/UserController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/Role.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/User$UserBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/User$UserBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/User.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/User.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/UserDetails$UserDetailsBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/UserDetails.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Repository/UserRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Repository/UserRepository.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/SecurityConfig/JwtService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/RentSphere/SecurityConfig/JwtService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Service/MyUserDetailsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Service/MyUserDetailsService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Service/UserService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Service/UserService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Controller/PropertyController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Controller/PropertyController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Repository/PropertyRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Repository/PropertyRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Service/PropertyService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Service/PropertyService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Controller/PropertyController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Controller/PropertyController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Repository/PropertyRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Repository/PropertyRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Service/PropertyService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Service/PropertyService.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,6 +69,7 @@
       <workItem from="1777467750142" duration="611000" />
       <workItem from="1777477817045" duration="15611000" />
       <workItem from="1777563262162" duration="2078000" />
+      <workItem from="1777573790249" duration="2309000" />
     </task>
     <servers />
   </component>

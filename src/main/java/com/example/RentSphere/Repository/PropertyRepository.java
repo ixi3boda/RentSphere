@@ -174,40 +174,95 @@ public class PropertyRepository {
         return Optional.of(details);
     }
 
-    public int update(Property p) {
-        String sql = """
-            UPDATE properties SET
-            property_type=?,
-            title=?,
-            property_description=?,
-            price_per_month=?,
-            city=?,
-            district=?,
-            address=?,
-            latitude=?,
-            longitude=?,
-            num_rooms=?,
-            area_sqm=?,
-            is_available=?,
-            updated_at=CURRENT_TIMESTAMP
-            WHERE property_id=?
-        """;
+    public int update(
+            Long property_id,
+            String property_type,
+            String title,
+            String property_description,
+            Double price_per_month,
+            String city,
+            String district,
+            String address,
+            Double latitude,
+            Double longitude,
+            Integer num_rooms,
+            Double area_sqm,
+            Boolean is_available
+    ) {
 
-        return jdbcTemplate.update(sql,
-                p.getPropertyType(),
-                p.getTitle(),
-                p.getPropertyDescription(),
-                p.getPricePerMonth(),
-                p.getCity(),
-                p.getDistrict(),
-                p.getAddress(),
-                p.getLatitude(),
-                p.getLongitude(),
-                p.getNumRooms(),
-                p.getAreaSqm(),
-                p.getIsAvailable(),
-                p.getPropertyId()
-        );
+        StringBuilder sql = new StringBuilder("UPDATE properties SET ");
+        List<Object> params = new ArrayList<>();
+
+        if (property_type != null) {
+            sql.append("property_type = ?, ");
+            params.add(property_type);
+        }
+
+        if (title != null) {
+            sql.append("title = ?, ");
+            params.add(title);
+        }
+
+        if (property_description != null) {
+            sql.append("property_description = ?, ");
+            params.add(property_description);
+        }
+
+        if (price_per_month != null) {
+            sql.append("price_per_month = ?, ");
+            params.add(price_per_month);
+        }
+
+        if (city != null && !city.isBlank()) {
+            sql.append("city = ?, ");
+            params.add(city);
+        }
+
+        if (district != null && !district.isBlank()) {
+            sql.append("district = ?, ");
+            params.add(district);
+        }
+
+        if (address != null && !address.isBlank()) {
+            sql.append("address = ?, ");
+            params.add(address);
+        }
+
+        if (latitude != null) {
+            sql.append("latitude = ?, ");
+            params.add(latitude);
+        }
+
+        if (longitude != null) {
+            sql.append("longitude = ?, ");
+            params.add(longitude);
+        }
+
+        if (num_rooms != null) {
+            sql.append("num_rooms = ?, ");
+            params.add(num_rooms);
+        }
+
+        if (area_sqm != null) {
+            sql.append("area_sqm = ?, ");
+            params.add(area_sqm);
+        }
+
+        if (is_available != null) {
+            sql.append("is_available = ?, ");
+            params.add(is_available);
+        }
+
+        if (params.isEmpty()) {
+            throw new RuntimeException("No fields to update");
+        }
+
+        sql.setLength(sql.length() - 2);
+
+        sql.append(", updated_at = CURRENT_TIMESTAMP WHERE property_id = ?");
+        params.add(property_id);
+
+        return jdbcTemplate.update(sql.toString(), params.toArray());
     }
 
     public int delete(Long id) {

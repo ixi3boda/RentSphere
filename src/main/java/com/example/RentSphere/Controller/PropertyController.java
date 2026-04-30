@@ -34,15 +34,15 @@ public class PropertyController {
         return ResponseEntity.status(status).body(errorResponse);
     }
 
-    @PostMapping("/{propertyId}/images/add")
+    @PostMapping("/{id}/images/add")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addPropertyImage(
-            @PathVariable Long property_id,
+            @PathVariable Long id,
             @RequestParam String image_url,
             @RequestParam(defaultValue = "false") boolean is_cover
     ) {
         try {
-            propertyService.addImage(property_id, image_url, is_cover);
+            propertyService.addImage(id, image_url, is_cover);
             return ResponseEntity.ok("Image added successfully");
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -95,11 +95,24 @@ public class PropertyController {
         }
     }
 
-    @PutMapping("/update")
+    @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> update(@RequestBody Property dto) {
+    public ResponseEntity<?> update(@PathVariable Long id,
+                                    @RequestParam(required = false)String property_type,
+                                    @RequestParam(required = false)String title,
+                                    @RequestParam(required = false)String property_description,
+                                    @RequestParam(required = false)Double price_per_month,
+                                    @RequestParam(required = false)String city,
+                                    @RequestParam(required = false)String district,
+                                    @RequestParam(required = false)String address,
+                                    @RequestParam(required = false)Double latitude,
+                                    @RequestParam(required = false)Double longitude,
+                                    @RequestParam(required = false)Integer num_rooms,
+                                    @RequestParam(required = false)Double area_sqm,
+                                    @RequestParam(required = false)Boolean is_available) {
         try {
-            propertyService.update(dto);
+            propertyService.update(id, property_type, title, property_description, price_per_month,
+                    city, district, address, latitude, longitude, num_rooms, area_sqm, is_available);
             return ResponseEntity.ok("Property updated successfully");
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -167,7 +180,7 @@ public class PropertyController {
         }
     }
 
-    @GetMapping("/favorite")
+    @PostMapping("/favorite")
     public ResponseEntity<?> favorite(@RequestParam int property_id, Principal principal) {
         try {
             String email = principal.getName();
