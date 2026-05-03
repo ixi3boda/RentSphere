@@ -1,6 +1,5 @@
 // src/components/AnimatedPage.js
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
 
 // Install framer-motion first: npm install framer-motion
 

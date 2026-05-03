@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { AnimatedPage, AnimatedButton, LoadingSpinner } from '../components/AnimatedPage';
+import { AnimatedPage, AnimatedButton } from '../components/AnimatedPage';
+
 import { motion } from 'framer-motion';
 
 function Login() {
