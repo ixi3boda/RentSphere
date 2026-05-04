@@ -1,8 +1,10 @@
 package com.example.RentSphere.Controller;
 
+import com.example.RentSphere.Dto.CreatePropertyRequest;
 import com.example.RentSphere.Dto.ErrorResponse;
-import com.example.RentSphere.Dto.Property;
+import com.example.RentSphere.Dto.Favorite;
 import com.example.RentSphere.Dto.PropertyDetails;
+import com.example.RentSphere.Dto.UpdatePropertyRequest;
 import com.example.RentSphere.Dto.User;
 import com.example.RentSphere.Service.PropertyService;
 import com.example.RentSphere.Service.UserService;
@@ -34,6 +36,24 @@ public class PropertyController {
         return ResponseEntity.status(status).body(errorResponse);
     }
 
+    @PostMapping("/add")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> addProperty(
+            @RequestBody CreatePropertyRequest request,
+            Principal principal
+    ) {
+        try {
+            String email = principal.getName();
+            int userId = userService.getCurrentUser(email).getUser_id();
+            PropertyDetails created = propertyService.addProperty(request, userId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalArgumentException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return buildErrorResponse("Failed to create property: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping("/{id}/images/add")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addPropertyImage(
@@ -47,37 +67,16 @@ public class PropertyController {
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            return buildErrorResponse(
-                    "Failed to add image: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR
-            );
-        }
-    }
-
-    @PostMapping("/add")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> addProperty(@RequestBody Property dto,@RequestParam(required = false) String coverPic, Principal principal) {
-        try {
-            String email = principal.getName();
-            int user_id = userService.getCurrentUser(email).getUser_id();
-            propertyService.addProperty(dto,user_id,coverPic);
-            return ResponseEntity.ok("Property created successfully");
-        } catch (IllegalArgumentException e) {
-            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            return buildErrorResponse("Failed to create property: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to add image: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/all")
     public ResponseEntity<?> getAll() {
         try {
-            List<PropertyDetails> properties = propertyService.getAll();
-            return ResponseEntity.ok(properties);
+            return ResponseEntity.ok(propertyService.getAll());
         } catch (Exception e) {
-            return buildErrorResponse("Failed to fetch properties: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to fetch properties: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -90,41 +89,29 @@ public class PropertyController {
         } catch (RuntimeException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            return buildErrorResponse("Failed to fetch property: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to fetch property: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}/update")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> update(@PathVariable Long id,
-                                    @RequestParam(required = false)String property_type,
-                                    @RequestParam(required = false)String title,
-                                    @RequestParam(required = false)String property_description,
-                                    @RequestParam(required = false)Double price_per_month,
-                                    @RequestParam(required = false)String city,
-                                    @RequestParam(required = false)String district,
-                                    @RequestParam(required = false)String address,
-                                    @RequestParam(required = false)Double latitude,
-                                    @RequestParam(required = false)Double longitude,
-                                    @RequestParam(required = false)Integer num_rooms,
-                                    @RequestParam(required = false)Double area_sqm,
-                                    @RequestParam(required = false)Boolean is_available) {
+    public ResponseEntity<?> update(
+            @PathVariable Long id,
+            @RequestBody UpdatePropertyRequest request
+    ) {
         try {
-            propertyService.update(id, property_type, title, property_description, price_per_month,
-                    city, district, address, latitude, longitude, num_rooms, area_sqm, is_available);
+            propertyService.update(id, request);
             return ResponseEntity.ok("Property updated successfully");
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (RuntimeException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            return buildErrorResponse("Failed to update property: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to update property: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}/delete")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         try {
@@ -133,8 +120,7 @@ public class PropertyController {
         } catch (RuntimeException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            return buildErrorResponse("Failed to delete property: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to delete property: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -159,10 +145,7 @@ public class PropertyController {
                     )
             );
         } catch (Exception e) {
-            return buildErrorResponse(
-                    "Failed to search properties: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR
-            );
+            return buildErrorResponse("Failed to search properties: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -173,46 +156,36 @@ public class PropertyController {
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            return buildErrorResponse(
-                    "Search failed: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR
-            );
+            return buildErrorResponse("Search failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @PostMapping("/favorite")
-    public ResponseEntity<?> favorite(@RequestParam int property_id, Principal principal) {
+    @PostMapping("/{propertyId}/favorite")
+    public ResponseEntity<?> favorite(
+            @PathVariable int propertyId,
+            Principal principal
+    ) {
         try {
             String email = principal.getName();
-            User userDetails = userService.getCurrentUser(email);
-            int tenant_id = userDetails.getUser_id();
-            return ResponseEntity.ok(propertyService.favorite(property_id,tenant_id));
+            int tenantId = userService.getCurrentUser(email).getUser_id();
+            return ResponseEntity.ok(propertyService.favorite(propertyId, tenantId));
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            return buildErrorResponse(
-                    "Favorite failed: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR
-            );
+            return buildErrorResponse("Favorite failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/favorites/all")
-    public ResponseEntity<?> getAllfavorites(Principal principal) {
+    public ResponseEntity<?> getAllFavorites(Principal principal) {
         try {
             String email = principal.getName();
-            User userDetails = userService.getCurrentUser(email);
-            int tenant_id = userDetails.getUser_id();
-            return ResponseEntity.ok(propertyService.getAllFavorites(tenant_id));
+            int tenantId = userService.getCurrentUser(email).getUser_id();
+            return ResponseEntity.ok(propertyService.getAllFavorites(tenantId));
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            return buildErrorResponse(
-                    "Favorite List failed: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR
-            );
+            return buildErrorResponse("Favorite list failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
 }
