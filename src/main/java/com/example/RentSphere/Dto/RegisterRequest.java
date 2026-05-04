@@ -15,5 +15,4 @@ public class RegisterRequest {
     private String full_name;
     private String mobile_number;
     private String avatar_url;
-
 }

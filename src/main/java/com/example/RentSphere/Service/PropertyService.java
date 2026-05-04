@@ -1,8 +1,9 @@
 package com.example.RentSphere.Service;
 
+import com.example.RentSphere.Dto.CreatePropertyRequest;
 import com.example.RentSphere.Dto.Favorite;
-import com.example.RentSphere.Dto.Property;
 import com.example.RentSphere.Dto.PropertyDetails;
+import com.example.RentSphere.Dto.UpdatePropertyRequest;
 import com.example.RentSphere.Repository.PropertyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,11 +16,11 @@ public class PropertyService {
 
     private final PropertyRepository propertyRepository;
 
-    public PropertyDetails addProperty(Property dto,int user_id,String coverPic) {
-       return propertyRepository.addProperty(dto,user_id,coverPic);
+    public PropertyDetails addProperty(CreatePropertyRequest request, int userId) {
+        return propertyRepository.addProperty(request, userId);
     }
 
-    public List <PropertyDetails> getAll() {
+    public List<PropertyDetails> getAll() {
         return propertyRepository.findAll();
     }
 
@@ -28,29 +29,25 @@ public class PropertyService {
                 .orElseThrow(() -> new RuntimeException("Property not found"));
     }
 
-    public void addImage(Long property_id, String image_url, boolean is_cover) {
-        propertyRepository.saveImage(property_id, image_url, is_cover);
+    public void addImage(Long propertyId, String imageUrl, boolean isCover) {
+        propertyRepository.saveImage(propertyId, imageUrl, isCover);
     }
 
-    public void update(Long property_id,
-                       String property_type,
-                       String title,
-                       String property_description,
-                       Double price_per_month,
-                       String city,
-                       String district,
-                       String address,
-                       Double latitude,
-                       Double longitude,
-                       Integer num_rooms,
-                       Double area_sqm,
-                       Boolean is_available) {
-        propertyRepository.update(property_id, property_type, title, property_description,
-                price_per_month, city, district, address, latitude, longitude, num_rooms, area_sqm, is_available);
+    public void update(Long propertyId, UpdatePropertyRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Update payload is required");
+        }
+        int rowsUpdated = propertyRepository.update(propertyId, request);
+        if (rowsUpdated == 0) {
+            throw new RuntimeException("Property not found");
+        }
     }
 
     public void delete(Long id) {
-        propertyRepository.delete(id);
+        int deleted = propertyRepository.delete(id);
+        if (deleted == 0) {
+            throw new RuntimeException("Property not found");
+        }
     }
 
     public List<PropertyDetails> filterProperties(
@@ -75,11 +72,11 @@ public class PropertyService {
         return propertyRepository.searchByPrefix(prefix.trim());
     }
 
-    public Favorite favorite(int property_id,int tenant_id){
-        return propertyRepository.favorite(property_id,tenant_id);
+    public Favorite favorite(int propertyId, int tenantId) {
+        return propertyRepository.favorite(propertyId, tenantId);
     }
 
-    public List <Favorite> getAllFavorites(int tenant_id){
-        return propertyRepository.getAllFavorites(tenant_id);
+    public List<Favorite> getAllFavorites(int tenantId) {
+        return propertyRepository.getAllFavorites(tenantId);
     }
 }
