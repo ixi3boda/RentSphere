@@ -1,11 +1,14 @@
 package com.example.RentSphere.Controller;
 
-import com.example.RentSphere.Dto.*;
+import com.example.RentSphere.Dto.AuthResponse;
+import com.example.RentSphere.Dto.ErrorResponse;
+import com.example.RentSphere.Dto.LoginRequest;
+import com.example.RentSphere.Dto.RegisterRequest;
+import com.example.RentSphere.Dto.User;
 import com.example.RentSphere.Service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -59,7 +62,6 @@ public class UserController {
             return buildErrorResponse("Failed to retrieve user details: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-    }
+}
 
 

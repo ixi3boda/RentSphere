@@ -56,9 +56,6 @@ public class UserService {
     }
 
     public User getCurrentUser(String email){
-        if (email == null || email.trim().isEmpty()) {
-            throw new IllegalArgumentException("Email is required");
-        }
         return userRepository.findByEmail(email).orElseThrow(() ->
                 new RuntimeException("User not found with email: " + email)
         );

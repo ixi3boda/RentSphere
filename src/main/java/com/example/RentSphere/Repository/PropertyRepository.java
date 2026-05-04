@@ -1,8 +1,10 @@
 package com.example.RentSphere.Repository;
 
+import com.example.RentSphere.Dto.CreatePropertyRequest;
 import com.example.RentSphere.Dto.Favorite;
 import com.example.RentSphere.Dto.Property;
 import com.example.RentSphere.Dto.PropertyDetails;
+import com.example.RentSphere.Dto.UpdatePropertyRequest;
 import com.example.RentSphere.Dto.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -84,7 +86,7 @@ public class PropertyRepository {
         return jdbcTemplate.update(sql, property_id, image_url, is_cover);
     }
 
-    public PropertyDetails addProperty(Property p, int user_id, String coverPic) {
+    public PropertyDetails addProperty(CreatePropertyRequest request, int user_id) {
 
         String insertSql = """
         INSERT INTO properties
@@ -96,18 +98,18 @@ public class PropertyRepository {
 
         jdbcTemplate.update(insertSql,
                 user_id,
-                p.getPropertyType(),
-                p.getTitle(),
-                p.getPropertyDescription(),
-                p.getPricePerMonth(),
-                p.getCity(),
-                p.getDistrict(),
-                p.getAddress(),
-                p.getLatitude(),
-                p.getLongitude(),
-                p.getNumRooms(),
-                p.getAreaSqm(),
-                p.getIsAvailable()
+                request.getPropertyType(),
+                request.getTitle(),
+                request.getPropertyDescription(),
+                request.getPricePerMonth(),
+                request.getCity(),
+                request.getDistrict(),
+                request.getAddress(),
+                request.getLatitude(),
+                request.getLongitude(),
+                request.getNumRooms(),
+                request.getAreaSqm(),
+                request.getIsAvailable() == null ? true : request.getIsAvailable()
         );
 
         Long propertyId = jdbcTemplate.queryForObject(
@@ -115,8 +117,12 @@ public class PropertyRepository {
                 Long.class
         );
 
-        if (coverPic != null && !coverPic.isBlank()) {
-            saveImage(propertyId, coverPic, true);
+        if (propertyId == null) {
+            throw new RuntimeException("Property creation failed");
+        }
+
+        if (request.getCoverPic() != null && !request.getCoverPic().isBlank()) {
+            saveImage(propertyId, request.getCoverPic(), true);
         }
 
         return findById(propertyId)
@@ -174,83 +180,69 @@ public class PropertyRepository {
         return Optional.of(details);
     }
 
-    public int update(
-            Long property_id,
-            String property_type,
-            String title,
-            String property_description,
-            Double price_per_month,
-            String city,
-            String district,
-            String address,
-            Double latitude,
-            Double longitude,
-            Integer num_rooms,
-            Double area_sqm,
-            Boolean is_available
-    ) {
+    public int update(Long property_id, UpdatePropertyRequest request) {
 
         StringBuilder sql = new StringBuilder("UPDATE properties SET ");
         List<Object> params = new ArrayList<>();
 
-        if (property_type != null) {
+        if (request.getPropertyType() != null) {
             sql.append("property_type = ?, ");
-            params.add(property_type);
+            params.add(request.getPropertyType());
         }
 
-        if (title != null) {
+        if (request.getTitle() != null) {
             sql.append("title = ?, ");
-            params.add(title);
+            params.add(request.getTitle());
         }
 
-        if (property_description != null) {
+        if (request.getPropertyDescription() != null) {
             sql.append("property_description = ?, ");
-            params.add(property_description);
+            params.add(request.getPropertyDescription());
         }
 
-        if (price_per_month != null) {
+        if (request.getPricePerMonth() != null) {
             sql.append("price_per_month = ?, ");
-            params.add(price_per_month);
+            params.add(request.getPricePerMonth());
         }
 
-        if (city != null && !city.isBlank()) {
+        if (request.getCity() != null) {
             sql.append("city = ?, ");
-            params.add(city);
+            params.add(request.getCity());
         }
 
-        if (district != null && !district.isBlank()) {
+        if (request.getDistrict() != null) {
             sql.append("district = ?, ");
-            params.add(district);
+            params.add(request.getDistrict());
         }
 
-        if (address != null && !address.isBlank()) {
+        if (request.getAddress() != null) {
             sql.append("address = ?, ");
-            params.add(address);
+            params.add(request.getAddress());
         }
 
-        if (latitude != null) {
+        if (request.getLatitude() != null) {
             sql.append("latitude = ?, ");
-            params.add(latitude);
+            params.add(request.getLatitude());
         }
 
-        if (longitude != null) {
+        if (request.getLongitude() != null) {
             sql.append("longitude = ?, ");
-            params.add(longitude);
+            params.add(request.getLongitude());
         }
 
-        if (num_rooms != null) {
+        if (request.getNumRooms() != null) {
             sql.append("num_rooms = ?, ");
-            params.add(num_rooms);
+            params.add(request.getNumRooms());
         }
 
-        if (area_sqm != null) {
+        if (request.getAreaSqm() != null) {
             sql.append("area_sqm = ?, ");
-            params.add(area_sqm);
+            params.add(request.getAreaSqm());
         }
 
-        if (is_available != null) {
+        if (request.getIsAvailable() != null) {
             sql.append("is_available = ?, ");
-            params.add(is_available);
+            params.add(request.getIsAvailable());
         }
 
         if (params.isEmpty()) {
@@ -258,7 +250,6 @@ public class PropertyRepository {
         }
 
         sql.setLength(sql.length() - 2);
-
         sql.append(", updated_at = CURRENT_TIMESTAMP WHERE property_id = ?");
         params.add(property_id);
 
