@@ -98,13 +98,11 @@ export const propertyApi = {
     apiClient.get("/api/properties/search", { params: { prefix } }),
 
   /**
-   * POST /api/properties/favorite?property_id=...  (authenticated tenant)
-   * Toggles favorite on/off and returns updated state.
+   * POST /api/properties/{propertyId}/favorite  (authenticated tenant)
+   * Marks property as favorite for the current tenant.
    */
-  favorite: (property_id) =>
-    apiClient.post("/api/properties/favorite", null, {
-      params: { property_id },
-    }),
+  favorite: (propertyId) =>
+    apiClient.post(`/api/properties/${propertyId}/favorite`),
 
   /**
    * GET /api/properties/favorites/all  (authenticated tenant)

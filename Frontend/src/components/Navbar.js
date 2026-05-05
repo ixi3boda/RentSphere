@@ -122,16 +122,6 @@ useEffect(() => {
                     </motion.button>
                   </Link>
 
-                  <Link to="/favorites">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="text-gray-700 hover:text-rentsphere-teal transition-colors"
-                    >
-                      🤍 Favorites
-                    </motion.button>
-                  </Link>
-
                   {user?.role === 'owner' && (
                     <Link to="/owner/dashboard">
                       <motion.button
@@ -251,9 +241,6 @@ useEffect(() => {
                   </Link>
                   <Link to="/properties">
                     <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">🏘️ Browse</button>
-                  </Link>
-                  <Link to="/favorites">
-                    <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">🤍 Favorites</button>
                   </Link>
                   <Link to="/profile">
                     <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Profile</button>

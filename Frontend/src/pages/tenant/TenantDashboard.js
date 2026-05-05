@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { AnimatedPage, LoadingSpinner } from '../../components/AnimatedPage';
 import PropertyCard from '../../components/PropertyCard';
-import StatsCard from '../../components/StatsCard';
 import { propertyApi } from '../../utils/api';
 import { mapPropertyToFrontend } from '../../utils/mappers';
 import { getRecentlyViewed } from '../../utils/recentlyViewed';
@@ -76,39 +75,48 @@ function TenantDashboard() {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08 }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10"
+            className="mb-10"
           >
-            <StatsCard
-              icon="🤍"
-              label="Saved Favorites"
-              value={favorites.length}
-              subLabel="Properties you bookmarked"
-              accent="orange"
-            />
-            <StatsCard
-              icon="🕘"
-              label="Recently Viewed"
-              value={recentlyViewed.length}
-              subLabel="Properties you opened"
-              accent="blue"
-            />
-            <StatsCard
-              icon="🏘️"
-              label="Browse Listings"
-              value="Live"
-              subLabel="Open the property catalog"
-              accent="teal"
-            />
-            <StatsCard
-              icon="👤"
-              label="Profile"
-              value={user?.name || 'Tenant'}
-              subLabel="Your account overview"
-              accent="blue"
-            />
+            <motion.div
+              animate={{ y: [0, -4, 0], scale: [1, 1.01, 1] }}
+              transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut' }}
+              className="relative overflow-hidden rounded-3xl p-7 sm:p-8 text-white shadow-2xl"
+              style={{
+                background:
+                  'linear-gradient(120deg, rgba(13,148,136,1) 0%, rgba(59,130,246,1) 45%, rgba(251,146,60,1) 100%)',
+              }}
+            >
+              <motion.div
+                animate={{ x: ['-120%', '120%'] }}
+                transition={{ duration: 2.8, repeat: Infinity, repeatDelay: 1.2, ease: 'easeInOut' }}
+                className="absolute inset-y-0 w-1/3 bg-white/15 blur-2xl"
+              />
+
+              <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+                <div>
+                  <p className="text-white/80 text-sm font-semibold tracking-wide uppercase mb-1">
+                    Your Properties Catalog
+                  </p>
+                  <h2 className="text-3xl sm:text-4xl font-extrabold leading-tight">
+                    Discover your next home
+                  </h2>
+                  <p className="text-white/85 mt-2 max-w-2xl">
+                    Browse the full live catalog, then save the listings you love.
+                  </p>
+                </div>
+
+                <motion.div
+                  animate={{ rotate: [0, -6, 6, 0] }}
+                  transition={{ duration: 3.6, repeat: Infinity, ease: 'easeInOut' }}
+                  className="text-6xl sm:text-7xl self-end sm:self-auto"
+                >
+                  🏘️
+                </motion.div>
+              </div>
+            </motion.div>
           </motion.div>
 
           {error && (
@@ -124,7 +132,7 @@ function TenantDashboard() {
             className="flex items-center justify-between mb-6"
           >
             <div>
-              <h2 className="text-2xl font-bold text-gray-800">Your Favorites</h2>
+              <h2 className="text-2xl font-bold text-gray-800">Your Favorites: {favorites.length} saved</h2>
               <p className="text-sm text-gray-400">Saved properties pulled directly from the database</p>
             </div>
             <Link to="/favorites" className="btn-secondary inline-flex !py-2 !px-5 text-sm">
@@ -175,7 +183,7 @@ function TenantDashboard() {
             className="flex items-center justify-between mt-14 mb-6"
           >
             <div>
-              <h2 className="text-2xl font-bold text-gray-800">Recently Viewed</h2>
+              <h2 className="text-2xl font-bold text-gray-800">Recently Viewed: {recentlyViewed.length} properties</h2>
               <p className="text-sm text-gray-400">Your latest property visits, stored in this browser</p>
             </div>
             <button
