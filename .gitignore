@@ -15,7 +15,7 @@ target/
 .idea/
 .vscode/
 *.iml
-
+*.class
 # OS
 .DS_Store
 Thumbs.db
