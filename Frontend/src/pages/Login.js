@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [staySignedIn, setStaySignedIn] = useState(false);
   const [error, setError] = useState('');
   const { login, loading } = useAuth();
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ function Login() {
     e.preventDefault();
     setError('');
     
-    const result = await login(email, password);
+    const result = await login(email, password, staySignedIn);
     
     if (result.success) {
       navigate('/');
@@ -91,6 +92,19 @@ function Login() {
                 placeholder="••••••••"
                 required
               />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                id="stay-signed-in"
+                type="checkbox"
+                checked={staySignedIn}
+                onChange={(e) => setStaySignedIn(e.target.checked)}
+                className="h-4 w-4 text-rentsphere-teal rounded"
+              />
+              <label htmlFor="stay-signed-in" className="text-sm text-gray-600">
+                Stay signed in
+              </label>
             </div>
 
             <AnimatedButton type="submit" loading={loading}>

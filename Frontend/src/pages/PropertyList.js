@@ -10,6 +10,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedPage } from "../components/AnimatedPage";
 import PropertyCard from "../components/PropertyCard";
+import { useAuth } from "../context/AuthContext";
 import { propertyApi } from "../utils/api";
 import { mapPropertyToFrontend } from "../utils/mappers";
 import useDebounce from "../hooks/useDebounce";
@@ -54,15 +55,19 @@ function SkeletonCard() {
 // PropertyList Page
 // ---------------------------------------------------------------------------
 function PropertyList() {
+  const { isAuthenticated } = useAuth();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState("");
+  const [favoriteIds, setFavoriteIds] = useState(new Set());
 
   // Search / filter state
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+  const [minPrice, setMinPrice] = useState("");
   const [sortBy, setSortBy] = useState("newest");
 
   // RS-11: debounce the search term 300ms
@@ -104,10 +109,34 @@ function PropertyList() {
     }
   }, []);
 
+  const fetchFavorites = useCallback(async () => {
+    if (!isAuthenticated) {
+      setFavoriteIds(new Set());
+      return;
+    }
+
+    try {
+      const res = await propertyApi.getFavorites();
+      const list = Array.isArray(res.data) ? res.data : [];
+      const nextIds = new Set(
+        list
+          .map((item) => String(item?.propertyDetails?.property?.propertyId))
+          .filter(Boolean),
+      );
+      setFavoriteIds(nextIds);
+    } catch (err) {
+      setFavoriteIds(new Set());
+    }
+  }, [isAuthenticated]);
+
   // Initial load
   useEffect(() => {
     fetchProperties();
   }, [fetchProperties]);
+
+  useEffect(() => {
+    fetchFavorites();
+  }, [fetchFavorites]);
 
   // RS-11: re-fetch on debounced search changes
   useEffect(() => {
@@ -127,8 +156,10 @@ function PropertyList() {
   const filtered = properties
     .filter((p) => {
       const matchType = !typeFilter || p.propertyType === typeFilter;
-      const matchPrice = !maxPrice || Number(p.price) <= Number(maxPrice);
-      return matchType && matchPrice;
+      const matchMin = !minPrice || Number(p.price) >= Number(minPrice);
+      const matchMax = !maxPrice || Number(p.price) <= Number(maxPrice);
+      const matchLocation = !locationFilter || (p.location || '').toLowerCase() === locationFilter.toLowerCase();
+      return matchType && matchMin && matchMax && matchLocation;
     })
     .sort((a, b) => {
       if (sortBy === "price_asc") return a.price - b.price;
@@ -138,13 +169,15 @@ function PropertyList() {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const hasFilters = search || typeFilter || maxPrice;
+  const hasFilters = search || typeFilter || maxPrice || minPrice || locationFilter;
   const activeSearch = debouncedSearch;
 
   const clearFilters = () => {
     setSearch("");
     setTypeFilter("");
     setMaxPrice("");
+    setMinPrice("");
+    setLocationFilter("");
     setSortBy("newest");
   };
 
@@ -232,7 +265,37 @@ function PropertyList() {
               ))}
             </select>
 
-            {/* Max price */}
+            {/* Location (derived from loaded properties) */}
+            <select
+              id="filter-location"
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+              className="input-field bg-white min-w-[160px] flex-shrink-0"
+            >
+              <option value="">All Locations</option>
+              {Array.from(new Set(properties.map((p) => p.location).filter(Boolean))).map((loc) => (
+                <option key={loc} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
+
+            {/* Price range: min and max */}
+            <div className="relative min-w-[140px] flex-shrink-0">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">
+                $
+              </span>
+              <input
+                type="number"
+                id="filter-min-price"
+                placeholder="Min price/mo"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                min={0}
+                className="input-field pl-7"
+              />
+            </div>
+
             <div className="relative min-w-[140px] flex-shrink-0">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">
                 $
@@ -367,7 +430,20 @@ function PropertyList() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {paginated.map((prop, i) => (
-                  <PropertyCard key={prop.id} property={prop} index={i} />
+                  <PropertyCard
+                    key={prop.id}
+                    property={prop}
+                    index={i}
+                    initialFavorited={favoriteIds.has(String(prop.id))}
+                    onFavoriteToggle={(next) => {
+                      setFavoriteIds((prev) => {
+                        const updated = new Set(prev);
+                        if (next) updated.add(String(prop.id));
+                        else updated.delete(String(prop.id));
+                        return updated;
+                      });
+                    }}
+                  />
                 ))}
               </div>
 

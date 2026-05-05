@@ -8,9 +8,10 @@
 //   index     {number}   – stagger animation index
 //   actions   {node}     – optional bottom-row action buttons (owner CRUD, etc.)
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import FavoriteButton from './FavoriteButton';
 
 // ---------------------------------------------------------------------------
 // Shared label maps (kept in sync with PropertyForm constants)
@@ -27,20 +28,13 @@ const PROPERTY_TYPE_LABELS = {
 // ---------------------------------------------------------------------------
 // PropertyCard
 // ---------------------------------------------------------------------------
-function PropertyCard({ property, index = 0, actions }) {
+function PropertyCard({ property, index = 0, actions, initialFavorited = false, onFavoriteToggle }) {
   const navigate = useNavigate();
-  const [favorited, setFavorited] = useState(false);
 
   const handleCardClick = (e) => {
     // Don't navigate when clicking buttons inside the card
     if (e.target.closest('button')) return;
     navigate(`/properties/${property.id}`);
-  };
-
-  const handleFavorite = (e) => {
-    e.stopPropagation();
-    setFavorited((prev) => !prev);
-    // TODO: POST /api/favorites when backend is ready
   };
 
   return (
@@ -69,16 +63,14 @@ function PropertyCard({ property, index = 0, actions }) {
         )}
 
         {/* Favorite button */}
-        <button
-          onClick={handleFavorite}
-          id={`favorite-${property.id}`}
-          aria-label={favorited ? 'Remove from favorites' : 'Add to favorites'}
-          className="absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow transition-transform hover:scale-110 active:scale-95"
-        >
-          <span className={`text-base transition-colors ${favorited ? 'text-red-500' : 'text-gray-400'}`}>
-            {favorited ? '❤️' : '🤍'}
-          </span>
-        </button>
+        <div className="absolute top-3 left-3">
+          <FavoriteButton
+            propertyId={property.id}
+            initialFavorited={initialFavorited}
+            onToggle={onFavoriteToggle}
+            compact
+          />
+        </div>
 
         {/* Status badge */}
         {property.status && (

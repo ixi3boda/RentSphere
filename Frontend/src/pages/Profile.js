@@ -49,24 +49,100 @@ function Profile() {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      // Check file size (max 2MB)
-      if (file.size > 2 * 1024 * 1024) {
-        alert('Image size should be less than 2MB');
-        return;
-      }
-      
-      // Check file type
-      if (!file.type.startsWith('image/')) {
-        alert('Please upload an image file');
-        return;
-      }
-      
-      setProfilePicture(file);
-      // Create preview URL
-      const previewUrl = URL.createObjectURL(file);
-      setProfilePicturePreview(previewUrl);
+    if (!file) return;
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file');
+      return;
     }
+
+    const MAX_BYTES = 2 * 1024 * 1024; // 2MB
+
+    const compressImage = (fileToCompress, maxBytes) => {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(fileToCompress);
+        const img = new Image();
+        img.onload = async () => {
+          try {
+            let canvas = document.createElement('canvas');
+            let ctx = canvas.getContext('2d');
+            let [w, h] = [img.naturalWidth, img.naturalHeight];
+
+            // Start with original dimensions
+            canvas.width = w;
+            canvas.height = h;
+            ctx.drawImage(img, 0, 0, w, h);
+
+            const mime = fileToCompress.type || 'image/jpeg';
+
+            // helper to get blob at given quality
+            const toBlob = (quality) =>
+              new Promise((res) => canvas.toBlob(res, mime, quality));
+
+            // Try decreasing quality first
+            let quality = 0.92;
+            let blob = await toBlob(quality);
+
+            // If still too large, iteratively reduce quality and dimensions
+            let attempts = 0;
+            while ((blob && blob.size > maxBytes) && attempts < 12) {
+              attempts += 1;
+              // reduce quality
+              quality = Math.max(0.4, quality - 0.12);
+              blob = await toBlob(quality);
+              if (blob && blob.size <= maxBytes) break;
+
+              // if quality floor reached and still large, scale down dimensions by 0.85
+              w = Math.floor(w * 0.85);
+              h = Math.floor(h * 0.85);
+              canvas.width = w;
+              canvas.height = h;
+              ctx.clearRect(0, 0, w, h);
+              ctx.drawImage(img, 0, 0, w, h);
+              blob = await toBlob(quality);
+            }
+
+            // If compression succeeded, return a File (preserve original name)
+            if (blob) {
+              const outFile = new File([blob], fileToCompress.name, { type: mime });
+              resolve(outFile);
+            } else {
+              // fallback: return original file
+              resolve(fileToCompress);
+            }
+          } catch (err) {
+            resolve(fileToCompress);
+          } finally {
+            URL.revokeObjectURL(url);
+          }
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error('Failed to read image'));
+        };
+        img.src = url;
+      });
+    };
+
+    (async () => {
+      let finalFile = file;
+      if (file.size > MAX_BYTES) {
+        alert('Reducing image size to 2 MB');
+        try {
+          finalFile = await compressImage(file, MAX_BYTES);
+        } catch (err) {
+          console.warn('Compression failed, using original file', err);
+          finalFile = file;
+        }
+      }
+
+      setProfilePicture(finalFile);
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(finalFile);
+      setProfilePicturePreview(previewUrl);
+    })();
+
   };
 
   // Function to convert image to base64 (for demo - use Cloudinary in production)

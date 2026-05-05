@@ -11,8 +11,10 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AnimatedPage } from "../components/AnimatedPage";
 import ImageCarousel from "../components/ImageCarousel";
+import FavoriteButton from "../components/FavoriteButton";
 import { propertyApi } from "../utils/api";
 import { mapPropertyToFrontend } from "../utils/mappers";
+import { recordRecentlyViewed } from "../utils/recentlyViewed";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -80,6 +82,35 @@ function PropertyDetail() {
       cancelled = true;
     };
   }, [id]);
+
+  useEffect(() => {
+    if (property) {
+      recordRecentlyViewed(property);
+    }
+  }, [property]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchFavoriteState = async () => {
+      if (!property) return;
+      try {
+        const res = await propertyApi.getFavorites();
+        const list = Array.isArray(res.data) ? res.data : [];
+        const isSaved = list.some(
+          (item) => String(item?.propertyDetails?.property?.propertyId) === String(id),
+        );
+        if (!cancelled) setFavorited(isSaved);
+      } catch (err) {
+        if (!cancelled) setFavorited(false);
+      }
+    };
+
+    fetchFavoriteState();
+    return () => {
+      cancelled = true;
+    };
+  }, [property, id]);
 
   // ---------------------------------------------------------------------------
   // Loading skeleton
@@ -256,26 +287,13 @@ function PropertyDetail() {
                 <div className="text-sm text-gray-400">per month</div>
               </div>
 
-              {/* Favorite button */}
-              <button
-                onClick={async () => {
-                  try {
-                    await propertyApi.favorite(id);
-                    setFavorited((f) => !f);
-                  } catch (err) {
-                    console.error("Favorite failed:", err);
-                  }
-                }}
-                id="detail-favorite-btn"
-                className={`flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl border transition-all
-                  ${
-                    favorited
-                      ? "border-red-300 bg-red-50 text-red-500"
-                      : "border-gray-200 bg-white/60 text-gray-500 hover:border-red-300 hover:text-red-400"
-                  }`}
-              >
-                {favorited ? "❤️ Saved" : "🤍 Save"}
-              </button>
+              <FavoriteButton
+                propertyId={id}
+                initialFavorited={favorited}
+                onToggle={setFavorited}
+                showLabel
+                className="px-4 py-2 rounded-xl"
+              />
             </div>
           </motion.div>
 

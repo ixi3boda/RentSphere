@@ -37,7 +37,7 @@ public class PropertyController {
     }
 
     @PostMapping("/add")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> addProperty(
             @RequestBody CreatePropertyRequest request,
             Principal principal
@@ -55,7 +55,7 @@ public class PropertyController {
     }
 
     @PostMapping("/{id}/images/add")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> addPropertyImage(
             @PathVariable Long id,
             @RequestParam String image_url,
@@ -94,7 +94,7 @@ public class PropertyController {
     }
 
     @PutMapping("/{id}/update")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> update(
             @PathVariable Long id,
             @RequestBody UpdatePropertyRequest request
@@ -112,7 +112,7 @@ public class PropertyController {
     }
 
     @DeleteMapping("/{id}/delete")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         try {
             propertyService.delete(id);

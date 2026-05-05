@@ -1,8 +1,11 @@
 // src/components/Hero.js
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function Hero() {
+  const { isAuthenticated } = useAuth();
+
   return (
     <div className="relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
@@ -38,20 +41,24 @@ function Hero() {
             transition={{ delay: 0.4, duration: 0.6 }}
             className="flex gap-4 justify-center flex-wrap"
           >
-            <Link to="/signup">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="btn-primary text-lg px-8 py-3"
-              >
-                Get Started
-              </motion.button>
-            </Link>
+            {/** Hide "Get Started" if the user is already logged in */}
+            {!isAuthenticated && (
+              <Link to="/signup">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="btn-primary text-lg px-8 py-3"
+                >
+                  Get Started
+                </motion.button>
+              </Link>
+            )}
+
             <Link to="/properties">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="btn-secondary text-lg px-8 py-3"
+                className="btn-primary text-lg px-8 py-3"
               >
                 Browse Properties
               </motion.button>

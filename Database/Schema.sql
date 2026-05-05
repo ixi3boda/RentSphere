@@ -27,7 +27,7 @@ CREATE TABLE users (
     updated_at      DATETIME              NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id),
     CONSTRAINT uq_users_email UNIQUE (email),
-    CONSTRAINT chk_role_name CHECK (role_name IN ('TENANT', 'ADMIN', 'VISITOR'))
+        CONSTRAINT chk_role_name CHECK (role_name IN ('TENANT', 'OWNER', 'VISITOR'))
 );
 
 -- properties

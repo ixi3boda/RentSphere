@@ -89,7 +89,7 @@ export function mapUserToFrontend(u) {
     name:   u.full_name || u.username || u.email,
     username: u.username,
     // Normalise role: backend stores 'ADMIN' | 'USER', frontend uses 'owner' | 'tenant'
-    role:   u.role_name === 'ADMIN' ? 'owner' : 'tenant',
+      role:   u.role_name === 'OWNER' ? 'owner' : 'tenant',
     role_name: u.role_name,
     avatar: u.avatar_url || null,
     phone:  u.mobile_number || null,

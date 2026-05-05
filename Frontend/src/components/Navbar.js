@@ -44,9 +44,10 @@ useEffect(() => {
         className="glass-effect sticky top-0 z-50 shadow-lg"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex items-center h-16">
             {/* Logo with Rotation Animation */}
-            <Link to="/" className="flex items-center space-x-3 group">
+            <div className="flex items-center">
+              <Link to="/" className="flex items-center space-x-3 group">
               <motion.img 
                 src="/rentSphereLogo.png" 
                 alt="RentSphere Logo" 
@@ -68,12 +69,12 @@ useEffect(() => {
                 RentSphere
               </span>
             </Link>
+            </div>
 
-            {/* Desktop Menu */}
-            <div className="hidden md:flex items-center space-x-6">
-              {isAuthenticated ? (
-                <>
-                  {/* Profile Picture Thumbnail */}
+            {/* Center: Welcome (desktop) */}
+            <div className="hidden md:flex md:flex-1 md:justify-center">
+              {isAuthenticated && (
+                <div className="flex items-center gap-3">
                   <Link to="/profile">
                     <motion.div
                       whileHover={{ scale: 1.1 }}
@@ -81,9 +82,9 @@ useEffect(() => {
                       className="w-8 h-8 rounded-full bg-gradient-to-r from-rentsphere-teal to-rentsphere-orange overflow-hidden cursor-pointer"
                     >
                       {user?.profilePicture ? (
-                        <img 
-                          src={user.profilePicture} 
-                          alt="Profile" 
+                        <img
+                          src={user.profilePicture}
+                          alt="Profile"
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -93,13 +94,22 @@ useEffect(() => {
                       )}
                     </motion.div>
                   </Link>
-                  
+
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     className="text-gray-700 font-medium"
                   >
                     👋 Welcome, {user?.name || user?.email?.split('@')[0]}
                   </motion.div>
+                </div>
+              )}
+            </div>
+
+            {/* Desktop Menu (right) */}
+            <div className="hidden md:flex items-center space-x-6 md:ml-auto">
+              {isAuthenticated ? (
+                <>
+                  
                   
                   {/* Browse Properties — visible to all logged-in users */}
                   <Link to="/properties">
@@ -109,6 +119,16 @@ useEffect(() => {
                       className="text-gray-700 hover:text-rentsphere-teal transition-colors"
                     >
                       🏘️ Browse
+                    </motion.button>
+                  </Link>
+
+                  <Link to="/favorites">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="text-gray-700 hover:text-rentsphere-teal transition-colors"
+                    >
+                      🤍 Favorites
                     </motion.button>
                   </Link>
 
@@ -231,6 +251,9 @@ useEffect(() => {
                   </Link>
                   <Link to="/properties">
                     <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">🏘️ Browse</button>
+                  </Link>
+                  <Link to="/favorites">
+                    <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">🤍 Favorites</button>
                   </Link>
                   <Link to="/profile">
                     <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Profile</button>

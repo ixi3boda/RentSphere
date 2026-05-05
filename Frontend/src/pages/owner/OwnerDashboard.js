@@ -11,6 +11,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useProperty } from '../../context/PropertyContext';
 import { AnimatedPage, LoadingSpinner } from '../../components/AnimatedPage';
 import StatsCard from '../../components/StatsCard';
+import { rentApi } from '../../utils/api';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -239,11 +240,13 @@ function OwnerDashboard() {
     setStatsLoading(true);
     setStatsError('');
     try {
-      // Stats are derived from the property list (no dedicated stats endpoint)
+      const requestsRes = await rentApi.getAllRequests();
+      const requests = Array.isArray(requestsRes.data) ? requestsRes.data : [];
+
       setStats({
         totalProperties: properties.length,
-        pendingRequests: 0,
-        activeContracts: properties.filter((p) => p.status === 'rented').length,
+        pendingRequests: requests.filter((request) => request.reqStatus === 'PENDING').length,
+        activeContracts: requests.filter((request) => request.reqStatus === 'ACCEPTED').length,
       });
     } catch (err) {
       setStatsError('Failed to load dashboard stats.');

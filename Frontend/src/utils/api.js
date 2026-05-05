@@ -17,7 +17,8 @@ const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  // Check sessionStorage first (current session), then localStorage (stay signed in)
+  const token = sessionStorage.getItem("token") || localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -120,6 +121,14 @@ export const propertyApi = {
     apiClient.post(`/api/properties/${id}/images/add`, null, {
       params: { image_url, is_cover },
     }),
+};
+
+// ---------------------------------------------------------------------------
+// Rent API  (/api/rent/*)
+// ---------------------------------------------------------------------------
+export const rentApi = {
+  /** GET /api/rent/requests/all */
+  getAllRequests: () => apiClient.get("/api/rent/requests/all"),
 };
 
 // ---------------------------------------------------------------------------
