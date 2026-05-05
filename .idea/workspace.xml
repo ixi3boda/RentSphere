@@ -5,16 +5,125 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="074c0a9e-75b9-4769-b464-88ddf06ab1d3" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Controller/RentController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/RentalRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Repository/RentRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Service/RentService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/HELP.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Schema.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mvnw" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mvnw.cmd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/.dockerignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/package-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/postcss.config.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/public/favicon.ico" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/public/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/public/logo192.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/public/logo512.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/public/manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/public/rentSphereLogo.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/public/robots.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/App.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/components/AnimatedPage.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/components/Hero.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/components/ImageCarousel.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/components/ImageUpload.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/components/Navbar.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/components/PrivateRoute.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/components/PropertyCard.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/components/StatsCard.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/context/AuthContext.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/context/PropertyContext.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/hooks/useDebounce.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/pages/Home.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/pages/Login.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/pages/Profile.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/pages/PropertyDetail.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/pages/PropertyList.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/pages/Signup.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/pages/owner/OwnerDashboard.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/pages/owner/PropertyForm.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/styles/App.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/styles/index.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/src/utils/api.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rentsphere-frontend/tailwind.config.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Controller/PropertyController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Controller/UserController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/AuthResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/ErrorResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/Favorite.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/LoginRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/PayPalPaymentRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/PayPalPaymentResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/Property.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/PropertyDetails.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/RegisterRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Dto/User.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/RentSphereApplication.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Repository/PropertyRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Repository/UserRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/SecurityConfig/CorsConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/SecurityConfig/JwtAuthenticationFilter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/SecurityConfig/JwtService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/SecurityConfig/SecConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/SecurityConfig/WebConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Service/MyUserDetailsService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Service/PayPalService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Service/PropertyService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/RentSphere/Service/UserService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/example/RentSphere/RentSphereApplicationTests.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/application.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Controller/PropertyController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Controller/UserController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/AuthResponse$AuthResponseBuilder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/AuthResponse.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/ErrorResponse$ErrorResponseBuilder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/ErrorResponse.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/Favorite$FavoriteBuilder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/Favorite.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/LoginRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/PayPalPaymentRequest$PayPalPaymentRequestBuilder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/PayPalPaymentRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/PayPalPaymentResponse.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/Property$PropertyBuilder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/Property.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/PropertyDetails$PropertyDetailsBuilder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/PropertyDetails.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/RegisterRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/User$UserBuilder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Dto/User.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/RentSphereApplication.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Repository/PropertyRepository.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Repository/UserRepository.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/SecurityConfig/CorsConfig.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/SecurityConfig/JwtAuthenticationFilter.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/SecurityConfig/JwtService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/SecurityConfig/SecConfig.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/SecurityConfig/WebConfig.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Service/MyUserDetailsService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Service/PayPalService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Service/PropertyService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/RentSphere/Service/UserService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/com/example/RentSphere/RentSphereApplicationTests.class" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="120" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -26,6 +135,26 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "KhaledBishr"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/ixi3boda/RentSphere.git",
+    "accountId": "dd36a2c2-1475-496a-a598-15d8b42c1bd4"
+  }
+}]]></component>
+  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
+  <component name="KubernetesApiProvider"><![CDATA[{
+  "isMigrated": true
+}]]></component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8,
   &quot;fromUser&quot;: false
@@ -35,28 +164,58 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;backend__properties&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/abdelrahmanessam/Downloads/RentSphere&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Docker.docker-compose.yaml.db: Compose Deployment.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "dev",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Data/Term8.CCE/Software Engineering/Project/RentSphere",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
+  <component name="RunManager">
+    <configuration name="docker-compose.yaml.db: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="services">
+            <list>
+              <option value="db" />
+            </list>
+          </option>
+          <option name="sourceFilePath" value="docker-compose.yaml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Docker.docker-compose.yaml.db: Compose Deployment" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.31033.145" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.31033.145" />
+      </set>
+    </attachedChunks>
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="074c0a9e-75b9-4769-b464-88ddf06ab1d3" name="Changes" comment="" />
@@ -69,9 +228,7 @@
       <workItem from="1777477817045" duration="15611000" />
       <workItem from="1777563262162" duration="2078000" />
       <workItem from="1777573790249" duration="2309000" />
-      <workItem from="1777576248840" duration="8000" />
-      <workItem from="1777580264043" duration="1322000" />
-      <workItem from="1777849756251" duration="55000" />
+      <workItem from="1777831897433" duration="992000" />
     </task>
     <servers />
   </component>

@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./Backend
+      dockerfile: Dockerfile
+    image: rentsphere-backend
+    container_name: rentsphere-backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Connects to your local Windows MySQL database
+      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/RentSphereSchema?allowPublicKeyRetrieval=true&useSSL=false
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=khaled#2027Bshr # Here but your DB password and then run docker compose up --build
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    image: rentsphere-frontend
+    container_name: rentsphere-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      # Tells the React proxy to route API calls to the backend container
+      - BACKEND_URL=http://backend:8080
+    depends_on:
+      - backend
+    # Needed for hot-reloading if you map volumes (optional)
+    # volumes:
+    #   - ./Frontend/src:/app/src
