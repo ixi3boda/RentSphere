@@ -9,7 +9,7 @@ function Signup() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('tenant');
+  const [repeatPassword, setRepeatPassword] = useState('');
   const [error, setError] = useState('');
   const { signup, loading } = useAuth();
   const navigate = useNavigate();
@@ -17,8 +17,13 @@ function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
-    const result = await signup(name, email, password, role);
+
+    if (password !== repeatPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    const result = await signup(name, email, password);
     
     if (result.success) {
       navigate('/');
@@ -110,18 +115,20 @@ function Signup() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                I am a
+                Repeat Password
               </label>
-              <motion.select 
+              <motion.input
                 whileFocus={{ scale: 1.02 }}
-                value={role} 
-                onChange={(e) => setRole(e.target.value)}
-                className="input-field cursor-pointer"
-              >
-                <option value="tenant">🏠 Tenant - Looking to rent</option>
-                <option value="owner">🔑 Owner - Have properties to list</option>
-              </motion.select>
+                type="password"
+                value={repeatPassword}
+                onChange={(e) => setRepeatPassword(e.target.value)}
+                className="input-field"
+                placeholder="Repeat your password"
+                required
+              />
             </div>
+
+            
 
             <AnimatedButton type="submit" loading={loading}>
               Create Account
