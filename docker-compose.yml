@@ -1,8 +1,32 @@
-version: '3.8'
-
 services:
+  mysql:
+    image: mysql:8.0
+    container_name: rentsphere-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: RentSphereSchema
+      MYSQL_USER: rentsphere
+      MYSQL_PASSWORD: rentsphere123
+      MYSQL_ROOT_PASSWORD: rootpassword123
+    command: #make db log all queries into terminal
+      - sh
+      - -c
+      - >
+          echo "MySQL is ready at jdbc:mysql://mysql:3306/RentSphereSchema";
+          echo "Follow live DB output with: docker compose logs -f mysql";
+          exec docker-entrypoint.sh mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --general-log=1 --general-log-file=/proc/1/fd/1
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./Database/Schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -urentsphere -prentsphere123 --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
   backend:
-    build: 
+    build:
       context: ./Backend
       dockerfile: Dockerfile
     image: rentsphere-backend
@@ -10,13 +34,12 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # Connects to your local Windows MySQL database
-      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/RentSphereSchema?allowPublicKeyRetrieval=true&useSSL=false
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=khaled#2027Bshr # Here but your DB password and then run docker compose up --build
-
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/RentSphereSchema?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: rentsphere
+      SPRING_DATASOURCE_PASSWORD: rentsphere123
+    depends_on:
+      mysql:
+        condition: service_healthy
 
   frontend:
     build:
@@ -34,3 +57,6 @@ services:
     # Needed for hot-reloading if you map volumes (optional)
     # volumes:
     #   - ./Frontend/src:/app/src
+
+volumes:
+  mysql_data:
