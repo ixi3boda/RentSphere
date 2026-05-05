@@ -67,6 +67,10 @@ public class UserRepository {
                 user.getAvatar_url(),
                 user.is_active()
         );
+    }
 
+    public int updateRole(int userId, String roleName) {
+        String sql = "UPDATE users SET role_name = ?, updated_at = NOW() WHERE user_id = ?";
+        return jdbcTemplate.update(sql, roleName, userId);
     }
 }
