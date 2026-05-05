@@ -1,8 +1,12 @@
 package com.example.RentSphere.Controller;
 
+import com.example.RentSphere.Dto.Contract;
 import com.example.RentSphere.Dto.CreateRentalRequest;
 import com.example.RentSphere.Dto.ErrorResponse;
+import com.example.RentSphere.Dto.PayPalPaymentRequest;
+import com.example.RentSphere.Dto.PayPalPaymentResponse;
 import com.example.RentSphere.Dto.RentalRequest;
+import com.example.RentSphere.Service.ContractService;
 import com.example.RentSphere.Service.RentService;
 import com.example.RentSphere.Service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +27,7 @@ public class RentController {
 
     private final UserService userService;
     private final RentService rentService;
+    private final ContractService contractService;
 
     private ResponseEntity<?> buildErrorResponse(String message, HttpStatus status) {
         ErrorResponse errorResponse = ErrorResponse.builder()
@@ -73,6 +78,15 @@ public class RentController {
         }
     }
 
+    @GetMapping("/contracts/all")
+    public ResponseEntity<?> getAllContracts() {
+        try {
+            return ResponseEntity.ok(contractService.getAllContracts());
+        } catch (Exception e) {
+            return buildErrorResponse("Failed to fetch contracts: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PutMapping("/requests/{id}/accept")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> acceptRequest(@PathVariable Long id, Principal principal) {
@@ -86,6 +100,37 @@ public class RentController {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return buildErrorResponse("Failed to accept rental request: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/contracts/{contractId}/paypal")
+    public ResponseEntity<?> createContractPayPalPayment(
+            @PathVariable Long contractId,
+            @RequestBody PayPalPaymentRequest paymentRequest
+    ) {
+        try {
+            PayPalPaymentResponse response = contractService.createPayPalPaymentForContract(contractId, paymentRequest);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return buildErrorResponse("Failed to create PayPal payment: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/contracts/{contractId}/paypal/execute")
+    public ResponseEntity<?> executeContractPayPalPayment(
+            @PathVariable Long contractId,
+            @RequestParam String paymentId,
+            @RequestParam String payerId
+    ) {
+        try {
+            PayPalPaymentResponse response = contractService.executePayPalPaymentForContract(contractId, paymentId, payerId);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return buildErrorResponse("Failed to execute PayPal payment: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
