@@ -14,6 +14,11 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
 
+  const hasToken =
+    !!sessionStorage.getItem("token") ||
+    !!localStorage.getItem("token") ||
+    document.cookie.includes("rentsphere_token=");
+
   // Restore session on app start
   // Priority: sessionStorage (current session) → localStorage (stay signed in) → cookie (fallback)
   useEffect(() => {
@@ -213,7 +218,7 @@ export function AuthProvider({ children }) {
     logout,
     updateUser,
     loading,
-    isAuthenticated: !!user,
+    isAuthenticated: !!user && hasToken,
     initializing,
   };
 

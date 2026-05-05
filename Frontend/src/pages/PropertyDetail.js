@@ -12,6 +12,8 @@ import { motion } from "framer-motion";
 import { AnimatedPage } from "../components/AnimatedPage";
 import ImageCarousel from "../components/ImageCarousel";
 import FavoriteButton from "../components/FavoriteButton";
+import QuickRentalRequestModal from "../components/QuickRentalRequestModal";
+import { useAuth } from "../context/AuthContext";
 import { propertyApi } from "../utils/api";
 import { mapPropertyToFrontend } from "../utils/mappers";
 import { recordRecentlyViewed } from "../utils/recentlyViewed";
@@ -49,11 +51,14 @@ function InfoTile({ icon, label, value }) {
 function PropertyDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [favorited, setFavorited] = useState(false);
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [requestSuccess, setRequestSuccess] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -366,10 +371,17 @@ function PropertyDetail() {
                   id="contact-owner-btn"
                   className="btn-primary !py-2.5 !px-6"
                   onClick={() => {
-                    /* TODO: open contact modal / navigate to inquiry form */
+                    if (!user) {
+                      navigate('/login');
+                      return;
+                    }
+                    if (user.role !== 'tenant') {
+                      return;
+                    }
+                    setShowRequestModal(true);
                   }}
                 >
-                  Contact Owner
+                  Request Rental
                 </button>
               ) : (
                 <span className="btn-secondary !py-2.5 !px-6 opacity-60 cursor-not-allowed">
@@ -383,6 +395,29 @@ function PropertyDetail() {
           </motion.div>
         </div>
       </div>
+
+      {/* Quick Rental Request Modal */}
+      <QuickRentalRequestModal
+        isOpen={showRequestModal}
+        property={property}
+        onClose={() => setShowRequestModal(false)}
+        onSuccess={() => {
+          setRequestSuccess(true);
+          setTimeout(() => setRequestSuccess(false), 3000);
+        }}
+      />
+
+      {/* Success Toast */}
+      {requestSuccess && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2"
+        >
+          <span>✓</span> Request sent successfully!
+        </motion.div>
+      )}
     </AnimatedPage>
   );
 }

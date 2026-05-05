@@ -89,6 +89,7 @@ CREATE TABLE rental_requests (
     message         VARCHAR(200)          NULL,
     desired_start   DATE                  NOT NULL,
     desired_months  INT      UNSIGNED NOT NULL DEFAULT 1,
+    offered_price   DECIMAL(12, 2)        NULL,
     req_status      VARCHAR(50)           NOT NULL DEFAULT 'PENDING',
     reviewed_at     DATETIME              NULL,
     created_at      DATETIME              NOT NULL DEFAULT CURRENT_TIMESTAMP,

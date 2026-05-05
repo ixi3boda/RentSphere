@@ -11,7 +11,9 @@ import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
 import Favorites from "./pages/Favorites";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
+import OwnerRequests from "./pages/owner/OwnerRequests";
 import TenantDashboard from "./pages/tenant/TenantDashboard";
+import TenantRequests from "./pages/tenant/TenantRequests";
 import PropertyForm from "./pages/owner/PropertyForm";
 import PropertyList from "./pages/PropertyList";
 import PropertyDetail from "./pages/PropertyDetail";
@@ -46,8 +48,14 @@ function App() {
             <Route path="/owner/dashboard" element={
               <PrivateRoute><OwnerDashboard /></PrivateRoute>
             } />
+            <Route path="/owner/requests" element={
+              <PrivateRoute><OwnerRequests /></PrivateRoute>
+            } />
             <Route path="/tenant/dashboard" element={
               <PrivateRoute><TenantDashboard /></PrivateRoute>
+            } />
+            <Route path="/tenant/requests" element={
+              <PrivateRoute><TenantRequests /></PrivateRoute>
             } />
             <Route path="/owner/properties/new" element={
               <PrivateRoute><PropertyForm /></PrivateRoute>

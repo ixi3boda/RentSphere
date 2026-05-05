@@ -242,11 +242,13 @@ function OwnerDashboard() {
     try {
       const requestsRes = await rentApi.getAllRequests();
       const requests = Array.isArray(requestsRes.data) ? requestsRes.data : [];
+      const ownerPropertyIds = new Set((properties || []).map((property) => String(property.id)));
+      const ownerRequests = requests.filter((request) => ownerPropertyIds.has(String(request.propertyId)));
 
       setStats({
         totalProperties: properties.length,
-        pendingRequests: requests.filter((request) => request.reqStatus === 'PENDING').length,
-        activeContracts: requests.filter((request) => request.reqStatus === 'ACCEPTED').length,
+        pendingRequests: ownerRequests.filter((request) => request.reqStatus === 'PENDING').length,
+        activeContracts: ownerRequests.filter((request) => request.reqStatus === 'ACCEPTED').length,
       });
     } catch (err) {
       setStatsError('Failed to load dashboard stats.');
@@ -358,6 +360,11 @@ function OwnerDashboard() {
                   to="/owner/dashboard"
                   icon="📋"
                   label="Manage Listings"
+                />
+                <QuickAction
+                  to="/owner/requests"
+                  icon="📬"
+                  label="View Requests"
                 />
                 <QuickAction
                   to="/properties"

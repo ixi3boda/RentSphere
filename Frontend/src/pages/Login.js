@@ -1,5 +1,5 @@
 // src/pages/Login.js
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AnimatedPage, AnimatedButton } from '../components/AnimatedPage';
@@ -11,8 +11,14 @@ function Login() {
   const [password, setPassword] = useState('');
   const [staySignedIn, setStaySignedIn] = useState(false);
   const [error, setError] = useState('');
-  const { login, loading } = useAuth();
+  const { login, loading, isAuthenticated, initializing } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!initializing && isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [initializing, isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

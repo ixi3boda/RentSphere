@@ -2,6 +2,7 @@ package com.example.RentSphere.Dto;
 
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -18,6 +19,7 @@ public class RentalRequest {
     private String message;
     private LocalDate desiredStart;
     private Integer desiredMonths;
+    private BigDecimal offeredPrice;
 
     private String reqStatus;
 

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -17,4 +18,5 @@ public class CreateRentalRequest {
     private String message;
     private LocalDate desiredStart;
     private Integer desiredMonths;
+    private BigDecimal offeredPrice;
 }

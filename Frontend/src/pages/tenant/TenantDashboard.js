@@ -69,9 +69,14 @@ function TenantDashboard() {
               </p>
             </div>
 
-            <Link to="/properties" className="btn-primary inline-flex self-start !py-2 !px-5">
-              Browse properties
-            </Link>
+            <div className="flex gap-2 self-start">
+              <Link to="/tenant/requests" className="btn-secondary inline-flex !py-2 !px-5 text-sm">
+                My Requests
+              </Link>
+              <Link to="/properties" className="btn-primary inline-flex !py-2 !px-5">
+                Browse properties
+              </Link>
+            </div>
           </motion.div>
 
           <motion.div

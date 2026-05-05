@@ -125,8 +125,20 @@ export const propertyApi = {
 // Rent API  (/api/rent/*)
 // ---------------------------------------------------------------------------
 export const rentApi = {
+  /** POST /api/rent/request */
+  createRequest: (payload) => apiClient.post("/api/rent/request", payload),
+
   /** GET /api/rent/requests/all */
   getAllRequests: () => apiClient.get("/api/rent/requests/all"),
+
+  /** GET /api/rent/requests/:id */
+  getRequestById: (id) => apiClient.get(`/api/rent/requests/${id}`),
+
+  /** PUT /api/rent/requests/:id/accept */
+  acceptRequest: (id) => apiClient.put(`/api/rent/requests/${id}/accept`),
+
+  /** PUT /api/rent/requests/:id/reject */
+  rejectRequest: (id) => apiClient.put(`/api/rent/requests/${id}/reject`),
 };
 
 // ---------------------------------------------------------------------------

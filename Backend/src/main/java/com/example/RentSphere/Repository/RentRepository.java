@@ -10,10 +10,12 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +32,7 @@ public class RentRepository {
             .message(rs.getString("message"))
             .desiredStart(rs.getDate("desired_start").toLocalDate())
             .desiredMonths(rs.getInt("desired_months"))
+            .offeredPrice(rs.getBigDecimal("offered_price"))
             .reqStatus(rs.getString("req_status"))
             .reviewedAt(getLocalDateTime(rs, "reviewed_at"))
             .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
@@ -37,12 +40,21 @@ public class RentRepository {
             .build();
 
     public RentalRequest createRentalRequest(CreateRentalRequest request, int tenantId) {
+        if (request.getDesiredStart() == null) {
+            throw new IllegalArgumentException("Desired start date is required");
+        }
+        if (request.getDesiredStart().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Desired start date cannot be in the past");
+        }
         if (request.getDesiredMonths() == null || request.getDesiredMonths() < 1) {
             request.setDesiredMonths(1);
         }
+        if (request.getOfferedPrice() == null || request.getOfferedPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Offered price must be greater than zero");
+        }
 
-        String sql = "INSERT INTO rental_requests (property_id, tenant_id, message, desired_start, desired_months, req_status) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO rental_requests (property_id, tenant_id, message, desired_start, desired_months, offered_price, req_status) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"rental_req_id"});
@@ -51,7 +63,8 @@ public class RentRepository {
             ps.setString(3, request.getMessage());
             ps.setDate(4, Date.valueOf(request.getDesiredStart()));
             ps.setInt(5, request.getDesiredMonths());
-            ps.setString(6, "PENDING");
+            ps.setBigDecimal(6, request.getOfferedPrice());
+            ps.setString(7, "PENDING");
             return ps;
         }, keyHolder);
 

@@ -11,6 +11,7 @@ function Navbar() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const showAuthenticatedUi = isAuthenticated && !!user;
 // Add ESC key handler
 useEffect(() => {
   const handleEsc = (e) => {
@@ -73,7 +74,7 @@ useEffect(() => {
 
             {/* Center: Welcome (desktop) */}
             <div className="hidden md:flex md:flex-1 md:justify-center">
-              {isAuthenticated && (
+              {showAuthenticatedUi && (
                 <div className="flex items-center gap-3">
                   <Link to="/profile">
                     <motion.div
@@ -107,7 +108,7 @@ useEffect(() => {
 
             {/* Desktop Menu (right) */}
             <div className="hidden md:flex items-center space-x-6 md:ml-auto">
-              {isAuthenticated ? (
+              {showAuthenticatedUi ? (
                 <>
                   
                   
@@ -123,27 +124,49 @@ useEffect(() => {
                   </Link>
 
                   {user?.role === 'owner' && (
-                    <Link to="/owner/dashboard">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="text-gray-700 hover:text-rentsphere-teal transition-colors"
-                      >
-                        📊 Dashboard
-                      </motion.button>
-                    </Link>
+                    <>
+                      <Link to="/owner/dashboard">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="text-gray-700 hover:text-rentsphere-teal transition-colors"
+                        >
+                          📊 Dashboard
+                        </motion.button>
+                      </Link>
+                      <Link to="/owner/requests">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="text-gray-700 hover:text-rentsphere-teal transition-colors"
+                        >
+                          📬 Rental Requests
+                        </motion.button>
+                      </Link>
+                    </>
                   )}
-                  
+
                   {user?.role === 'tenant' && (
-                    <Link to="/tenant/dashboard">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="text-gray-700 hover:text-rentsphere-teal transition-colors"
-                      >
-                        📊 Dashboard
-                      </motion.button>
-                    </Link>
+                    <>
+                      <Link to="/tenant/dashboard">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="text-gray-700 hover:text-rentsphere-teal transition-colors"
+                        >
+                          📊 Dashboard
+                        </motion.button>
+                      </Link>
+                      <Link to="/tenant/requests">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="text-gray-700 hover:text-rentsphere-teal transition-colors"
+                        >
+                          📨 Rental Requests
+                        </motion.button>
+                      </Link>
+                    </>
                   )}
                   
                   {/* Profile Link */}
@@ -215,7 +238,7 @@ useEffect(() => {
               animate={{ opacity: 1, y: 0 }}
               className="md:hidden py-4 border-t border-gray-200"
             >
-              {isAuthenticated ? (
+              {showAuthenticatedUi ? (
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3 mb-4">
                     {/* Profile Picture in Mobile Menu */}
@@ -236,8 +259,11 @@ useEffect(() => {
                       Welcome, {user?.name || user?.email}
                     </div>
                   </div>
-                  <Link to="/dashboard">
+                  <Link to={user?.role === 'owner' ? '/owner/dashboard' : '/tenant/dashboard'}>
                     <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Dashboard</button>
+                  </Link>
+                  <Link to={user?.role === 'owner' ? '/owner/requests' : '/tenant/requests'}>
+                    <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Requests</button>
                   </Link>
                   <Link to="/properties">
                     <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">🏘️ Browse</button>
