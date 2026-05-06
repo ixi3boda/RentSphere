@@ -8,13 +8,15 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedPage } from "../components/AnimatedPage";
 import ImageCarousel from "../components/ImageCarousel";
 import FavoriteButton from "../components/FavoriteButton";
+import RentRequestModal from "../components/RentRequestModal";
 import { propertyApi } from "../utils/api";
 import { mapPropertyToFrontend } from "../utils/mappers";
 import { recordRecentlyViewed } from "../utils/recentlyViewed";
+import { useAuth } from "../context/AuthContext";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -49,11 +51,13 @@ function InfoTile({ icon, label, value }) {
 function PropertyDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
 
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [favorited, setFavorited] = useState(false);
+  const [showRentModal, setShowRentModal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -354,23 +358,35 @@ function PropertyDetail() {
           >
             <div>
               <h3 className="text-lg font-bold text-gray-800">
-                Interested in this property?
+                {user?.role === 'admin' ? 'Your Property' : 'Interested in this property?'}
               </h3>
               <p className="text-gray-500 text-sm">
-                Contact the owner to schedule a viewing.
+                {user?.role === 'admin'
+                  ? 'You manage this listing from the admin dashboard.'
+                  : isAvailable
+                  ? 'Submit a rental request and the admin will get back to you.'
+                  : 'This property is currently not available for rent.'}
               </p>
             </div>
             <div className="flex gap-3 flex-shrink-0">
-              {isAvailable ? (
-                <button
-                  id="contact-owner-btn"
+              {user?.role === 'admin' ? (
+                <Link to="/admin/dashboard" className="btn-secondary !py-2.5 !px-6">
+                  📊 Dashboard
+                </Link>
+              ) : isAvailable && isAuthenticated && user?.role !== 'admin' ? (
+                <motion.button
+                  id="request-rental-btn"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setShowRentModal(true)}
                   className="btn-primary !py-2.5 !px-6"
-                  onClick={() => {
-                    /* TODO: open contact modal / navigate to inquiry form */
-                  }}
                 >
-                  Contact Owner
-                </button>
+                  📋 Request Rental
+                </motion.button>
+              ) : isAvailable && !isAuthenticated ? (
+                <Link to="/login" className="btn-primary !py-2.5 !px-6">
+                  🔑 Login to Request
+                </Link>
               ) : (
                 <span className="btn-secondary !py-2.5 !px-6 opacity-60 cursor-not-allowed">
                   Not Available
@@ -381,6 +397,16 @@ function PropertyDetail() {
               </Link>
             </div>
           </motion.div>
+
+          {/* Rent Request Modal */}
+          <AnimatePresence>
+            {showRentModal && property && (
+              <RentRequestModal
+                property={property}
+                onClose={() => setShowRentModal(false)}
+              />
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </AnimatedPage>

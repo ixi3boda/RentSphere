@@ -122,16 +122,36 @@ useEffect(() => {
                     </motion.button>
                   </Link>
 
-                  {user?.role === 'owner' && (
-                    <Link to="/owner/dashboard">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="text-gray-700 hover:text-rentsphere-teal transition-colors"
-                      >
-                        📊 Dashboard
-                      </motion.button>
-                    </Link>
+                  {user?.role === 'admin' && (
+                    <>
+                      <Link to="/admin/dashboard">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="text-gray-700 hover:text-rentsphere-teal transition-colors"
+                        >
+                          📊 Dashboard
+                        </motion.button>
+                      </Link>
+                      <Link to="/admin/requests">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="text-gray-700 hover:text-rentsphere-teal transition-colors"
+                        >
+                          📬 Requests
+                        </motion.button>
+                      </Link>
+                      <Link to="/admin/contracts">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="text-gray-700 hover:text-rentsphere-teal transition-colors"
+                        >
+                          📋 Contracts
+                        </motion.button>
+                      </Link>
+                    </>
                   )}
                   
                   {user?.role === 'tenant' && (
@@ -239,6 +259,16 @@ useEffect(() => {
                   <Link to="/dashboard">
                     <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Dashboard</button>
                   </Link>
+                  {user?.role === 'admin' && (
+                    <>
+                      <Link to="/admin/requests">
+                        <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">📬 Rental Requests</button>
+                      </Link>
+                      <Link to="/admin/contracts">
+                        <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">📋 Contracts</button>
+                      </Link>
+                    </>
+                  )}
                   <Link to="/properties">
                     <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">🏘️ Browse</button>
                   </Link>

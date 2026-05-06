@@ -88,7 +88,7 @@ public class RentController {
     }
 
     @PutMapping("/requests/{id}/accept")
-    @PreAuthorize("hasRole('OWNER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> acceptRequest(@PathVariable Long id, Principal principal) {
         try {
             String email = principal.getName();
@@ -135,7 +135,7 @@ public class RentController {
     }
 
     @PutMapping("/requests/{id}/reject")
-    @PreAuthorize("hasRole('OWNER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> rejectRequest(@PathVariable Long id, Principal principal) {
         try {
             String email = principal.getName();

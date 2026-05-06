@@ -132,10 +132,6 @@ export function AuthProvider({ children }) {
   const signup = async (name, email, password, role) => {
     setLoading(true);
     try {
-      // Map UI role to backend role_name.
-      // Backend accepts 'TENANT' or 'VISITOR'. 'OWNER' cannot be self-assigned.
-      const backendRole = role === 'owner' ? 'TENANT' : 'TENANT';
-
       const registerRes = await authApi.register({
         email,
         password_hash:  password,
@@ -143,7 +139,6 @@ export function AuthProvider({ children }) {
         full_name:      name,
         mobile_number:  '',
         avatar_url:     '',
-        role_name:      backendRole,
       });
 
       const token = registerRes.data?.token;

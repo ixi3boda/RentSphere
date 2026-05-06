@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { AnimatedPage, AnimatedButton } from '../components/AnimatedPage';
 import { motion } from 'framer-motion';
+import { authApi } from '../utils/api';
+import { mapUserToFrontend } from '../utils/mappers';
 
 function Profile() {
   const { user, updateUser } = useAuth();
@@ -13,25 +15,39 @@ function Profile() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: '',
-    location: '',
-    bio: ''
+    phone: ''
   });
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        setFetchLoading(true);
+        const response = await authApi.getMe();
+        const userData = mapUserToFrontend(response.data);
+        await updateUser(userData);
+      } catch (error) {
+        console.error('Failed to fetch user details:', error);
+      } finally {
+        setFetchLoading(false);
+      }
+    };
+
+    fetchUserDetails();
+  }, []);
 
   useEffect(() => {
     if (user) {
       setFormData({
         name: user.name || '',
         email: user.email || '',
-        phone: user.phone || '',
-        location: user.location || '',
-        bio: user.bio || ''
+        phone: user.phone || ''
       });
       // Load existing profile picture if any
-      if (user.profilePicture) {
-        setProfilePicturePreview(user.profilePicture);
+      if (user.avatar) {
+        setProfilePicturePreview(user.avatar);
       }
     }
   }, [user]);
@@ -171,7 +187,7 @@ function Profile() {
       // Prepare update data
       const updateData = {
         ...formData,
-        profilePicture: profilePictureBase64 || user?.profilePicture || null
+        avatar: profilePictureBase64 || user?.avatar || null
       };
       
       // Simulate API call - replace with actual Spring Boot call
@@ -216,24 +232,37 @@ function Profile() {
             <p className="text-gray-600">Manage your personal information</p>
           </motion.div>
 
-          {/* Success Message */}
-          {successMessage && (
+          {fetchLoading ? (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-lg"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex justify-center items-center py-20"
             >
-              {successMessage}
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rentsphere-teal mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading your profile...</p>
+              </div>
             </motion.div>
-          )}
+          ) : (
+            <>
+              {/* Success Message */}
+              {successMessage && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-lg"
+                >
+                  {successMessage}
+                </motion.div>
+              )}
 
-          {/* Profile Card */}
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.1 }}
-            className="glass-effect rounded-2xl overflow-hidden shadow-2xl"
-          >
+              {/* Profile Card */}
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.1 }}
+                className="glass-effect rounded-2xl overflow-hidden shadow-2xl"
+              >
             {/* Cover Image Section */}
             <div className="relative h-32 bg-gradient-to-r from-rentsphere-teal to-rentsphere-orange">
               <div className="absolute -bottom-12 left-8">
@@ -301,10 +330,6 @@ function Profile() {
                         <label className="text-sm text-gray-500">Phone Number</label>
                         <p className="text-gray-800 font-medium">{formData.phone || 'Not provided'}</p>
                       </div>
-                      <div>
-                        <label className="text-sm text-gray-500">Location</label>
-                        <p className="text-gray-800 font-medium">{formData.location || 'Not provided'}</p>
-                      </div>
                     </div>
                     <div className="space-y-4">
                       <div>
@@ -316,13 +341,9 @@ function Profile() {
                       <div>
                         <label className="text-sm text-gray-500">Account Type</label>
                         <p className="text-gray-800 font-medium capitalize">
-                          {user?.role === 'owner' ? '🔑 Property Owner' : '🏠 Tenant'}
+                          {user?.role === 'admin' ? '🔑 Property Admin' : user?.role === 'tenant' ? '🏠 Tenant' : '👤 Visitor'}
                         </p>
                       </div>
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="text-sm text-gray-500">Bio</label>
-                      <p className="text-gray-800 font-medium">{formData.bio || 'No bio provided'}</p>
                     </div>
                   </div>
                 </div>
@@ -372,34 +393,6 @@ function Profile() {
                         placeholder="+1 234 567 8900"
                       />
                     </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Location
-                      </label>
-                      <input
-                        type="text"
-                        name="location"
-                        value={formData.location}
-                        onChange={handleChange}
-                        className="input-field"
-                        placeholder="City, Country"
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Bio
-                      </label>
-                      <textarea
-                        name="bio"
-                        value={formData.bio}
-                        onChange={handleChange}
-                        rows="4"
-                        className="input-field"
-                        placeholder="Tell us about yourself..."
-                      />
-                    </div>
                   </div>
 
                   {/* Image Upload Info */}
@@ -418,8 +411,8 @@ function Profile() {
                       onClick={() => {
                         setIsEditing(false);
                         // Reset image preview if cancelled
-                        if (user?.profilePicture) {
-                          setProfilePicturePreview(user.profilePicture);
+                        if (user?.avatar) {
+                          setProfilePicturePreview(user.avatar);
                         } else {
                           setProfilePicturePreview(null);
                         }
@@ -461,6 +454,8 @@ function Profile() {
               <div className="text-gray-600">Reviews</div>
             </div>
           </motion.div>
+            </>
+          )}
         </div>
       </div>
     </AnimatedPage>

@@ -62,27 +62,26 @@ export const propertyApi = {
 
   /**
    * POST /api/properties/add  (ADMIN only)
-   * @param {Property} data  — backend Property DTO shape
-   * @param {string|null} coverPic — optional cover image URL query param
+   * @param {Object} data — CreatePropertyRequest body (includes coverPic)
+   * Backend expects: { propertyType, title, propertyDescription, pricePerMonth,
+   *   city, district, address, latitude, longitude, numRooms, areaSqm,
+   *   isAvailable, coverPic }
    */
-  create: (data, coverPic = null) => {
-    const params = coverPic ? { coverPic } : {};
-    return apiClient.post("/api/properties/add", data, { params });
-  },
+  create: (data) => apiClient.post("/api/properties/add", data),
 
   /**
-   * PUT /api/properties/update/:id  (ADMIN only)
-   * All fields sent as query params (all optional on the backend).
+   * PUT /api/properties/{id}/update  (ADMIN only)
+   * All fields sent as JSON request body (all optional on the backend).
    * @param {number|string} id
-   * @param {Object} params — subset of property fields to update
+   * @param {Object} body — UpdatePropertyRequest fields (camelCase)
    */
-  update: (id, params) =>
-    apiClient.put(`/api/properties/update/${id}`, null, { params }),
+  update: (id, body) =>
+    apiClient.put(`/api/properties/${id}/update`, body),
 
   /**
-   * DELETE /api/properties/delete/:id  (ADMIN only)
+   * DELETE /api/properties/{id}/delete  (ADMIN only)
    */
-  delete: (id) => apiClient.delete(`/api/properties/delete/${id}`),
+  delete: (id) => apiClient.delete(`/api/properties/${id}/delete`),
 
   /**
    * GET /api/properties/filter
@@ -125,8 +124,49 @@ export const propertyApi = {
 // Rent API  (/api/rent/*)
 // ---------------------------------------------------------------------------
 export const rentApi = {
-  /** GET /api/rent/requests/all */
+  /**
+   * POST /api/rent/request  (authenticated tenant)
+   * @param {{ propertyId, message, desiredStart, desiredMonths }} body — CreateRentalRequest
+   */
+  createRequest: (body) => apiClient.post("/api/rent/request", body),
+
+  /** GET /api/rent/requests/all  (ADMIN) */
   getAllRequests: () => apiClient.get("/api/rent/requests/all"),
+
+  /** GET /api/rent/requests/:id */
+  getRequestById: (id) => apiClient.get(`/api/rent/requests/${id}`),
+
+  /** GET /api/rent/contracts/all  (ADMIN) */
+  getAllContracts: () => apiClient.get("/api/rent/contracts/all"),
+
+  /**
+   * PUT /api/rent/requests/:id/accept  (ADMIN only)
+   */
+  acceptRequest: (id) => apiClient.put(`/api/rent/requests/${id}/accept`),
+
+  /**
+   * PUT /api/rent/requests/:id/reject  (ADMIN only)
+   */
+  rejectRequest: (id) => apiClient.put(`/api/rent/requests/${id}/reject`),
+
+  /**
+   * POST /api/rent/contracts/:contractId/paypal
+   * @param {number} contractId
+   * @param {{ amount, currency, description, cancelUrl, successUrl }} body — PayPalPaymentRequest
+   */
+  createPayPalPayment: (contractId, body) =>
+    apiClient.post(`/api/rent/contracts/${contractId}/paypal`, body),
+
+  /**
+   * POST /api/rent/contracts/:contractId/paypal/execute?paymentId=...&payerId=...
+   * @param {number} contractId
+   * @param {string} paymentId
+   * @param {string} payerId
+   */
+  executePayPalPayment: (contractId, paymentId, payerId) =>
+    apiClient.post(`/api/rent/contracts/${contractId}/paypal/execute`, null, {
+      params: { paymentId, payerId },
+    }),
 };
 
 // ---------------------------------------------------------------------------

@@ -10,11 +10,14 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
 import Favorites from "./pages/Favorites";
-import OwnerDashboard from "./pages/owner/OwnerDashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import RentalRequestsPage from "./pages/admin/RentalRequestsPage";
+import ContractsPage from "./pages/admin/ContractsPage";
 import TenantDashboard from "./pages/tenant/TenantDashboard";
 import PropertyForm from "./pages/owner/PropertyForm";
 import PropertyList from "./pages/PropertyList";
 import PropertyDetail from "./pages/PropertyDetail";
+import PayPalCallbackPage from "./pages/PayPalCallbackPage";
 
 function App() {
   return (
@@ -42,19 +45,28 @@ function App() {
               <PrivateRoute><Profile /></PrivateRoute>
             } />
 
-            {/* Protected owner routes — must be logged in */}
-            <Route path="/owner/dashboard" element={
-              <PrivateRoute><OwnerDashboard /></PrivateRoute>
+            {/* Protected admin routes — must be logged in */}
+            <Route path="/admin/dashboard" element={
+              <PrivateRoute><AdminDashboard /></PrivateRoute>
+            } />
+            <Route path="/admin/requests" element={
+              <PrivateRoute><RentalRequestsPage /></PrivateRoute>
+            } />
+            <Route path="/admin/contracts" element={
+              <PrivateRoute><ContractsPage /></PrivateRoute>
             } />
             <Route path="/tenant/dashboard" element={
               <PrivateRoute><TenantDashboard /></PrivateRoute>
             } />
-            <Route path="/owner/properties/new" element={
+            <Route path="/admin/properties/new" element={
               <PrivateRoute><PropertyForm /></PrivateRoute>
             } />
-            <Route path="/owner/properties/edit/:id" element={
+            <Route path="/admin/properties/edit/:id" element={
               <PrivateRoute><PropertyForm /></PrivateRoute>
             } />
+
+            {/* PayPal callback — public but only meaningful after a payment flow */}
+            <Route path="/paypal/callback" element={<PayPalCallbackPage />} />
           </Routes>
         </PropertyProvider>
       </AuthProvider>

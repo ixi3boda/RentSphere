@@ -17,14 +17,11 @@ export function mapPropertyToFrontend(pd) {
   if (!pd) return null;
   const p = pd.property || {};
 
-  // Build a readable location string from city + district + address
   const locationParts = [p.city, p.district, p.address].filter(Boolean);
   const location = locationParts.join(', ') || '—';
 
-  // Derive status from isAvailable flag
   const status = p.isAvailable === false ? 'rented' : 'available';
 
-  // Combine cover pic + image list (cover first, de-duplicated)
   const images = [];
   if (pd.coverPic) images.push(pd.coverPic);
   if (Array.isArray(pd.propertyImages)) {
@@ -57,23 +54,28 @@ export function mapPropertyToFrontend(pd) {
 }
 
 /**
- * Frontend PropertyForm fields  →  Backend Property DTO body
- * Used by POST /api/properties/add
- * Field names match the backend Property DTO (camelCase).
+ * Frontend PropertyForm fields  →  Backend CreatePropertyRequest / UpdatePropertyRequest body
+ *
+ * Used by:
+ *   POST /api/properties/add          (createProperty)
+ *   PUT  /api/properties/{id}/update  (updateProperty)
+ *
+ * Field names match CreatePropertyRequest exactly (camelCase).
+ * NOTE: caller is responsible for spreading in { coverPic } before sending.
  */
 export function mapFormToBackend(formData) {
   return {
-    propertyType:        (formData.propertyType || '').toUpperCase(), // backend CHECK: APARTMENT|STUDIO|VILLA|DUPLEX|OFFICE|SHOP|WAREHOUSE
+    propertyType:        (formData.propertyType || '').toUpperCase(), // APARTMENT|STUDIO|VILLA|DUPLEX|OFFICE|SHOP|WAREHOUSE
     title:               formData.title || '',
-    propertyDescription: formData.description || '',
-    pricePerMonth:       formData.price ? Number(formData.price) : null,
+    propertyDescription: formData.propertyDescription || '',          // matches EMPTY_FORM key
+    pricePerMonth:       formData.pricePerMonth ? Number(formData.pricePerMonth) : null, // matches EMPTY_FORM key
     city:                formData.city || '',
     district:            formData.district || '',
-    address:             formData.address || formData.location || '',  // address is NOT NULL in DB
+    address:             formData.address || '',                       // NOT NULL in DB
     latitude:            formData.latitude  ? Number(formData.latitude)  : null,
     longitude:           formData.longitude ? Number(formData.longitude) : null,
     numRooms:            formData.numRooms  ? Number(formData.numRooms)  : null,
-    areaSqm:             formData.areaSqm   ? Number(formData.areaSqm)  : null,
+    areaSqm:             formData.areaSqm   ? Number(formData.areaSqm)   : null,
     isAvailable:         formData.isAvailable !== false,
   };
 }
@@ -84,15 +86,15 @@ export function mapFormToBackend(formData) {
 export function mapUserToFrontend(u) {
   if (!u) return null;
   return {
-    id:     u.user_id,
-    email:  u.email,
-    name:   u.full_name || u.username || u.email,
-    username: u.username,
-    // Normalise role: backend stores 'ADMIN' | 'USER', frontend uses 'owner' | 'tenant'
-      role:   u.role_name === 'OWNER' ? 'owner' : 'tenant',
+    id:        u.user_id,
+    email:     u.email,
+    name:      u.full_name || u.username || u.email,
+    username:  u.username,
+    role:      u.role_name === 'ADMIN' ? 'admin' : u.role_name === 'TENANT' ? 'tenant' : 'visitor',
     role_name: u.role_name,
-    avatar: u.avatar_url || null,
-    phone:  u.mobile_number || null,
-    active: u.is_active,
+    avatar:    u.avatar_url || null,
+    phone:     u.mobile_number || null,
+    active:    u.is_active,
+    createdAt: u.created_at,
   };
 }

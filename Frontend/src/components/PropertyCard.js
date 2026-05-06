@@ -1,7 +1,7 @@
 // src/components/PropertyCard.js
 //
 // RS-10 — Reusable property summary card.
-// Used by: PropertyList (tenant browse) and OwnerDashboard (owner view).
+// Used by: PropertyList (tenant browse) and AdminDashboard (admin view).
 //
 // Props:
 //   property  {object}   – property data object

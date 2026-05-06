@@ -1,6 +1,6 @@
-// src/pages/owner/OwnerDashboard.js
+// src/pages/admin/AdminDashboard.js
 //
-// RS-14 — Owner Dashboard UI
+// RS-14 — Admin Dashboard UI
 // Displays key stats (Total Properties, Pending Requests, Active Contracts),
 // quick action buttons, and the full property management list.
 
@@ -133,9 +133,9 @@ function DeleteModal({ property, onConfirm, onCancel, loading }) {
 }
 
 // ---------------------------------------------------------------------------
-// Property Row Card (owner-specific — has Edit / Delete actions)
+// Property Row Card (admin-specific — has Edit / Delete actions)
 // ---------------------------------------------------------------------------
-function OwnerPropertyCard({ property, onDelete, index }) {
+function AdminPropertyCard({ property, onDelete, index }) {
   const navigate = useNavigate();
 
   return (
@@ -178,7 +178,7 @@ function OwnerPropertyCard({ property, onDelete, index }) {
           <motion.button
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.96 }}
-            onClick={() => navigate(`/owner/properties/edit/${property.id}`)}
+            onClick={() => navigate(`/admin/properties/edit/${property.id}`)}
             id={`edit-property-${property.id}`}
             className="flex-1 btn-secondary !py-2 !px-3 text-sm"
           >
@@ -200,9 +200,9 @@ function OwnerPropertyCard({ property, onDelete, index }) {
 }
 
 // ---------------------------------------------------------------------------
-// Owner Dashboard — RS-14
+// Admin Dashboard — RS-14
 // ---------------------------------------------------------------------------
-function OwnerDashboard() {
+function AdminDashboard() {
   const { user } = useAuth();
   const { properties, loading: propsLoading, error: propsError, fetchOwnerProperties, deleteProperty } = useProperty();
   const navigate = useNavigate();
@@ -220,10 +220,10 @@ function OwnerDashboard() {
   const [toast, setToast] = useState(null);
 
   // -------------------------------------------------------------------------
-  // Redirect non-owners
+  // Redirect non-admins
   // -------------------------------------------------------------------------
   useEffect(() => {
-    if (user && user.role !== 'owner') navigate('/');
+    if (user && user.role !== 'admin') navigate('/');
   }, [user, navigate]);
 
   // -------------------------------------------------------------------------
@@ -340,24 +340,29 @@ function OwnerDashboard() {
           >
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div>
-                <h1 className="text-4xl font-bold gradient-text mb-1">Owner Dashboard</h1>
+                <h1 className="text-4xl font-bold gradient-text mb-1">Admin Dashboard</h1>
                 <p className="text-gray-500">
-                  Welcome back, <span className="font-semibold text-gray-700">{user?.name || 'Owner'}</span> — here's your overview
+                  Welcome back, <span className="font-semibold text-gray-700">{user?.name || 'Admin'}</span> — here's your overview
                 </p>
               </div>
 
               {/* Quick actions */}
               <div className="flex flex-wrap gap-2">
                 <QuickAction
-                  to="/owner/properties/new"
+                  to="/admin/properties/new"
                   icon="+"
                   label="Add Property"
                   variant="primary"
                 />
                 <QuickAction
-                  to="/owner/dashboard"
+                  to="/admin/requests"
+                  icon="📬"
+                  label="Requests"
+                />
+                <QuickAction
+                  to="/admin/contracts"
                   icon="📋"
-                  label="Manage Listings"
+                  label="Contracts"
                 />
                 <QuickAction
                   to="/properties"
@@ -423,7 +428,7 @@ function OwnerDashboard() {
             </div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
-                to="/owner/properties/new"
+                to="/admin/properties/new"
                 id="add-property-btn"
                 className="btn-primary inline-flex items-center gap-2 !py-2 !px-5 text-sm"
               >
@@ -458,7 +463,7 @@ function OwnerDashboard() {
               <div className="text-6xl mb-4">🏘️</div>
               <h2 className="text-2xl font-bold text-gray-700 mb-2">No Properties Yet</h2>
               <p className="text-gray-500 mb-6">Start by adding your first property listing.</p>
-              <Link to="/owner/properties/new" className="btn-primary inline-block !py-2.5 !px-8">
+              <Link to="/admin/properties/new" className="btn-primary inline-block !py-2.5 !px-8">
                 + Add Your First Property
               </Link>
             </motion.div>
@@ -468,7 +473,7 @@ function OwnerDashboard() {
           {properties.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {properties.map((prop, i) => (
-                <OwnerPropertyCard
+                <AdminPropertyCard
                   key={prop.id}
                   property={prop}
                   onDelete={handleDeleteClick}
@@ -518,4 +523,4 @@ function OwnerDashboard() {
   );
 }
 
-export default OwnerDashboard;
+export default AdminDashboard;
