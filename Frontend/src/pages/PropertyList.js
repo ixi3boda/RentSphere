@@ -51,6 +51,19 @@ function SkeletonCard() {
   );
 }
 
+function FilterChip({ label, onRemove }) {
+  return (
+    <button
+      type="button"
+      onClick={onRemove}
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rentsphere-teal/10 text-rentsphere-teal text-xs font-semibold border border-rentsphere-teal/20 hover:bg-rentsphere-teal/20 transition-colors"
+    >
+      {label}
+      <span className="text-[10px]">✕</span>
+    </button>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // PropertyList Page
 // ---------------------------------------------------------------------------
@@ -194,6 +207,7 @@ function PropertyList() {
   const hasFilters =
     search || typeFilter || cityFilter || maxPrice || minPrice || minRooms || availableOnly;
   const activeSearch = search.trim();
+  const typeLabel = PROPERTY_TYPES.find((t) => t.value === typeFilter)?.label;
 
   const clearFilters = () => {
     setSearch("");
@@ -237,146 +251,175 @@ function PropertyList() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="glass-effect rounded-2xl p-4 mb-8 flex flex-col sm:flex-row gap-3 flex-wrap"
+            className="glass-effect rounded-2xl p-5 mb-8 border border-white/40 shadow-sm"
           >
-            {/* Search */}
-            <div className="flex-1 min-w-[180px] relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                {"🔍"}
-              </span>
-              <input
-                type="text"
-                id="search-properties"
-                placeholder="Search title, city, district, address, description..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="input-field pl-9 pr-8"
-                autoComplete="off"
-              />
-              {/* Inline clear button */}
-              <AnimatePresence>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-800">Search & Filters</h2>
+              {hasFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="text-sm font-semibold text-rentsphere-teal hover:text-rentsphere-orange transition-colors"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+              <div className="md:col-span-6 relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                  🔍
+                </span>
+                <input
+                  type="text"
+                  id="search-properties"
+                  placeholder="Search title, location, description..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="input-field pl-9 pr-8"
+                  autoComplete="off"
+                />
                 {search && (
-                  <motion.button
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
+                  <button
                     type="button"
                     onClick={() => setSearch("")}
                     aria-label="Clear search"
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm leading-none transition-colors"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
                   >
                     ✕
-                  </motion.button>
+                  </button>
                 )}
-              </AnimatePresence>
+              </div>
+
+              <div className="md:col-span-3">
+                <select
+                  id="filter-type"
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  className="input-field bg-white w-full"
+                >
+                  {PROPERTY_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="md:col-span-3">
+                <select
+                  id="filter-city"
+                  value={cityFilter}
+                  onChange={(e) => setCityFilter(e.target.value)}
+                  className="input-field bg-white w-full"
+                >
+                  <option value="">All Cities</option>
+                  {cityOptions.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="md:col-span-2 relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">
+                  $
+                </span>
+                <input
+                  type="number"
+                  id="filter-min-price"
+                  placeholder="Min"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  min={0}
+                  className="input-field pl-7"
+                />
+              </div>
+
+              <div className="md:col-span-2 relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">
+                  $
+                </span>
+                <input
+                  type="number"
+                  id="filter-max-price"
+                  placeholder="Max"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  min={0}
+                  className="input-field pl-7"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <input
+                  type="number"
+                  id="filter-min-rooms"
+                  placeholder="Min rooms"
+                  value={minRooms}
+                  onChange={(e) => setMinRooms(e.target.value)}
+                  min={0}
+                  className="input-field w-full"
+                />
+              </div>
+
+              <div className="md:col-span-3">
+                <select
+                  id="sort-properties"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="input-field bg-white w-full"
+                >
+                  <option value="newest">Newest first</option>
+                  <option value="price_asc">Price: Low → High</option>
+                  <option value="price_desc">Price: High → Low</option>
+                  <option value="rooms_desc">Rooms: High → Low</option>
+                  <option value="rooms_asc">Rooms: Low → High</option>
+                </select>
+              </div>
+
+              <div className="md:col-span-3 flex items-center">
+                <label className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm text-gray-700 w-full">
+                  <input
+                    type="checkbox"
+                    checked={availableOnly}
+                    onChange={(e) => setAvailableOnly(e.target.checked)}
+                    className="h-4 w-4"
+                  />
+                  Available only
+                </label>
+              </div>
             </div>
 
-            {/* Type */}
-            <select
-              id="filter-type"
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="input-field bg-white min-w-[140px] flex-shrink-0"
-            >
-              {PROPERTY_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-
-            {/* City */}
-            <select
-              id="filter-city"
-              value={cityFilter}
-              onChange={(e) => setCityFilter(e.target.value)}
-              className="input-field bg-white min-w-[160px] flex-shrink-0"
-            >
-              <option value="">All Cities</option>
-              {cityOptions.map((city) => (
-                <option key={city} value={city}>
-                  {city}
-                </option>
-              ))}
-            </select>
-
-            {/* Price range: min and max */}
-            <div className="relative min-w-[140px] flex-shrink-0">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">
-                $
-              </span>
-              <input
-                type="number"
-                id="filter-min-price"
-                placeholder="Min price/mo"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value)}
-                min={0}
-                className="input-field pl-7"
-              />
-            </div>
-
-            <input
-              type="number"
-              id="filter-min-rooms"
-              placeholder="Min rooms"
-              value={minRooms}
-              onChange={(e) => setMinRooms(e.target.value)}
-              min={0}
-              className="input-field min-w-[120px] flex-shrink-0"
-            />
-
-            <label className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm text-gray-700">
-              <input
-                type="checkbox"
-                checked={availableOnly}
-                onChange={(e) => setAvailableOnly(e.target.checked)}
-                className="h-4 w-4"
-              />
-              Available only
-            </label>
-
-            <div className="relative min-w-[140px] flex-shrink-0">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">
-                $
-              </span>
-              <input
-                type="number"
-                id="filter-max-price"
-                placeholder="Max price/mo"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                min={0}
-                className="input-field pl-7"
-              />
-            </div>
-
-            {/* Sort */}
-            <select
-              id="sort-properties"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="input-field bg-white min-w-[140px] flex-shrink-0"
-            >
-              <option value="newest">Newest first</option>
-              <option value="price_asc">Price: Low → High</option>
-              <option value="price_desc">Price: High → Low</option>
-              <option value="rooms_desc">Rooms: High → Low</option>
-              <option value="rooms_asc">Rooms: Low → High</option>
-            </select>
-
-            {/* Clear */}
             <AnimatePresence>
               {hasFilters && (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  onClick={clearFilters}
-                  className="btn-secondary !py-2 !px-4 text-sm flex-shrink-0"
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  className="mt-4 flex flex-wrap gap-2"
                 >
-                  ✕ Clear
-                </motion.button>
+                  {search && <FilterChip label={`Search: "${search}"`} onRemove={() => setSearch("")} />}
+                  {typeFilter && typeLabel && (
+                    <FilterChip label={typeLabel} onRemove={() => setTypeFilter("")} />
+                  )}
+                  {cityFilter && (
+                    <FilterChip label={`City: ${cityFilter}`} onRemove={() => setCityFilter("")} />
+                  )}
+                  {minPrice && (
+                    <FilterChip label={`Min $${minPrice}`} onRemove={() => setMinPrice("")} />
+                  )}
+                  {maxPrice && (
+                    <FilterChip label={`Max $${maxPrice}`} onRemove={() => setMaxPrice("")} />
+                  )}
+                  {minRooms && (
+                    <FilterChip label={`${minRooms}+ rooms`} onRemove={() => setMinRooms("")} />
+                  )}
+                  {availableOnly && (
+                    <FilterChip label="Available only" onRemove={() => setAvailableOnly(false)} />
+                  )}
+                </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
