@@ -5,7 +5,7 @@ import { AnimatedPage, AnimatedButton } from '../components/AnimatedPage';
 import { motion } from 'framer-motion';
 
 function Profile() {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, refreshUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [profilePicture, setProfilePicture] = useState(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState(null);
@@ -21,9 +21,10 @@ function Profile() {
   const [fetchLoading, setFetchLoading] = useState(true);
 
   useEffect(() => {
-    // Profile page depends on auth state, no extra update needed here.
+    // Refresh user data from backend to get latest status (active/inactive)
+    refreshUser();
     setFetchLoading(false);
-  }, []);
+  }, [refreshUser]);
 
   useEffect(() => {
     if (user) {

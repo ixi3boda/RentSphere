@@ -188,6 +188,30 @@ export function AuthProvider({ children }) {
   };
 
   // -------------------------------------------------------------------------
+  // Refresh user data from backend (get latest active status, etc.)
+  // -------------------------------------------------------------------------
+  const refreshUser = async () => {
+    try {
+      const meRes = await authApi.getMe();
+      const mapped = mapUserToFrontend(meRes.data);
+      setUser(mapped);
+
+      // Update stored user in localStorage or sessionStorage
+      if (localStorage.getItem("user")) {
+        localStorage.setItem("user", JSON.stringify(mapped));
+      }
+      if (sessionStorage.getItem("user")) {
+        sessionStorage.setItem("user", JSON.stringify(mapped));
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  // -------------------------------------------------------------------------
   // Update user profile via backend
   // -------------------------------------------------------------------------
   const updateProfile = async (payload) => {
@@ -235,6 +259,7 @@ export function AuthProvider({ children }) {
     signup,
     logout,
     updateProfile,
+    refreshUser,
     loading,
     isAuthenticated: !!user,
     initializing,
