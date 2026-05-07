@@ -23,7 +23,7 @@ function Login() {
     if (result.success) {
       navigate('/');
     } else {
-      setError('Login failed. Please try again.');
+      setError(result.error || 'Login failed. Please try again.');
     }
   };
 

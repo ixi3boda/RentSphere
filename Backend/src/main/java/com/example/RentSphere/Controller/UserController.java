@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.RentSphere.Dto.UpdateProfileRequest;
+import com.example.RentSphere.Dto.UpdateProfileResponse;
 import java.security.Principal;
 import java.time.LocalDateTime;
 
@@ -20,6 +22,13 @@ import java.time.LocalDateTime;
 public class UserController {
 
     private final UserService userService;
+
+    private String getPrincipalEmail(Principal principal) {
+        if (principal == null || principal.getName() == null || principal.getName().isBlank()) {
+            throw new IllegalStateException("Unauthorized access");
+        }
+        return principal.getName();
+    }
 
     private ResponseEntity<?> buildErrorResponse(String message, HttpStatus status) {
         ErrorResponse errorResponse = ErrorResponse.builder()
@@ -56,10 +65,40 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(Principal principal) {
         try {
-            String email = principal.getName();
+            String email = getPrincipalEmail(principal);
             return ResponseEntity.ok(userService.getCurrentUser(email));
+        } catch (IllegalStateException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             return buildErrorResponse("Failed to retrieve user details: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<?> updateCurrentUser(Principal principal, @RequestBody UpdateProfileRequest request) {
+        try {
+            String email = getPrincipalEmail(principal);
+            UpdateProfileResponse response = userService.updateCurrentUser(email, request);
+            return ResponseEntity.ok(response);
+        } catch (IllegalStateException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch (IllegalArgumentException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return buildErrorResponse("Failed to update profile: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(Principal principal) {
+        try {
+            String email = getPrincipalEmail(principal);
+            userService.logout(email);
+            return ResponseEntity.ok().build();
+        } catch (IllegalStateException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            return buildErrorResponse("Failed to logout user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -81,9 +81,9 @@ useEffect(() => {
                       whileTap={{ scale: 0.95 }}
                       className="w-8 h-8 rounded-full bg-gradient-to-r from-rentsphere-teal to-rentsphere-orange overflow-hidden cursor-pointer"
                     >
-                      {user?.profilePicture ? (
+                      {user?.avatar ? (
                         <img
-                          src={user.profilePicture}
+                          src={user.avatar}
                           alt="Profile"
                           className="w-full h-full object-cover"
                         />
@@ -240,9 +240,9 @@ useEffect(() => {
                   <div className="flex items-center space-x-3 mb-4">
                     {/* Profile Picture in Mobile Menu */}
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-rentsphere-teal to-rentsphere-orange overflow-hidden">
-                      {user?.profilePicture ? (
+                      {user?.avatar ? (
                         <img 
-                          src={user.profilePicture} 
+                          src={user.avatar} 
                           alt="Profile" 
                           className="w-full h-full object-cover"
                         />
@@ -256,9 +256,15 @@ useEffect(() => {
                       Welcome, {user?.name || user?.email}
                     </div>
                   </div>
-                  <Link to="/dashboard">
-                    <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Dashboard</button>
-                  </Link>
+                  {user?.role === 'admin' ? (
+                    <Link to="/admin/dashboard">
+                      <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Dashboard</button>
+                    </Link>
+                  ) : user?.role === 'tenant' ? (
+                    <Link to="/tenant/dashboard">
+                      <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Dashboard</button>
+                    </Link>
+                  ) : null}
                   {user?.role === 'admin' && (
                     <>
                       <Link to="/admin/requests">

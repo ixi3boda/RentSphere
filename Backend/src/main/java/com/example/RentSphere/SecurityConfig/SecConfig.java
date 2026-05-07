@@ -5,6 +5,7 @@ import com.example.RentSphere.Service.MyUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -33,6 +34,10 @@ public class SecConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/user/register").permitAll()
                         .requestMatchers("/api/user/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/properties/all").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/properties/filter").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/properties/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/properties/*").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

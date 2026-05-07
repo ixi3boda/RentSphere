@@ -129,7 +129,7 @@ export function AuthProvider({ children }) {
   // Does NOT call login() again to avoid a duplicate-email error on the
   // second React StrictMode render and to save an extra round-trip.
   // -------------------------------------------------------------------------
-  const signup = async (name, email, password, role) => {
+  const signup = async (name, email, password, phone = '', avatarUrl = '') => {
     setLoading(true);
     try {
       const registerRes = await authApi.register({
@@ -137,8 +137,8 @@ export function AuthProvider({ children }) {
         password_hash:  password,
         username:       name,
         full_name:      name,
-        mobile_number:  '',
-        avatar_url:     '',
+        mobile_number:  phone,
+        avatar_url:     avatarUrl,
       });
 
       const token = registerRes.data?.token;
@@ -172,30 +172,58 @@ export function AuthProvider({ children }) {
   // -------------------------------------------------------------------------
   // Logout
   // -------------------------------------------------------------------------
-  const logout = () => {
-    setUser(null);
-    // Clear both storage types
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("user");
-    // Clear "stay signed in" cookie
-    document.cookie = 'rentsphere_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  const logout = async () => {
+    try {
+      await authApi.logout();
+    } catch (_error) {
+      // Ignore network errors and still clear local state.
+    } finally {
+      setUser(null);
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("user");
+      document.cookie = 'rentsphere_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    }
   };
 
   // -------------------------------------------------------------------------
-  // Update user (local state + localStorage only — no backend endpoint yet)
+  // Update user profile via backend
   // -------------------------------------------------------------------------
-  const updateUser = async (userData) => {
+  const updateProfile = async (payload) => {
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+      const res = await authApi.updateProfile(payload);
+      const data = res.data;
+      const mapped = mapUserToFrontend(data.user || data);
+
+      const storingInLocalStorage = !!localStorage.getItem("token");
+      const storingInSessionStorage = !!sessionStorage.getItem("token");
+      const token = data.token || sessionStorage.getItem("token") || localStorage.getItem("token");
+
+      setUser(mapped);
+
+      if (storingInLocalStorage) {
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(mapped));
+      }
+      if (storingInSessionStorage) {
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("user", JSON.stringify(mapped));
+      }
+
+      if (storingInLocalStorage && token) {
+        const maxAge = 60 * 60 * 24 * 30;
+        document.cookie = `rentsphere_token=${encodeURIComponent(token)}; Path=/; max-age=${maxAge};`;
+      }
+
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      const msg =
+        error.response?.data?.message ||
+        error.message ||
+        'Profile update failed. Please try again.';
+      return { success: false, error: msg };
     } finally {
       setLoading(false);
     }
@@ -206,7 +234,7 @@ export function AuthProvider({ children }) {
     login,
     signup,
     logout,
-    updateUser,
+    updateProfile,
     loading,
     isAuthenticated: !!user,
     initializing,

@@ -10,6 +10,8 @@ function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
   const [error, setError] = useState('');
   const { signup, loading } = useAuth();
   const navigate = useNavigate();
@@ -23,12 +25,12 @@ function Signup() {
       return;
     }
 
-    const result = await signup(name, email, password);
+    const result = await signup(name, email, password, phone, avatarUrl);
     
     if (result.success) {
       navigate('/');
     } else {
-      setError('Signup failed. Please try again.');
+      setError(result.error || 'Signup failed. Please try again.');
     }
   };
 
@@ -128,7 +130,33 @@ function Signup() {
               />
             </div>
 
-            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number
+              </label>
+              <motion.input
+                whileFocus={{ scale: 1.02 }}
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="input-field"
+                placeholder="Optional: +1 234 567 8900"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Profile Picture URL
+              </label>
+              <motion.input
+                whileFocus={{ scale: 1.02 }}
+                type="url"
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+                className="input-field"
+                placeholder="Optional: https://example.com/avatar.jpg"
+              />
+            </div>
 
             <AnimatedButton type="submit" loading={loading}>
               Create Account

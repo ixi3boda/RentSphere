@@ -96,5 +96,6 @@ export function mapUserToFrontend(u) {
     phone:     u.mobile_number || null,
     active:    u.is_active,
     createdAt: u.created_at,
+    updatedAt: u.updated_at,
   };
 }

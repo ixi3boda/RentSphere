@@ -3,17 +3,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { AnimatedPage, AnimatedButton } from '../components/AnimatedPage';
 import { motion } from 'framer-motion';
-import { authApi } from '../utils/api';
-import { mapUserToFrontend } from '../utils/mappers';
 
 function Profile() {
-  const { user, updateUser } = useAuth();
+  const { user, updateProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [profilePicture, setProfilePicture] = useState(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState(null);
   const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     name: '',
+    username: '',
     email: '',
     phone: ''
   });
@@ -22,26 +21,15 @@ function Profile() {
   const [fetchLoading, setFetchLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUserDetails = async () => {
-      try {
-        setFetchLoading(true);
-        const response = await authApi.getMe();
-        const userData = mapUserToFrontend(response.data);
-        await updateUser(userData);
-      } catch (error) {
-        console.error('Failed to fetch user details:', error);
-      } finally {
-        setFetchLoading(false);
-      }
-    };
-
-    fetchUserDetails();
+    // Profile page depends on auth state, no extra update needed here.
+    setFetchLoading(false);
   }, []);
 
   useEffect(() => {
     if (user) {
       setFormData({
         name: user.name || '',
+        username: user.username || '',
         email: user.email || '',
         phone: user.phone || ''
       });
@@ -186,15 +174,16 @@ function Profile() {
       
       // Prepare update data
       const updateData = {
-        ...formData,
-        avatar: profilePictureBase64 || user?.avatar || null
+        full_name: formData.name,
+        username: formData.username,
+        mobile_number: formData.phone || '',
+        avatar_url: profilePictureBase64 || user?.avatar || null,
       };
-      
-      // Simulate API call - replace with actual Spring Boot call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Update user in context
-      await updateUser(updateData);
+
+      const result = await updateProfile(updateData);
+      if (!result.success) {
+        throw new Error(result.error || 'Profile update failed.');
+      }
       
       setSuccessMessage('Profile updated successfully!');
       setIsEditing(false);
@@ -287,6 +276,10 @@ function Profile() {
                       </div>
                     )}
                   </div>
+                  {/* Status Indicator Circle */}
+                  <div className={`absolute top-0 right-0 w-6 h-6 rounded-full border-2 border-white shadow-lg ${
+                    user?.active ? 'bg-green-500' : 'bg-red-500'
+                  }`} title={user?.active ? 'Active' : 'Inactive'} />
                   {isEditing && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                       <span className="text-white text-xs font-semibold">Change</span>
@@ -327,6 +320,14 @@ function Profile() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
                     <div className="space-y-4">
                       <div>
+                        <label className="text-sm text-gray-500">Username</label>
+                        <p className="text-gray-800 font-medium">{formData.username || 'Not set'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm text-gray-500">Email Address</label>
+                        <p className="text-gray-800 font-medium">{formData.email || 'Not set'}</p>
+                      </div>
+                      <div>
                         <label className="text-sm text-gray-500">Phone Number</label>
                         <p className="text-gray-800 font-medium">{formData.phone || 'Not provided'}</p>
                       </div>
@@ -335,13 +336,29 @@ function Profile() {
                       <div>
                         <label className="text-sm text-gray-500">Member Since</label>
                         <p className="text-gray-800 font-medium">
-                          {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'January 2024'}
+                          {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm text-gray-500">Last Updated</label>
+                        <p className="text-gray-800 font-medium">
+                          {user?.updatedAt ? new Date(user.updatedAt).toLocaleString() : 'N/A'}
                         </p>
                       </div>
                       <div>
                         <label className="text-sm text-gray-500">Account Type</label>
                         <p className="text-gray-800 font-medium capitalize">
                           {user?.role === 'admin' ? '🔑 Property Admin' : user?.role === 'tenant' ? '🏠 Tenant' : '👤 Visitor'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm text-gray-500">Account Status</label>
+                        <p className="text-gray-800 font-medium">
+                          {user?.active ? (
+                            <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-green-500"></span>Active</span>
+                          ) : (
+                            <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-red-500"></span>Inactive</span>
+                          )}
                         </p>
                       </div>
                     </div>
@@ -359,6 +376,20 @@ function Profile() {
                         type="text"
                         name="name"
                         value={formData.name}
+                        onChange={handleChange}
+                        className="input-field"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Username *
+                      </label>
+                      <input
+                        type="text"
+                        name="username"
+                        value={formData.username}
                         onChange={handleChange}
                         className="input-field"
                         required

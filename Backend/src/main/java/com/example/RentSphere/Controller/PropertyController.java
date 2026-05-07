@@ -26,6 +26,13 @@ public class PropertyController {
     private final PropertyService propertyService;
     private final UserService userService;
 
+    private String getPrincipalEmail(Principal principal) {
+        if (principal == null || principal.getName() == null || principal.getName().isBlank()) {
+            throw new IllegalStateException("Unauthorized access");
+        }
+        return principal.getName();
+    }
+
     private ResponseEntity<?> buildErrorResponse(String message, HttpStatus status) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(message)
@@ -43,10 +50,12 @@ public class PropertyController {
             Principal principal
     ) {
         try {
-            String email = principal.getName();
+            String email = getPrincipalEmail(principal);
             int userId = userService.getCurrentUser(email).getUser_id();
             PropertyDetails created = propertyService.addProperty(request, userId);
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalStateException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
@@ -166,9 +175,11 @@ public class PropertyController {
             Principal principal
     ) {
         try {
-            String email = principal.getName();
+            String email = getPrincipalEmail(principal);
             int tenantId = userService.getCurrentUser(email).getUser_id();
             return ResponseEntity.ok(propertyService.favorite(propertyId, tenantId));
+        } catch (IllegalStateException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
@@ -179,9 +190,11 @@ public class PropertyController {
     @GetMapping("/favorites/all")
     public ResponseEntity<?> getAllFavorites(Principal principal) {
         try {
-            String email = principal.getName();
+            String email = getPrincipalEmail(principal);
             int tenantId = userService.getCurrentUser(email).getUser_id();
             return ResponseEntity.ok(propertyService.getAllFavorites(tenantId));
+        } catch (IllegalStateException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {

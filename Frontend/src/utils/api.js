@@ -44,6 +44,16 @@ export const authApi = {
   login: (payload) => apiClient.post("/api/user/login", payload),
 
   /**
+   * PUT /api/user/me  — update current user profile
+   */
+  updateProfile: (payload) => apiClient.put("/api/user/me", payload),
+
+  /**
+   * POST /api/user/logout
+   */
+  logout: () => apiClient.post("/api/user/logout"),
+
+  /**
    * GET /api/user/me  — requires JWT
    * @returns {Promise<AxiosResponse<User>>}
    */
