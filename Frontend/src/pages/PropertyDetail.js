@@ -98,6 +98,11 @@ function PropertyDetail() {
 
     const fetchFavoriteState = async () => {
       if (!property) return;
+      // Only fetch if user is authenticated
+      if (!isAuthenticated) {
+        if (!cancelled) setFavorited(false);
+        return;
+      }
       try {
         const res = await propertyApi.getFavorites();
         const list = Array.isArray(res.data) ? res.data : [];

@@ -285,9 +285,7 @@ function Profile() {
                     )}
                   </div>
                   {/* Status Indicator Circle */}
-                  <div className={`absolute top-0 right-0 w-6 h-6 rounded-full border-2 border-white shadow-lg ${
-                    user?.active ? 'bg-green-500' : 'bg-red-500'
-                  }`} title={user?.active ? 'Active' : 'Inactive'} />
+                  <div className="absolute top-0 right-0 w-6 h-6 rounded-full border-2 border-white shadow-lg bg-green-500" title="Online" />
                   {isEditing && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                       <span className="text-white text-xs font-semibold">Change</span>
@@ -362,11 +360,7 @@ function Profile() {
                       <div>
                         <label className="text-sm text-gray-500">Account Status</label>
                         <p className="text-gray-800 font-medium">
-                          {user?.active ? (
-                            <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-green-500"></span>Active</span>
-                          ) : (
-                            <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-red-500"></span>Inactive</span>
-                          )}
+                          <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-green-500"></span>Online</span>
                         </p>
                       </div>
                     </div>

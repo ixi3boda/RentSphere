@@ -23,6 +23,11 @@ function TenantDashboard() {
     setLoading(true);
     setError('');
     try {
+      // Only fetch favorites if user is authenticated
+      if (!user) {
+        setFavorites([]);
+        return;
+      }
       const res = await propertyApi.getFavorites();
       const list = Array.isArray(res.data) ? res.data : [];
       setFavorites(
@@ -31,17 +36,16 @@ function TenantDashboard() {
           .filter(Boolean),
       );
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load your favorites.');
+      // If not authenticated (401), just show empty instead of error
+      if (err.response?.status === 401) {
+        setFavorites([]);
+      } else {
+        setError(err.response?.data?.message || 'Failed to load your favorites.');
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  useEffect(() => {
-    if (user && user.role !== 'tenant') {
-      navigate('/');
-    }
-  }, [user, navigate]);
+  }, [user]);
 
   useEffect(() => {
     fetchFavorites();

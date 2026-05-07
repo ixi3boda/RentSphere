@@ -55,9 +55,7 @@ function App() {
             <Route path="/admin/contracts" element={
               <PrivateRoute><ContractsPage /></PrivateRoute>
             } />
-            <Route path="/tenant/dashboard" element={
-              <PrivateRoute><TenantDashboard /></PrivateRoute>
-            } />
+            <Route path="/tenant/dashboard" element={<TenantDashboard />} />
             <Route path="/admin/properties/new" element={
               <PrivateRoute><PropertyForm /></PrivateRoute>
             } />

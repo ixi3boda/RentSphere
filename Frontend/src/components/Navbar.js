@@ -198,6 +198,15 @@ useEffect(() => {
                       🏘️ Browse
                     </motion.button>
                   </Link>
+                  <Link to="/tenant/dashboard">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="text-gray-700 hover:text-rentsphere-teal transition-colors"
+                    >
+                      📊 Dashboard
+                    </motion.button>
+                  </Link>
                   <Link to="/login">
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -301,6 +310,9 @@ useEffect(() => {
                 <div className="space-y-3">
                   <Link to="/properties">
                     <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">🏘️ Browse</button>
+                  </Link>
+                  <Link to="/tenant/dashboard">
+                    <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">📊 Dashboard</button>
                   </Link>
                   <Link to="/login">
                     <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Login</button>

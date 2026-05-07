@@ -1,221 +1,197 @@
-# Full Project Consistency & Architecture Review Prompt
+# Full Stack Project Deep Review & Logic Fix Prompt
 
-You are a senior full-stack software architect and code reviewer.  
-I want you to perform a COMPLETE audit and refactor review of my entire full-stack project.
+You are a senior full-stack software architect and code reviewer.
 
-## Main Goal
-Fix all inconsistencies between frontend and backend while keeping the project architecture clean, logical, maintainable, and production-ready.
+I want you to perform a COMPLETE deep review of my entire full-stack project (frontend + backend) and fix all inconsistencies, broken flows, missing validations, incorrect logic, bad API usage, and frontend/backend mismatches.
 
----
+## VERY IMPORTANT RULES
 
-# VERY IMPORTANT RULES
-
-- DO NOT change the database schema itself.
+- DO NOT change my database schema in any way.
 - DO NOT rename database tables or columns.
-- DO NOT modify SQL schema definitions unless absolutely required for runtime compatibility.
-- You MAY adjust:
-  - backend logic
-  - DTOs
-  - API contracts
-  - frontend integration
-  - validation
-  - state handling
-  - naming consistency
-  - response structures
-  - service logic
-  - controller logic
-  - frontend models/interfaces/types
-  - API calls
-  - error handling
-  - route logic
-  - authentication flow
-  - business logic consistency
+- DO NOT remove existing features unless they are completely broken.
+- DO NOT make random refactors that are unrelated to fixing logic.
+- Keep the project architecture/style consistent with the current codebase.
+- Preserve all existing business logic unless it is incorrect or insecure.
+- Focus on fixing logic, consistency, correctness, security, and API integration.
 
 ---
 
-# Required Tasks
+# MAIN REQUIREMENT
 
-## 1. Full Backend Review
+## Tenant Dashboard Access & Visibility
 
-Review ALL backend layers carefully:
+Currently, I want visitors/non-authenticated users to also be able to access and view the Tenant Dashboard UI.
+
+Fix the logic so the application behaves correctly and consistently.
+
+Requirements:
+- Visitors/guests SHOULD be able to open and view the Tenant Dashboard page.
+- Navbar/sidebar/dashboard links should appear correctly for visitors.
+- The dashboard should gracefully handle unauthenticated users.
+- Public-safe data should still load properly.
+- Any actions requiring authentication must still be protected.
+- If a visitor tries to perform protected actions (renting, favorites, payments, requests, etc.), redirect them to login or show proper authorization handling.
+- Keep role-based restrictions for sensitive operations.
+- Ensure frontend and backend logic remain fully consistent.
+
+Examples:
+- Visitors can browse/view tenant dashboard content.
+- Visitors CANNOT perform tenant-only protected actions.
+- Authenticated tenants get full functionality.
+- Unauthorized users should receive proper HTTP status codes (`401` or `403`) for protected APIs.
+
+---
+
+# FULL PROJECT REVIEW REQUIREMENTS
+
+Perform a FULL audit of the entire project.
+
+## Backend Review
+
+Carefully inspect:
 - Controllers
 - Services
 - Repositories
 - DTOs
-- Entities/Models
+- Security configuration
+- JWT authentication/authorization
 - Validation
-- Security/Auth
 - Exception handling
-- API routes
-- HTTP methods
-- Request/response structures
+- API responses
+- Role permissions
+- Business logic
+- Entity relationships
+- Transaction flow
+- API consistency
 
 Check for:
-- incorrect logic
-- inconsistent naming
-- missing validations
-- duplicated logic
-- bad architecture
-- broken API design
-- inconsistent response bodies
-- incorrect status codes
-- nullable issues
-- missing edge-case handling
-- incorrect business flow
-- poor separation of concerns
+- Broken endpoints
+- Incorrect status codes
+- Missing validations
+- Null pointer risks
+- Unsafe logic
+- Duplicate logic
+- Incorrect authentication flow
+- Incorrect role access
+- API contract mismatches
+- Improper request/response handling
+- Missing edge-case handling
+- Security issues
+- Improper ownership checks
+- Missing authorization checks
 
-Fix everything logically.
+Make sure:
+- Every API is logical and correctly implemented.
+- Every endpoint matches frontend expectations.
+- All role restrictions are enforced correctly.
+- Authentication flow is secure and consistent.
+- API naming and behavior are consistent.
 
 ---
 
-## 2. Full Frontend Review
+# Frontend Review
 
-Review ALL frontend code carefully:
-- API integration
-- State management
-- Forms
-- Components
-- Pages
-- Hooks
-- Services/API files
+Carefully inspect:
 - Routing
+- State management
+- API integration
 - Authentication flow
 - Protected routes
 - Role-based rendering
-- Data rendering
+- Navbar/sidebar visibility
+- Forms
 - Error handling
 - Loading states
-- UI logic
+- Data fetching
+- Component logic
+- Dashboard logic
+- Conditional rendering
 
 Check for:
-- incorrect API usage
-- wrong field names
-- mismatched DTO fields
-- stale state bugs
-- inconsistent naming
-- duplicated requests
-- broken forms
-- invalid assumptions
-- incorrect response parsing
-- hardcoded values
-- inconsistent user flows
-- improper async handling
+- Incorrect API calls
+- Broken UI logic
+- Wrong conditional rendering
+- State inconsistencies
+- Missing authentication checks
+- Role leaks
+- Improper redirects
+- Broken protected routes
+- Invalid assumptions
+- Unhandled errors
+- Duplicate requests
+- Infinite re-renders
+- Stale state bugs
 
-Fix everything logically.
-
----
-
-## 3. API Contract Verification (VERY IMPORTANT)
-
-Review EVERY SINGLE API in the project.
-
-For each API:
-- Verify frontend request matches backend request DTO.
-- Verify frontend response handling matches backend response structure.
-- Verify endpoint paths are correct.
-- Verify HTTP methods are correct.
-- Verify authentication requirements are correct.
-- Verify role restrictions are correct.
-- Verify validation rules are consistent.
-- Verify query/path/body parameters are correct.
-- Verify null handling and optional fields are correct.
-
-DO NOT MISS ANY API.
-
-Create consistency between:
-- backend DTOs
-- frontend interfaces/types
-- frontend forms
-- frontend rendering
-- API responses
+Make sure:
+- Frontend behavior matches backend logic.
+- All APIs are consumed correctly.
+- Role-based UI is fully secure and consistent.
+- Visitors can safely access public tenant dashboard views.
+- Protected actions remain secured.
+- Unauthorized users are redirected properly when required.
 
 ---
 
-## 4. Business Logic Validation
+# API CONSISTENCY CHECK
 
-Ensure the entire project flow is logical.
+Carefully verify ALL frontend/backend integrations:
+- Request payloads
+- Response payloads
+- DTO fields
+- Field naming consistency
+- Error response formats
+- Pagination handling
+- Authentication headers
+- Token usage
+- Route paths
+- Query parameters
 
-Examples:
-- Property creation/update flow
-- Authentication flow
-- Enrollment/renting/payment/request flow
-- Favorites/bookmarks flow
-- Role permissions
-- Admin actions
-- User ownership checks
-- Status transitions
-- Error cases
-- Unauthorized access prevention
+Fix all mismatches.
 
-Fix any illogical or inconsistent behavior.
-
----
-
-## 5. Naming & Structure Consistency
-
-Standardize naming across the entire project:
-- DTO names
-- API names
-- variable names
-- response fields
-- frontend types
-- services
-- routes
-- folder structure
-
-Examples:
-- camelCase consistency
-- singular/plural consistency
-- response naming consistency
-- ID naming consistency
+DO NOT miss any API.
 
 ---
 
-## 6. Cleanup & Refactoring
+# SECURITY REVIEW
 
-Improve code quality without changing project functionality.
+Review and fix:
+- JWT validation
+- Token parsing
+- Authorization logic
+- Route protection
+- Role enforcement
+- Access control
+- Ownership validation
+- Sensitive endpoint exposure
+- Visitor access leaks
 
-Allowed improvements:
-- remove dead code
-- remove duplicate code
-- simplify logic
-- improve readability
-- improve maintainability
-- improve modularity
-- improve reusable components/services
-- improve validation structure
-- improve error handling
-
-BUT:
-- preserve existing features
-- preserve database schema
-- preserve core architecture unless necessary
-
----
-
-## 7. Final Deliverables
-
-After review:
-1. Apply all fixes directly.
-2. Explain every major issue found.
-3. Explain why each fix was necessary.
-4. List all changed files.
-5. Highlight any dangerous logic bugs found.
-6. Highlight any frontend/backend mismatch found.
-7. Highlight any security concerns found.
-8. Provide recommendations for future scalability.
+Ensure:
+- Public endpoints are intentionally public.
+- Protected operations remain protected.
+- Users cannot access unauthorized resources.
+- Role escalation is impossible.
 
 ---
 
-# Review Style
+# CLEANUP & STABILITY
 
-Be EXTREMELY strict and thorough.
-Act like a senior engineer reviewing production code before deployment.
+Also:
+- Remove dead/unreachable logic if necessary.
+- Fix inconsistent naming if it causes logic issues.
+- Improve maintainability where needed WITHOUT unnecessary refactoring.
+- Prevent future regressions.
+- Add missing defensive checks.
+- Ensure loading/error handling is stable.
 
-Do NOT skip files.
-Do NOT assume things work.
-Trace actual data flow end-to-end:
+---
 
-Frontend → API → Service → Repository → Database → Response → Frontend Rendering
+# EXPECTED OUTPUT
 
-Review the ENTIRE project systematically.
+While working:
+1. Explain each major issue found.
+2. Explain why it is wrong.
+3. Show the fix applied.
+4. Ensure fixes do not break existing functionality.
+5. Verify frontend and backend work together correctly after changes.
+
+Prioritize correctness, consistency, and stability over unnecessary optimization.

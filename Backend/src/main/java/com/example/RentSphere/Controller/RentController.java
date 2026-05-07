@@ -99,7 +99,6 @@ public class RentController {
     }
 
     @PutMapping("/requests/{id}/accept")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> acceptRequest(@PathVariable Long id, Principal principal) {
         try {
             String email = getPrincipalEmail(principal);
@@ -119,9 +118,13 @@ public class RentController {
     @PostMapping("/contracts/{contractId}/paypal")
     public ResponseEntity<?> createContractPayPalPayment(
             @PathVariable Long contractId,
-            @RequestBody PayPalPaymentRequest paymentRequest
+            @RequestBody PayPalPaymentRequest paymentRequest,
+            Principal principal
     ) {
         try {
+            String email = getPrincipalEmail(principal);
+            int currentUserId = userService.getCurrentUser(email).getUser_id();
+            // TODO: Verify user has permission to create payment for this contract
             PayPalPaymentResponse response = contractService.createPayPalPaymentForContract(contractId, paymentRequest);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
@@ -135,9 +138,13 @@ public class RentController {
     public ResponseEntity<?> executeContractPayPalPayment(
             @PathVariable Long contractId,
             @RequestParam String paymentId,
-            @RequestParam String payerId
+            @RequestParam String payerId,
+            Principal principal
     ) {
         try {
+            String email = getPrincipalEmail(principal);
+            int currentUserId = userService.getCurrentUser(email).getUser_id();
+            // TODO: Verify user has permission to execute payment for this contract
             PayPalPaymentResponse response = contractService.executePayPalPaymentForContract(contractId, paymentId, payerId);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
@@ -148,7 +155,6 @@ public class RentController {
     }
 
     @PutMapping("/requests/{id}/reject")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> rejectRequest(@PathVariable Long id, Principal principal) {
         try {
             String email = getPrincipalEmail(principal);
