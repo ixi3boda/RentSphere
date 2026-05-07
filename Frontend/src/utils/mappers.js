@@ -85,6 +85,9 @@ export function mapFormToBackend(formData) {
  */
 export function mapUserToFrontend(u) {
   if (!u) return null;
+  const activeValue =
+    u.is_active ?? u.isActive ?? u.active ?? false;
+
   return {
     id:        u.user_id,
     email:     u.email,
@@ -94,7 +97,7 @@ export function mapUserToFrontend(u) {
     role_name: u.role_name,
     avatar:    u.avatar_url || null,
     phone:     u.mobile_number || null,
-    active:    u.is_active,
+    active:    Boolean(activeValue),
     createdAt: u.created_at,
     updatedAt: u.updated_at,
   };

@@ -1,5 +1,5 @@
 // src/context/AuthContext.js
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
 import { authApi } from "../utils/api";
 import { mapUserToFrontend } from "../utils/mappers";
 
@@ -14,6 +14,34 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
 
+  const persistUser = useCallback((mapped) => {
+    if (!mapped) return;
+    if (localStorage.getItem("user")) {
+      localStorage.setItem("user", JSON.stringify(mapped));
+    }
+    if (sessionStorage.getItem("user")) {
+      sessionStorage.setItem("user", JSON.stringify(mapped));
+    }
+  }, []);
+
+  // -------------------------------------------------------------------------
+  // Refresh user data from backend (get latest active status, etc.)
+  // -------------------------------------------------------------------------
+  const refreshUser = useCallback(async () => {
+    try {
+      const meRes = await authApi.getMe();
+      const mapped = mapUserToFrontend(meRes.data);
+      setUser(mapped);
+      persistUser(mapped);
+      return { success: true, data: mapped };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message,
+      };
+    }
+  }, [persistUser]);
+
   // Restore session on app start
   // Priority: sessionStorage (current session) → localStorage (stay signed in) → cookie (fallback)
   useEffect(() => {
@@ -27,6 +55,7 @@ export function AuthProvider({ children }) {
     const sessionToken = sessionStorage.getItem("token");
     if (sessionUser && sessionToken) {
       setUser(JSON.parse(sessionUser));
+      refreshUser();
       setInitializing(false);
       return;
     }
@@ -36,6 +65,7 @@ export function AuthProvider({ children }) {
     const token = localStorage.getItem("token");
     if (storedUser && token) {
       setUser(JSON.parse(storedUser));
+      refreshUser();
       setInitializing(false);
       return;
     }
@@ -48,10 +78,10 @@ export function AuthProvider({ children }) {
       // fetch profile
       (async () => {
         try {
-          const meRes = await authApi.getMe();
-          const mapped = mapUserToFrontend(meRes.data);
-          setUser(mapped);
-          localStorage.setItem('user', JSON.stringify(mapped));
+          const refreshed = await refreshUser();
+          if (refreshed.success && refreshed.data) {
+            localStorage.setItem('user', JSON.stringify(refreshed.data));
+          }
         } catch (e) {
           // invalid token, clean up
           localStorage.removeItem('token');
@@ -64,7 +94,7 @@ export function AuthProvider({ children }) {
     } else {
       setInitializing(false);
     }
-  }, []);
+  }, [refreshUser]);
 
   // -------------------------------------------------------------------------
   // Login — POST /api/user/login  →  { token }  →  GET /api/user/me
@@ -184,30 +214,6 @@ export function AuthProvider({ children }) {
       sessionStorage.removeItem("token");
       sessionStorage.removeItem("user");
       document.cookie = 'rentsphere_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-    }
-  };
-
-  // -------------------------------------------------------------------------
-  // Refresh user data from backend (get latest active status, etc.)
-  // -------------------------------------------------------------------------
-  const refreshUser = async () => {
-    try {
-      const meRes = await authApi.getMe();
-      const mapped = mapUserToFrontend(meRes.data);
-      setUser(mapped);
-
-      // Update stored user in localStorage or sessionStorage
-      if (localStorage.getItem("user")) {
-        localStorage.setItem("user", JSON.stringify(mapped));
-      }
-      if (sessionStorage.getItem("user")) {
-        sessionStorage.setItem("user", JSON.stringify(mapped));
-      }
-
-      return { success: true };
-    } catch (error) {
-      console.error('Failed to refresh user:', error);
-      return { success: false, error: error.message };
     }
   };
 

@@ -1,6 +1,6 @@
 // src/App.js
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { PropertyProvider } from "./context/PropertyContext";
 import Navbar from "./components/Navbar";
@@ -78,8 +78,7 @@ export default App;
 
 // Small helper component so root path redirects to /login when not authenticated
 function HomeRedirect() {
-  const { isAuthenticated, initializing } = useAuth();
+  const { initializing } = useAuth();
   if (initializing) return null; // wait for auth restoration
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
   return <Home />;
 }

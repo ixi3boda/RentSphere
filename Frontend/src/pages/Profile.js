@@ -21,9 +21,16 @@ function Profile() {
   const [fetchLoading, setFetchLoading] = useState(true);
 
   useEffect(() => {
-    // Refresh user data from backend to get latest status (active/inactive)
-    refreshUser();
-    setFetchLoading(false);
+    let mounted = true;
+    const syncProfile = async () => {
+      setFetchLoading(true);
+      await refreshUser();
+      if (mounted) setFetchLoading(false);
+    };
+    syncProfile();
+    return () => {
+      mounted = false;
+    };
   }, [refreshUser]);
 
   useEffect(() => {

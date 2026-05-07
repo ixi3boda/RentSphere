@@ -1,19 +1,19 @@
 // src/pages/PropertyList.js
 //
-// RS-10 — Tenant property browsing page.
+// Public property browsing page.
 // Route: /properties
 //
-// Shows all available properties in a responsive grid with search/filter,
-// pagination, loading skeletons, empty state, and error handling.
+// Rich local filtering/sorting over the fetched dataset:
+// search across title/description/location/type, city/type filters,
+// price/rooms constraints, availability toggle, and pagination.
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedPage } from "../components/AnimatedPage";
 import PropertyCard from "../components/PropertyCard";
 import { useAuth } from "../context/AuthContext";
 import { propertyApi } from "../utils/api";
 import { mapPropertyToFrontend } from "../utils/mappers";
-import useDebounce from "../hooks/useDebounce";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -58,20 +58,18 @@ function PropertyList() {
   const { isAuthenticated } = useAuth();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searching, setSearching] = useState(false);
   const [error, setError] = useState("");
   const [favoriteIds, setFavoriteIds] = useState(new Set());
 
   // Search / filter state
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
-  const [locationFilter, setLocationFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [minPrice, setMinPrice] = useState("");
+  const [minRooms, setMinRooms] = useState("");
+  const [availableOnly, setAvailableOnly] = useState(false);
   const [sortBy, setSortBy] = useState("newest");
-
-  // RS-11: debounce the search term 300ms
-  const debouncedSearch = useDebounce(search, 300);
 
   // Pagination
   const [page, setPage] = useState(1);
@@ -79,24 +77,12 @@ function PropertyList() {
   // ---------------------------------------------------------------------------
   // Fetch
   // ---------------------------------------------------------------------------
-  const fetchProperties = useCallback(async (searchKeyword = "") => {
-    if (!searchKeyword) {
-      setLoading(true);
-    } else {
-      setSearching(true);
-    }
+  const fetchProperties = useCallback(async () => {
+    setLoading(true);
     setError("");
     try {
-      let list;
-      if (searchKeyword) {
-        // RS-11: debounced search — GET /api/properties/search?prefix=...
-        const res = await propertyApi.search(searchKeyword);
-        list = Array.isArray(res.data) ? res.data : [];
-      } else {
-        // Initial load — GET /api/properties/all
-        const res = await propertyApi.getAll();
-        list = Array.isArray(res.data) ? res.data : [];
-      }
+      const res = await propertyApi.getAll();
+      const list = Array.isArray(res.data) ? res.data : [];
       setProperties(list.map(mapPropertyToFrontend));
     } catch (err) {
       setError(
@@ -105,7 +91,6 @@ function PropertyList() {
       );
     } finally {
       setLoading(false);
-      setSearching(false);
     }
   }, []);
 
@@ -138,46 +123,86 @@ function PropertyList() {
     fetchFavorites();
   }, [fetchFavorites]);
 
-  // RS-11: re-fetch on debounced search changes
-  useEffect(() => {
-    fetchProperties(debouncedSearch);
-  }, [debouncedSearch, fetchProperties]);
-
-  // Reset to page 1 whenever filters or debounced search changes
+  // Reset to page 1 whenever filters/search changes
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, typeFilter, maxPrice, sortBy]);
+  }, [search, typeFilter, cityFilter, maxPrice, minPrice, minRooms, availableOnly, sortBy]);
 
   // ---------------------------------------------------------------------------
   // Client-side filter + sort + paginate
   // ---------------------------------------------------------------------------
-  // API mode: properties[] is already server-filtered for search.
-  // Apply client-side type/price/sort on top.
-  const filtered = properties
-    .filter((p) => {
-      const matchType = !typeFilter || p.propertyType === typeFilter;
-      const matchMin = !minPrice || Number(p.price) >= Number(minPrice);
-      const matchMax = !maxPrice || Number(p.price) <= Number(maxPrice);
-      const matchLocation = !locationFilter || (p.location || '').toLowerCase() === locationFilter.toLowerCase();
-      return matchType && matchMin && matchMax && matchLocation;
-    })
-    .sort((a, b) => {
-      if (sortBy === "price_asc") return a.price - b.price;
-      if (sortBy === "price_desc") return b.price - a.price;
-      return 0; // 'newest' — keep API order
-    });
+  const cityOptions = useMemo(
+    () =>
+      Array.from(new Set(properties.map((p) => p.city).filter(Boolean))).sort((a, b) =>
+        a.localeCompare(b),
+      ),
+    [properties],
+  );
+
+  const filtered = useMemo(() => {
+    const normalizedQuery = search.trim().toLowerCase();
+    const queryTokens = normalizedQuery.split(/\s+/).filter(Boolean);
+
+    return properties
+      .filter((p) => {
+        const searchHaystack = [
+          p.title,
+          p.description,
+          p.propertyType,
+          p.city,
+          p.district,
+          p.address,
+          p.location,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        const matchSearch =
+          queryTokens.length === 0 ||
+          queryTokens.every((token) => searchHaystack.includes(token));
+        const matchType = !typeFilter || p.propertyType === typeFilter;
+        const matchCity = !cityFilter || p.city === cityFilter;
+        const matchMin = !minPrice || Number(p.price) >= Number(minPrice);
+        const matchMax = !maxPrice || Number(p.price) <= Number(maxPrice);
+        const matchRooms = !minRooms || Number(p.numRooms || 0) >= Number(minRooms);
+        const matchAvailable = !availableOnly || p.status === "available";
+
+        return (
+          matchSearch &&
+          matchType &&
+          matchCity &&
+          matchMin &&
+          matchMax &&
+          matchRooms &&
+          matchAvailable
+        );
+      })
+      .sort((a, b) => {
+        if (sortBy === "price_asc") return a.price - b.price;
+        if (sortBy === "price_desc") return b.price - a.price;
+        if (sortBy === "rooms_desc") return Number(b.numRooms || 0) - Number(a.numRooms || 0);
+        if (sortBy === "rooms_asc") return Number(a.numRooms || 0) - Number(b.numRooms || 0);
+        const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return bTime - aTime;
+      });
+  }, [properties, search, typeFilter, cityFilter, minPrice, maxPrice, minRooms, availableOnly, sortBy]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const hasFilters = search || typeFilter || maxPrice || minPrice || locationFilter;
-  const activeSearch = debouncedSearch;
+  const hasFilters =
+    search || typeFilter || cityFilter || maxPrice || minPrice || minRooms || availableOnly;
+  const activeSearch = search.trim();
 
   const clearFilters = () => {
     setSearch("");
     setTypeFilter("");
     setMaxPrice("");
     setMinPrice("");
-    setLocationFilter("");
+    setCityFilter("");
+    setMinRooms("");
+    setAvailableOnly(false);
     setSortBy("newest");
   };
 
@@ -214,20 +239,15 @@ function PropertyList() {
             transition={{ delay: 0.1 }}
             className="glass-effect rounded-2xl p-4 mb-8 flex flex-col sm:flex-row gap-3 flex-wrap"
           >
-            {/* Search — RS-11 */}
+            {/* Search */}
             <div className="flex-1 min-w-[180px] relative">
-              {/* Spinner while searching, magnifier otherwise */}
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                {searching ? (
-                  <span className="inline-block w-4 h-4 border-2 border-rentsphere-teal border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  "🔍"
-                )}
+                {"🔍"}
               </span>
               <input
                 type="text"
                 id="search-properties"
-                placeholder="Search by title or location…"
+                placeholder="Search title, city, district, address, description..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="input-field pl-9 pr-8"
@@ -265,17 +285,17 @@ function PropertyList() {
               ))}
             </select>
 
-            {/* Location (derived from loaded properties) */}
+            {/* City */}
             <select
-              id="filter-location"
-              value={locationFilter}
-              onChange={(e) => setLocationFilter(e.target.value)}
+              id="filter-city"
+              value={cityFilter}
+              onChange={(e) => setCityFilter(e.target.value)}
               className="input-field bg-white min-w-[160px] flex-shrink-0"
             >
-              <option value="">All Locations</option>
-              {Array.from(new Set(properties.map((p) => p.location).filter(Boolean))).map((loc) => (
-                <option key={loc} value={loc}>
-                  {loc}
+              <option value="">All Cities</option>
+              {cityOptions.map((city) => (
+                <option key={city} value={city}>
+                  {city}
                 </option>
               ))}
             </select>
@@ -295,6 +315,26 @@ function PropertyList() {
                 className="input-field pl-7"
               />
             </div>
+
+            <input
+              type="number"
+              id="filter-min-rooms"
+              placeholder="Min rooms"
+              value={minRooms}
+              onChange={(e) => setMinRooms(e.target.value)}
+              min={0}
+              className="input-field min-w-[120px] flex-shrink-0"
+            />
+
+            <label className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={availableOnly}
+                onChange={(e) => setAvailableOnly(e.target.checked)}
+                className="h-4 w-4"
+              />
+              Available only
+            </label>
 
             <div className="relative min-w-[140px] flex-shrink-0">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">
@@ -321,6 +361,8 @@ function PropertyList() {
               <option value="newest">Newest first</option>
               <option value="price_asc">Price: Low → High</option>
               <option value="price_desc">Price: High → Low</option>
+              <option value="rooms_desc">Rooms: High → Low</option>
+              <option value="rooms_asc">Rooms: Low → High</option>
             </select>
 
             {/* Clear */}
