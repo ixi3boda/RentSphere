@@ -240,13 +240,17 @@ function AdminDashboard() {
     setStatsLoading(true);
     setStatsError('');
     try {
-      const requestsRes = await rentApi.getAllRequests();
-      const requests = Array.isArray(requestsRes.data) ? requestsRes.data : [];
+      const [requestsRes, contractsRes] = await Promise.all([
+        rentApi.getAllRequests(),
+        rentApi.getAllContracts(),
+      ]);
+      const requests  = Array.isArray(requestsRes.data)  ? requestsRes.data  : [];
+      const contracts = Array.isArray(contractsRes.data) ? contractsRes.data : [];
 
       setStats({
         totalProperties: properties.length,
-        pendingRequests: requests.filter((request) => request.reqStatus === 'PENDING').length,
-        activeContracts: requests.filter((request) => request.reqStatus === 'ACCEPTED').length,
+        pendingRequests: requests.filter((r) => r.reqStatus === 'PENDING').length,
+        activeContracts: contracts.filter((c) => c.contractStatus === 'ACTIVE').length,
       });
     } catch (err) {
       setStatsError('Failed to load dashboard stats.');
@@ -360,7 +364,7 @@ function AdminDashboard() {
                   label="Requests"
                 />
                 <QuickAction
-                  to="/admin/contracts"
+                  to="/contracts"
                   icon="📋"
                   label="Contracts"
                 />

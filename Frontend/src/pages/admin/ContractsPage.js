@@ -1,7 +1,7 @@
-// src/pages/admin/ContractsPage.js
+// src/pages/ContractsPage.js
 //
-// Admin page — view all contracts, trigger PayPal payment.
-// Route: /admin/contracts
+// Shared page — view all contracts, trigger PayPal payment.
+// Route: /contracts
 //
 // GET  /api/rent/contracts/all                          → Contract[]
 // POST /api/rent/contracts/{contractId}/paypal          → PayPalPaymentResponse
@@ -10,9 +10,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../context/AuthContext';
-import { AnimatedPage, LoadingSpinner } from '../../components/AnimatedPage';
-import { rentApi } from '../../utils/api';
+import { useAuth } from '../context/AuthContext';
+import { AnimatedPage, LoadingSpinner } from '../components/AnimatedPage';
+import { rentApi } from '../utils/api';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -56,7 +56,7 @@ function PayPalModal({ contract, onClose }) {
     setError('');
     try {
       const successUrl = `${window.location.origin}/paypal/callback`;
-      const cancelUrl  = `${window.location.origin}/admin/contracts`;
+      const cancelUrl  = `${window.location.origin}/contracts`;
 
       const res = await rentApi.createPayPalPayment(contract.contractId, {
         amount:      Number(contract.rentAmount),
@@ -174,10 +174,12 @@ function PayPalModal({ contract, onClose }) {
 // ---------------------------------------------------------------------------
 // Contract card
 // ---------------------------------------------------------------------------
-function ContractCard({ contract, onPay, index }) {
+function ContractCard({ contract, onPay, index, role }) {
   const statusStyle = CONTRACT_STATUS_STYLES[contract.contractStatus] || 'bg-gray-100 text-gray-600';
   const statusIcon  = CONTRACT_STATUS_ICONS[contract.contractStatus] || '📋';
-  const canPay = ['ACTIVE', 'PENDING_PAYMENT'].includes(contract.contractStatus);
+  
+  // Payment visibility: ONLY tenants see the Pay button, and only when applicable
+  const canPay = role === 'tenant' && ['ACTIVE', 'PENDING_PAYMENT'].includes(contract.contractStatus);
 
   return (
     <motion.div
@@ -243,6 +245,13 @@ function ContractCard({ contract, onPay, index }) {
         </a>
       )}
 
+      {/* Admin Payment History Summary */}
+      {role === 'admin' && (
+        <div className="mt-2 text-xs text-gray-500 border-t border-gray-100 pt-3">
+          <p>Tenant Payment History: <span className="font-semibold">{contract.contractStatus === 'PENDING_PAYMENT' ? 'Payment Due' : 'Up to Date'}</span></p>
+        </div>
+      )}
+
       {/* PayPal CTA */}
       {canPay && (
         <motion.button
@@ -271,9 +280,13 @@ function ContractsPage() {
   const [payTarget, setPayTarget]     = useState(null);
   const [filterStatus, setFilterStatus] = useState('ALL');
 
-  // Redirect non-admins
+  // Redirect non-authenticated or unauthorized users
   useEffect(() => {
-    if (user && user.role !== 'admin') navigate('/');
+    if (!user) {
+      navigate('/login');
+    } else if (user.role !== 'admin' && user.role !== 'tenant') {
+      navigate('/');
+    }
   }, [user, navigate]);
 
   const fetchContracts = useCallback(async () => {
@@ -320,20 +333,22 @@ function ContractsPage() {
           >
             <div>
               <Link
-                to="/admin/dashboard"
+                to={user?.role === 'admin' ? "/admin/dashboard" : "/tenant/dashboard"}
                 className="inline-flex items-center gap-1 text-gray-500 hover:text-rentsphere-teal transition-colors text-sm mb-3"
               >
                 ← Back to Dashboard
               </Link>
               <h1 className="text-4xl font-bold gradient-text mb-1">Contracts</h1>
               <p className="text-gray-500">
-                All rental contracts — view details and collect payments via PayPal
+                {user?.role === 'admin' ? 'All rental contracts — view details and track payments.' : 'Your rental contracts and payment portal.'}
               </p>
             </div>
             <div className="flex gap-2 self-start">
-              <Link to="/admin/requests" className="btn-secondary !py-2 !px-4 text-sm">
-                📬 Requests
-              </Link>
+              {user?.role === 'admin' && (
+                <Link to="/admin/requests" className="btn-secondary !py-2 !px-4 text-sm">
+                  📬 Requests
+                </Link>
+              )}
               <motion.button
                 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                 onClick={fetchContracts}
@@ -414,6 +429,7 @@ function ContractsPage() {
                   key={c.contractId}
                   contract={c}
                   index={i}
+                  role={user?.role}
                   onPay={setPayTarget}
                 />
               ))}

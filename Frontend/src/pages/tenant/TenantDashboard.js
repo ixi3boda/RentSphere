@@ -67,7 +67,7 @@ function TenantDashboard() {
             className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4"
           >
             <div>
-              <h1 className="text-4xl font-bold gradient-text mb-1">Tenant Dashboard</h1>
+              <h1 className="text-4xl font-bold gradient-text mb-1">Dashboard</h1>
               <p className="text-gray-500">
                 Welcome back, <span className="font-semibold text-gray-700">{user?.name || 'Tenant'}</span>
               </p>

@@ -1,6 +1,6 @@
 // src/pages/Login.js
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AnimatedPage, AnimatedButton } from '../components/AnimatedPage';
 
@@ -13,15 +13,24 @@ function Login() {
   const [error, setError] = useState('');
   const { login, loading } = useAuth();
   const navigate = useNavigate();
+  // useLocation so we can honour the PrivateRoute redirect-back-after-login pattern
+  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     
     const result = await login(email, password, staySignedIn);
-    
+
     if (result.success) {
-      navigate('/');
+      // 1. If PrivateRoute stored the originally requested path, go there first
+      const from = location.state?.from?.pathname;
+      if (from) { navigate(from, { replace: true }); return; }
+      // 2. Otherwise redirect based on role
+      const role = result.role || // some auth implementations return role in result
+        JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user') || '{}')?.role;
+      if (role === 'admin')  { navigate('/admin/dashboard');  return; }
+      navigate('/tenant/dashboard'); // TENANT and VISITOR both see the tenant dashboard
     } else {
       setError(result.error || 'Login failed. Please try again.');
     }

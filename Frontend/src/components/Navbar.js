@@ -142,19 +142,10 @@ useEffect(() => {
                           📬 Requests
                         </motion.button>
                       </Link>
-                      <Link to="/admin/contracts">
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="text-gray-700 hover:text-rentsphere-teal transition-colors"
-                        >
-                          📋 Contracts
-                        </motion.button>
-                      </Link>
                     </>
                   )}
                   
-                  {user?.role === 'tenant' && (
+                  {user?.role !== 'admin' && (
                     <Link to="/tenant/dashboard">
                       <motion.button
                         whileHover={{ scale: 1.05 }}
@@ -162,6 +153,18 @@ useEffect(() => {
                         className="text-gray-700 hover:text-rentsphere-teal transition-colors"
                       >
                         📊 Dashboard
+                      </motion.button>
+                    </Link>
+                  )}
+                  
+                  {(user?.role === 'admin' || user?.role === 'tenant') && (
+                    <Link to="/contracts">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="text-gray-700 hover:text-rentsphere-teal transition-colors"
+                      >
+                        📋 Contracts
                       </motion.button>
                     </Link>
                   )}
@@ -196,15 +199,6 @@ useEffect(() => {
                       className="text-gray-700 hover:text-rentsphere-teal transition-colors"
                     >
                       🏘️ Browse
-                    </motion.button>
-                  </Link>
-                  <Link to="/tenant/dashboard">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="text-gray-700 hover:text-rentsphere-teal transition-colors"
-                    >
-                      📊 Dashboard
                     </motion.button>
                   </Link>
                   <Link to="/login">
@@ -278,20 +272,22 @@ useEffect(() => {
                     <Link to="/admin/dashboard">
                       <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Dashboard</button>
                     </Link>
-                  ) : user?.role === 'tenant' ? (
+                  ) : (
                     <Link to="/tenant/dashboard">
                       <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Dashboard</button>
                     </Link>
-                  ) : null}
+                  )}
                   {user?.role === 'admin' && (
                     <>
                       <Link to="/admin/requests">
                         <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">📬 Rental Requests</button>
                       </Link>
-                      <Link to="/admin/contracts">
-                        <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">📋 Contracts</button>
-                      </Link>
                     </>
+                  )}
+                  {(user?.role === 'admin' || user?.role === 'tenant') && (
+                    <Link to="/contracts">
+                      <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">📋 Contracts</button>
+                    </Link>
                   )}
                   <Link to="/properties">
                     <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">🏘️ Browse</button>
@@ -310,9 +306,6 @@ useEffect(() => {
                 <div className="space-y-3">
                   <Link to="/properties">
                     <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">🏘️ Browse</button>
-                  </Link>
-                  <Link to="/tenant/dashboard">
-                    <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">📊 Dashboard</button>
                   </Link>
                   <Link to="/login">
                     <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Login</button>

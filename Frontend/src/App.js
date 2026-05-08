@@ -36,32 +36,67 @@ function App() {
             <Route path="/properties/:id" element={<PropertyDetail />} />
 
             {/* Protected favorites page */}
-            <Route path="/favorites" element={
-              <PrivateRoute><Favorites /></PrivateRoute>
-            } />
+            <Route
+              path="/favorites"
+              element={
+                <PrivateRoute>
+                  <Favorites />
+                </PrivateRoute>
+              }
+            />
 
             {/* Protected — must be logged in */}
-            <Route path="/profile" element={
-              <PrivateRoute><Profile /></PrivateRoute>
-            } />
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <Profile />
+                </PrivateRoute>
+              }
+            />
 
             {/* Protected admin routes — must be logged in */}
-            <Route path="/admin/dashboard" element={
-              <PrivateRoute><AdminDashboard /></PrivateRoute>
-            } />
-            <Route path="/admin/requests" element={
-              <PrivateRoute><RentalRequestsPage /></PrivateRoute>
-            } />
-            <Route path="/admin/contracts" element={
-              <PrivateRoute><ContractsPage /></PrivateRoute>
-            } />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <PrivateRoute>
+                  <AdminDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/requests"
+              element={
+                <PrivateRoute>
+                  <RentalRequestsPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/contracts"
+              element={
+                <PrivateRoute>
+                  <ContractsPage />
+                </PrivateRoute>
+              }
+            />
             <Route path="/tenant/dashboard" element={<TenantDashboard />} />
-            <Route path="/admin/properties/new" element={
-              <PrivateRoute><PropertyForm /></PrivateRoute>
-            } />
-            <Route path="/admin/properties/edit/:id" element={
-              <PrivateRoute><PropertyForm /></PrivateRoute>
-            } />
+            <Route
+              path="/admin/properties/new"
+              element={
+                <PrivateRoute>
+                  <PropertyForm />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/properties/edit/:id"
+              element={
+                <PrivateRoute>
+                  <PropertyForm />
+                </PrivateRoute>
+              }
+            />
 
             {/* PayPal callback — public but only meaningful after a payment flow */}
             <Route path="/paypal/callback" element={<PayPalCallbackPage />} />

@@ -50,7 +50,7 @@ function PayPalCallbackPage() {
         setStatus('success');
         setMessage(`Payment for Contract #${contractId} was completed successfully!`);
         // Auto-redirect after 4 s
-        setTimeout(() => navigate('/admin/contracts'), 4000);
+        setTimeout(() => navigate('/contracts'), 4000);
       } catch (err) {
         setStatus('error');
         setMessage(
@@ -137,14 +137,14 @@ function PayPalCallbackPage() {
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              to="/admin/contracts"
+              to="/contracts"
               className="btn-primary !py-2.5 !px-7"
             >
               📋 View Contracts
             </Link>
             {status !== 'success' && (
               <Link
-                to="/admin/dashboard"
+                to="/"
                 className="btn-secondary !py-2.5 !px-7"
               >
                 Dashboard

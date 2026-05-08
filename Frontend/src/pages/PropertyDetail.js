@@ -368,6 +368,8 @@ function PropertyDetail() {
               <p className="text-gray-500 text-sm">
                 {user?.role === 'admin'
                   ? 'You manage this listing from the admin dashboard.'
+                  : user?.role === 'visitor' && isAvailable
+                  ? 'Rental requests are available to tenants. Browse more properties and contact admin.'
                   : isAvailable
                   ? 'Submit a rental request and the admin will get back to you.'
                   : 'This property is currently not available for rent.'}
@@ -378,7 +380,7 @@ function PropertyDetail() {
                 <Link to="/admin/dashboard" className="btn-secondary !py-2.5 !px-6">
                   📊 Dashboard
                 </Link>
-              ) : isAvailable && isAuthenticated && user?.role !== 'admin' ? (
+              ) : isAvailable && isAuthenticated && user?.role === 'tenant' ? (
                 <motion.button
                   id="request-rental-btn"
                   whileHover={{ scale: 1.03 }}
@@ -388,6 +390,11 @@ function PropertyDetail() {
                 >
                   📋 Request Rental
                 </motion.button>
+              ) : isAvailable && isAuthenticated && user?.role === 'visitor' ? (
+                // VISITOR is authenticated but not yet a tenant — backend blocks rental requests
+                <span className="btn-secondary !py-2.5 !px-6 opacity-60 cursor-not-allowed" title="Your account must be promoted to Tenant before you can submit rental requests.">
+                  🔒 Tenants Only
+                </span>
               ) : isAvailable && !isAuthenticated ? (
                 <Link to="/login" className="btn-primary !py-2.5 !px-6">
                   🔑 Login to Request
