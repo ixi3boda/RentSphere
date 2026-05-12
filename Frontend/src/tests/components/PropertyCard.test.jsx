@@ -1,6 +1,6 @@
-// src/tests/components/PropertyCard.test.jsx
-//
-// Tests PropertyCard rendering and click navigation.
+
+
+
 
 import React from 'react';
 import { screen } from '@testing-library/react';
@@ -35,9 +35,11 @@ describe('PropertyCard', () => {
   });
 
   it('renders "rented" badge for unavailable property', () => {
-    const rented = createMockProperty({ status: 'rented', title: 'Rented Flat' });
+    const rented = createMockProperty({ status: 'rented', title: 'Property for Rent' });
     renderInRouter(<PropertyCard property={rented} />, { user: MOCK_TENANT });
-    expect(screen.getByText(/rented/i)).toBeInTheDocument();
+    
+    const badge = screen.getByText(/^rented$/i, { selector: 'span' });
+    expect(badge).toBeInTheDocument();
   });
 
   it('renders FavoriteButton', () => {
@@ -48,7 +50,7 @@ describe('PropertyCard', () => {
   it('renders placeholder when no image', () => {
     const noImg = createMockProperty({ images: [], coverPic: null });
     renderInRouter(<PropertyCard property={noImg} />, { user: MOCK_TENANT });
-    // Should render without crashing — placeholder div exists
+    
     expect(screen.getByRole('button', { name: /favorites/i })).toBeInTheDocument();
   });
 

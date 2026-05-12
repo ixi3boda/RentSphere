@@ -1,11 +1,11 @@
-// src/tests/pages/PropertyList.test.jsx
-//
-// Tests PropertyList:
-//   - fetches and renders property cards
-//   - loading skeleton shows before data arrives
-//   - empty state when no properties
-//   - API error state
-//   - search/filter works (client-side)
+
+
+
+
+
+
+
+
 
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
@@ -25,7 +25,7 @@ describe('PropertyList — data loading', () => {
 
   it('shows loading skeleton before data arrives', () => {
     renderInRouter(<PropertyList />, { user: MOCK_TENANT });
-    // Loading indicator should appear immediately
+    
     const skeletons = document.querySelectorAll('[class*="animate-pulse"]');
     expect(skeletons.length).toBeGreaterThan(0);
   });
@@ -62,7 +62,7 @@ describe('PropertyList — search', () => {
     const user = userEvent.setup();
     renderInRouter(<PropertyList />, { user: MOCK_TENANT });
 
-    // Wait for data to load
+    
     await screen.findByText('Cozy Downtown Apartment');
 
     const searchInput = screen.getByPlaceholderText(/search/i);

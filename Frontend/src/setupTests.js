@@ -1,20 +1,20 @@
-// src/setupTests.js
-// ─────────────────────────────────────────────────────────────────
-// CRA's Jest entry point (react-scripts picks this up automatically).
-// Bootstraps:
-//   - @testing-library/jest-dom custom matchers
-//   - MSW server lifecycle (start / reset / close)
-//   - global browser API stubs (matchMedia, IntersectionObserver, ResizeObserver)
-// ─────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
 import '@testing-library/jest-dom';
 import { server } from './tests/mocks/server';
 
-// ── MSW lifecycle ──────────────────────────────────────────────────
+
 beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
-// ── window.matchMedia stub (JSDOM doesn't implement it) ────────────
+
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: jest.fn().mockImplementation((query) => ({
@@ -29,21 +29,60 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-// ── IntersectionObserver stub ──────────────────────────────────────
+
 global.IntersectionObserver = class IntersectionObserver {
   observe() {}
   unobserve() {}
   disconnect() {}
 };
 
-// ── ResizeObserver stub ────────────────────────────────────────────
+
 global.ResizeObserver = class ResizeObserver {
   observe() {}
   unobserve() {}
   disconnect() {}
 };
 
-// ── Suppress console.error noise in tests ─────────────────────────
+
+jest.mock('framer-motion', () => {
+  const React = require('react');
+  const dummy = (tag) => React.forwardRef(({ children, ...props }, ref) => {
+    const {
+      initial, animate, exit, variants, transition, custom,
+      whileHover, whileTap, whileFocus, whileDrag, whileInView,
+      viewport, layout, layoutId, onAnimationStart, onAnimationComplete,
+      onUpdate, onDragStart, onDragEnd, onDrag, onDirectionLock,
+      onDragTransitionEnd, drag, dragControls, dragListener,
+      dragConstraints, dragElastic, dragMomentum, dragPropagation,
+      ...rest
+    } = props;
+    return React.createElement(tag, { ...rest, ref }, children);
+  });
+
+  return {
+    motion: {
+      div: dummy('div'),
+      h1: dummy('h1'),
+      h2: dummy('h2'),
+      h3: dummy('h3'),
+      p: dummy('p'),
+      span: dummy('span'),
+      button: dummy('button'),
+      input: dummy('input'),
+      img: dummy('img'),
+      section: dummy('section'),
+      footer: dummy('footer'),
+      nav: dummy('nav'),
+      aside: dummy('aside'),
+      main: dummy('main'),
+      label: dummy('label'),
+    },
+    AnimatePresence: ({ children }) => <>{children}</>,
+    MotionConfig: ({ children }) => <>{children}</>,
+  };
+});
+
+
 const originalError = console.error.bind(console);
 beforeAll(() => {
   console.error = (...args) => {

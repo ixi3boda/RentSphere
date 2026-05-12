@@ -17,10 +17,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Unit tests for PropertyService.
- * PropertyRepository is mocked — no database interaction.
- */
+
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PropertyService Unit Tests")
 class PropertyServiceTest {
@@ -28,7 +25,7 @@ class PropertyServiceTest {
     @Mock private PropertyRepository propertyRepository;
     @InjectMocks private PropertyService propertyService;
 
-    // ── addProperty ────────────────────────────────────────────────
+    
 
     @Test
     @DisplayName("addProperty — delegates to repository")
@@ -42,7 +39,7 @@ class PropertyServiceTest {
         verify(propertyRepository).addProperty(req, 1);
     }
 
-    // ── getAll ─────────────────────────────────────────────────────
+    
 
     @Test
     @DisplayName("getAll — returns list from repository")
@@ -55,7 +52,7 @@ class PropertyServiceTest {
         assertThat(result).hasSize(1);
     }
 
-    // ── getById ────────────────────────────────────────────────────
+    
 
     @Test
     @DisplayName("getById — returns PropertyDetails when found")
@@ -77,12 +74,12 @@ class PropertyServiceTest {
                 .hasMessageContaining("Property not found");
     }
 
-    // ── updateByOwner ──────────────────────────────────────────────
+    
 
     @Test
     @DisplayName("updateByOwner — succeeds when caller is the owner")
     void updateByOwner_succeeds_whenCallerIsOwner() {
-        Property prop = TestFixtures.testProperty(); // ownerId = 1
+        Property prop = TestFixtures.testProperty(); 
         PropertyDetails pd = new PropertyDetails();
         pd.setProperty(prop);
         when(propertyRepository.findById(1L)).thenReturn(Optional.of(pd));
@@ -97,7 +94,7 @@ class PropertyServiceTest {
     @Test
     @DisplayName("updateByOwner — throws when caller is not the owner")
     void updateByOwner_throws_whenNotOwner() {
-        Property prop = TestFixtures.testProperty(); // ownerId = 1
+        Property prop = TestFixtures.testProperty(); 
         PropertyDetails pd = new PropertyDetails();
         pd.setProperty(prop);
         when(propertyRepository.findById(1L)).thenReturn(Optional.of(pd));
@@ -126,12 +123,12 @@ class PropertyServiceTest {
                 .hasMessageContaining("Property not found");
     }
 
-    // ── deleteByOwner ──────────────────────────────────────────────
+    
 
     @Test
     @DisplayName("deleteByOwner — succeeds when caller is the owner")
     void deleteByOwner_succeeds_whenCallerIsOwner() {
-        Property prop = TestFixtures.testProperty(); // ownerId = 1
+        Property prop = TestFixtures.testProperty(); 
         PropertyDetails pd = new PropertyDetails();
         pd.setProperty(prop);
         when(propertyRepository.findById(1L)).thenReturn(Optional.of(pd));
@@ -144,7 +141,7 @@ class PropertyServiceTest {
     @Test
     @DisplayName("deleteByOwner — throws when caller is not the owner")
     void deleteByOwner_throws_whenNotOwner() {
-        Property prop = TestFixtures.testProperty(); // ownerId = 1
+        Property prop = TestFixtures.testProperty(); 
         PropertyDetails pd = new PropertyDetails();
         pd.setProperty(prop);
         when(propertyRepository.findById(1L)).thenReturn(Optional.of(pd));
@@ -154,12 +151,12 @@ class PropertyServiceTest {
                 .hasMessageContaining("do not have permission");
     }
 
-    // ── addImageByOwner ────────────────────────────────────────────
+    
 
     @Test
     @DisplayName("addImageByOwner — allows owner to add image")
     void addImageByOwner_allowsOwner() {
-        Property prop = TestFixtures.testProperty(); // ownerId = 1
+        Property prop = TestFixtures.testProperty(); 
         PropertyDetails pd = new PropertyDetails();
         pd.setProperty(prop);
         when(propertyRepository.findById(1L)).thenReturn(Optional.of(pd));
@@ -171,7 +168,7 @@ class PropertyServiceTest {
     @Test
     @DisplayName("addImageByOwner — throws when non-owner tries")
     void addImageByOwner_throwsWhenNotOwner() {
-        Property prop = TestFixtures.testProperty(); // ownerId = 1
+        Property prop = TestFixtures.testProperty(); 
         PropertyDetails pd = new PropertyDetails();
         pd.setProperty(prop);
         when(propertyRepository.findById(1L)).thenReturn(Optional.of(pd));
@@ -181,7 +178,7 @@ class PropertyServiceTest {
                 .hasMessageContaining("do not have permission");
     }
 
-    // ── searchByPrefix ─────────────────────────────────────────────
+    
 
     @Test
     @DisplayName("searchByPrefix — trims whitespace before querying")

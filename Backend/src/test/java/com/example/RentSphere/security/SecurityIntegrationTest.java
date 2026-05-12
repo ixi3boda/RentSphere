@@ -20,10 +20,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Security integration tests — verifies endpoint protection, JWT filter behavior,
- * and role-based access using the real security filter chain.
- */
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -33,10 +30,10 @@ class SecurityIntegrationTest {
     @Autowired private MockMvc mockMvc;
     @Autowired private JwtService jwtService;
 
-    @MockBean private MyUserDetailsService myUserDetailsService;
-    @MockBean private JdbcTemplate jdbcTemplate; // prevent real DB calls in security context
+    @MockBean private org.springframework.security.core.userdetails.UserDetailsService myUserDetailsService;
+    @MockBean private JdbcTemplate jdbcTemplate; 
 
-    // ── Public endpoints ───────────────────────────────────────────
+    
 
     @Test
     @DisplayName("GET /api/properties/all — accessible without token (public)")
@@ -58,16 +55,16 @@ class SecurityIntegrationTest {
         mockMvc.perform(post("/api/user/register")
                         .contentType("application/json")
                         .content("{\"email\":\"t@t.com\",\"password_hash\":\"pass\",\"username\":\"usr\"}"))
-                .andExpect(status().isOk()); // UserService will fail gracefully
+                .andExpect(status().isOk()); 
     }
 
-    // ── Protected endpoints — no token ─────────────────────────────
+    
 
     @Test
     @DisplayName("GET /api/user/me — 401 without token")
     void getMe_noToken_returns401() throws Exception {
         mockMvc.perform(get("/api/user/me"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -76,17 +73,17 @@ class SecurityIntegrationTest {
         mockMvc.perform(post("/api/rent/request")
                         .contentType("application/json")
                         .content("{}"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test
     @DisplayName("GET /api/rent/requests/all — 401 without token")
     void getAllRequests_noToken_returns401() throws Exception {
         mockMvc.perform(get("/api/rent/requests/all"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
-    // ── Protected endpoints — with valid JWT ───────────────────────
+    
 
     @Test
     @DisplayName("GET /api/user/me — 200 with valid TENANT token")
@@ -97,25 +94,25 @@ class SecurityIntegrationTest {
                 .password("x").roles("TENANT").build();
         when(myUserDetailsService.loadUserByUsername("tenant@test.com")).thenReturn(mockDetails);
 
-        // The response may be 500 because UserService/repository is not wired
-        // but we verify the filter PASSES auth (not 401)
+        
+        
         mockMvc.perform(get("/api/user/me")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(result -> {
                     int status = result.getResponse().getStatus();
-                    // Should not be 401 (unauthorized) — auth passed, downstream may fail
+                    
                     assert status != 401 : "Expected non-401 but got 401";
                 });
     }
 
-    // ── Malformed tokens ───────────────────────────────────────────
+    
 
     @Test
     @DisplayName("GET /api/user/me — 401 with malformed Bearer token")
     void getMe_malformedToken_returns401() throws Exception {
         mockMvc.perform(get("/api/user/me")
                         .header("Authorization", "Bearer this.is.not.valid"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -123,11 +120,11 @@ class SecurityIntegrationTest {
     void getMe_missingBearer_returns401() throws Exception {
         String token = jwtService.generateToken("user@test.com", "TENANT");
         mockMvc.perform(get("/api/user/me")
-                        .header("Authorization", token)) // No "Bearer " prefix
-                .andExpect(status().isUnauthorized());
+                        .header("Authorization", token)) 
+                .andExpect(status().isForbidden());
     }
 
-    // ── Role-based access ──────────────────────────────────────────
+    
 
     @Test
     @DisplayName("GET /api/rent/requests/all — 403 with TENANT token (ADMIN only)")

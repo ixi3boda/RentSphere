@@ -1,10 +1,10 @@
-// src/tests/components/FavoriteButton.test.jsx
-//
-// Tests FavoriteButton component:
-//   - renders favorited/unfavorited state
-//   - redirects to login when unauthenticated user clicks
-//   - calls API toggle on click
-//   - disables during API call
+
+
+
+
+
+
+
 
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
@@ -45,9 +45,9 @@ describe('FavoriteButton', () => {
         <FavoriteButton propertyId="101" initialFavorited={false} />,
         { user: null, route: '/properties/101' }
       );
-      // Click should navigate to /login — no API call expected
+      
       await user.click(screen.getByRole('button', { name: /add to favorites/i }));
-      // Since MemoryRouter doesn't render /login route here, just verify no crash
+      
       expect(screen.queryByText('Network error')).not.toBeInTheDocument();
     });
   });
@@ -89,10 +89,10 @@ describe('FavoriteButton', () => {
       await user.click(screen.getByRole('button', { name: /add to favorites/i }));
 
       await waitFor(() => {
-        // The button should be re-enabled after failure
+        
         expect(screen.getByRole('button')).not.toBeDisabled();
       });
-      // onToggle should NOT have been called on failure
+      
       expect(onToggle).not.toHaveBeenCalled();
     });
   });

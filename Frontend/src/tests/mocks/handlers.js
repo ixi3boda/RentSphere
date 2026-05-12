@@ -1,13 +1,13 @@
-// src/tests/mocks/handlers.js
-//
-// MSW v1 request handlers — covers all 24 RentSphere API endpoints.
-// Default responses simulate happy-path. Tests can override per-case
-// using server.use(...) inside individual test files.
+
+
+
+
+
 
 import { rest } from 'msw';
 import { RAW_ADMIN_USER, RAW_TENANT_USER, MOCK_TOKEN } from './authMocks';
 
-// ── Reusable mock data ─────────────────────────────────────────────
+
 
 const MOCK_PROPERTY_DETAILS = {
   property: {
@@ -90,11 +90,11 @@ const MOCK_CONTRACT = {
   updatedAt: '2024-02-15T10:00:00',
 };
 
-// ── Handlers ───────────────────────────────────────────────────────
+
 
 export const handlers = [
 
-  // ── Auth ──────────────────────────────────────────────────────────
+  
 
   rest.post('/api/user/register', (req, res, ctx) =>
     res(ctx.status(200), ctx.json({ token: MOCK_TOKEN }))
@@ -109,7 +109,7 @@ export const handlers = [
   }),
 
   rest.get('/api/user/me', (req, res, ctx) => {
-    // Return admin by default; tests that need tenant override with server.use()
+    
     const auth = req.headers.get('Authorization');
     if (!auth) return res(ctx.status(401), ctx.json({ message: 'Unauthorized' }));
     return res(ctx.status(200), ctx.json(RAW_ADMIN_USER));
@@ -123,7 +123,7 @@ export const handlers = [
     res(ctx.status(200))
   ),
 
-  // ── Properties ────────────────────────────────────────────────────
+  
 
   rest.get('/api/properties/all', (req, res, ctx) =>
     res(ctx.status(200), ctx.json([MOCK_PROPERTY_DETAILS, MOCK_PROPERTY_DETAILS_2]))
@@ -169,7 +169,7 @@ export const handlers = [
     res(ctx.status(200), ctx.json({ message: 'Image added' }))
   ),
 
-  // ── Rent ──────────────────────────────────────────────────────────
+  
 
   rest.post('/api/rent/request', (req, res, ctx) =>
     res(ctx.status(200), ctx.json(MOCK_RENTAL_REQUEST))
@@ -207,5 +207,5 @@ export const handlers = [
   ),
 ];
 
-// Re-export mock data for use in tests
+
 export { MOCK_PROPERTY_DETAILS, MOCK_PROPERTY_DETAILS_2, MOCK_FAVORITE, MOCK_RENTAL_REQUEST, MOCK_CONTRACT };

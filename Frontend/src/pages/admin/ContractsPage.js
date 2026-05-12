@@ -1,22 +1,22 @@
-// src/pages/ContractsPage.js
-//
-// Shared page — view all contracts, trigger PayPal payment.
-// Route: /contracts
-//
-// GET  /api/rent/contracts/all                          → Contract[]
-// POST /api/rent/contracts/{contractId}/paypal          → PayPalPaymentResponse
-// POST /api/rent/contracts/{contractId}/paypal/execute  → called from /paypal/callback
+
+
+
+
+
+
+
+
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../context/AuthContext';
-import { AnimatedPage, LoadingSpinner } from '../components/AnimatedPage';
-import { rentApi } from '../utils/api';
+import { useAuth } from '../../context/AuthContext';
+import { AnimatedPage, LoadingSpinner } from '../../components/AnimatedPage';
+import { rentApi } from '../../utils/api';
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+
+
+
 const CONTRACT_STATUS_STYLES = {
   ACTIVE:          'bg-green-100  text-green-700  border border-green-200',
   EXPIRED:         'bg-gray-100   text-gray-600   border border-gray-200',
@@ -38,9 +38,9 @@ function formatDate(val) {
   });
 }
 
-// ---------------------------------------------------------------------------
-// PayPal Payment Modal
-// ---------------------------------------------------------------------------
+
+
+
 function PayPalModal({ contract, onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
@@ -69,11 +69,11 @@ function PayPalModal({ contract, onClose }) {
       const { approvalUrl, paymentId } = res.data || {};
       if (!approvalUrl) throw new Error('No PayPal approval URL received.');
 
-      // Store contractId + paymentId so callback page can execute the payment
+      
       sessionStorage.setItem('paypal_contract_id', String(contract.contractId));
       sessionStorage.setItem('paypal_payment_id',  paymentId || '');
 
-      // Redirect to PayPal
+      
       window.location.href = approvalUrl;
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to start PayPal payment.');
@@ -103,7 +103,7 @@ function PayPalModal({ contract, onClose }) {
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors text-xl leading-none"
         >✕</button>
 
-        {/* PayPal brand header */}
+        {}
         <div className="text-center mb-6">
           <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-700 flex items-center justify-center">
             <span className="text-3xl">💳</span>
@@ -112,7 +112,7 @@ function PayPalModal({ contract, onClose }) {
           <p className="text-gray-500 text-sm mt-1">Contract #{contract.contractId}</p>
         </div>
 
-        {/* Summary */}
+        {}
         <div className="bg-gray-50 rounded-xl p-4 mb-5 space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-gray-500">Property</span>
@@ -171,14 +171,14 @@ function PayPalModal({ contract, onClose }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Contract card
-// ---------------------------------------------------------------------------
+
+
+
 function ContractCard({ contract, onPay, index, role }) {
   const statusStyle = CONTRACT_STATUS_STYLES[contract.contractStatus] || 'bg-gray-100 text-gray-600';
   const statusIcon  = CONTRACT_STATUS_ICONS[contract.contractStatus] || '📋';
   
-  // Payment visibility: ONLY tenants see the Pay button, and only when applicable
+  
   const canPay = role === 'tenant' && ['ACTIVE', 'PENDING_PAYMENT'].includes(contract.contractStatus);
 
   return (
@@ -188,7 +188,7 @@ function ContractCard({ contract, onPay, index, role }) {
       transition={{ delay: index * 0.05 }}
       className="glass-effect rounded-2xl p-5 shadow-md flex flex-col gap-4"
     >
-      {/* Top row */}
+      {}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <span className="text-xs text-gray-400 font-mono">CONTRACT #{contract.contractId}</span>
         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusStyle}`}>
@@ -196,7 +196,7 @@ function ContractCard({ contract, onPay, index, role }) {
         </span>
       </div>
 
-      {/* Details */}
+      {}
       <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
         <div>
           <p className="text-xs text-gray-400 uppercase tracking-wide">Property</p>
@@ -226,14 +226,14 @@ function ContractCard({ contract, onPay, index, role }) {
         </div>
       </div>
 
-      {/* Notes */}
+      {}
       {contract.notes && (
         <div className="bg-gray-50 rounded-xl p-3 text-sm text-gray-600 italic border border-gray-100">
           "{contract.notes}"
         </div>
       )}
 
-      {/* PDF link */}
+      {}
       {contract.pdfUrl && (
         <a
           href={contract.pdfUrl}
@@ -245,14 +245,14 @@ function ContractCard({ contract, onPay, index, role }) {
         </a>
       )}
 
-      {/* Admin Payment History Summary */}
+      {}
       {role === 'admin' && (
         <div className="mt-2 text-xs text-gray-500 border-t border-gray-100 pt-3">
           <p>Tenant Payment History: <span className="font-semibold">{contract.contractStatus === 'PENDING_PAYMENT' ? 'Payment Due' : 'Up to Date'}</span></p>
         </div>
       )}
 
-      {/* PayPal CTA */}
+      {}
       {canPay && (
         <motion.button
           whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
@@ -267,9 +267,9 @@ function ContractCard({ contract, onPay, index, role }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// ContractsPage
-// ---------------------------------------------------------------------------
+
+
+
 function ContractsPage() {
   const { user } = useAuth();
   const navigate  = useNavigate();
@@ -280,7 +280,7 @@ function ContractsPage() {
   const [payTarget, setPayTarget]     = useState(null);
   const [filterStatus, setFilterStatus] = useState('ALL');
 
-  // Redirect non-authenticated or unauthorized users
+  
   useEffect(() => {
     if (!user) {
       navigate('/login');
@@ -317,15 +317,15 @@ function ContractsPage() {
     TERMINATED:     contracts.filter((c) => c.contractStatus === 'TERMINATED').length,
   };
 
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
+  
+  
+  
   return (
     <AnimatedPage>
       <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
 
-          {/* Header */}
+          {}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -360,7 +360,7 @@ function ContractsPage() {
             </div>
           </motion.div>
 
-          {/* Stats / filter tabs */}
+          {}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -390,7 +390,7 @@ function ContractsPage() {
             ))}
           </motion.div>
 
-          {/* Error */}
+          {}
           {error && (
             <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg flex items-center gap-3">
               <span>⚠️</span><span>{error}</span>
@@ -438,7 +438,7 @@ function ContractsPage() {
         </div>
       </div>
 
-      {/* PayPal modal */}
+      {}
       <AnimatePresence>
         {payTarget && (
           <PayPalModal

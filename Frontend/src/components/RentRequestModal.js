@@ -1,14 +1,14 @@
-// src/components/RentRequestModal.js
-//
-// Tenant rental-request modal.
-// Calls POST /api/rent/request → CreateRentalRequest
-// { propertyId, message, desiredStart, desiredMonths }
+
+
+
+
+
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { rentApi } from '../utils/api';
 
-// Today formatted as YYYY-MM-DD for the date input min attribute
+
 const todayIso = () => new Date().toISOString().split('T')[0];
 
 function RentRequestModal({ property, onClose }) {
@@ -21,7 +21,7 @@ function RentRequestModal({ property, onClose }) {
   const [error, setError]   = useState('');
   const [success, setSuccess] = useState(false);
 
-  // Close on Escape
+  
   useEffect(() => {
     const handler = (e) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', handler);
@@ -55,7 +55,7 @@ function RentRequestModal({ property, onClose }) {
       await rentApi.createRequest({
         propertyId:    Number(property.id),
         message:       form.message || '',
-        desiredStart:  form.desiredStart,           // "YYYY-MM-DD" — matches LocalDate
+        desiredStart:  form.desiredStart,           
         desiredMonths: Number(form.desiredMonths),
       });
       setSuccess(true);
@@ -73,7 +73,7 @@ function RentRequestModal({ property, onClose }) {
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center px-4"
     >
-      {/* Backdrop */}
+      {}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -82,7 +82,7 @@ function RentRequestModal({ property, onClose }) {
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
       />
 
-      {/* Modal card */}
+      {}
       <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 24 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -90,7 +90,7 @@ function RentRequestModal({ property, onClose }) {
         transition={{ type: 'spring', damping: 26, stiffness: 300 }}
         className="relative glass-effect rounded-2xl p-7 max-w-lg w-full shadow-2xl z-10"
       >
-        {/* Close button */}
+        {}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors text-xl leading-none"
@@ -98,9 +98,9 @@ function RentRequestModal({ property, onClose }) {
           ✕
         </button>
 
-        {/* ---------------------------------------------------------------- */}
-        {/* Success state                                                     */}
-        {/* ---------------------------------------------------------------- */}
+        {}
+        {}
+        {}
         {success ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -133,7 +133,7 @@ function RentRequestModal({ property, onClose }) {
           </motion.div>
         ) : (
           <>
-            {/* Header */}
+            {}
             <div className="mb-6">
               <div className="w-12 h-12 mb-3 rounded-xl bg-gradient-to-r from-rentsphere-teal to-rentsphere-orange flex items-center justify-center">
                 <span className="text-2xl">📋</span>
@@ -152,7 +152,7 @@ function RentRequestModal({ property, onClose }) {
               )}
             </div>
 
-            {/* Error */}
+            {}
             <AnimatePresence>
               {error && (
                 <motion.div
@@ -166,15 +166,16 @@ function RentRequestModal({ property, onClose }) {
               )}
             </AnimatePresence>
 
-            {/* Form */}
+            {}
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Start date + Duration */}
+              {}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label htmlFor="desiredStart" className="block text-sm font-medium text-gray-700 mb-1.5">
                     Desired Start Date <span className="text-red-500">*</span>
                   </label>
                   <input
+                    id="desiredStart"
                     type="date"
                     name="desiredStart"
                     value={form.desiredStart}
@@ -185,10 +186,11 @@ function RentRequestModal({ property, onClose }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label htmlFor="desiredMonths" className="block text-sm font-medium text-gray-700 mb-1.5">
                     Duration (months) <span className="text-red-500">*</span>
                   </label>
                   <input
+                    id="desiredMonths"
                     type="number"
                     name="desiredMonths"
                     value={form.desiredMonths}
@@ -202,7 +204,7 @@ function RentRequestModal({ property, onClose }) {
                 </div>
               </div>
 
-              {/* Estimated total */}
+              {}
               {property?.price && form.desiredMonths > 0 && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -219,12 +221,13 @@ function RentRequestModal({ property, onClose }) {
                 </motion.div>
               )}
 
-              {/* Message */}
+              {}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1.5">
                   Message <span className="text-gray-400 text-xs">(optional)</span>
                 </label>
                 <textarea
+                  id="message"
                   name="message"
                   value={form.message}
                   onChange={handleChange}
@@ -236,7 +239,7 @@ function RentRequestModal({ property, onClose }) {
                 <p className="text-xs text-gray-400 mt-1 text-right">{form.message.length}/500</p>
               </div>
 
-              {/* Actions */}
+              {}
               <div className="flex gap-3 pt-1">
                 <motion.button
                   type="button"

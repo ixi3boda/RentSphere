@@ -1,10 +1,10 @@
-// src/tests/integration/loginFlow.test.jsx
-//
-// End-to-end integration test for the login workflow:
-//   1. User fills in email + password
-//   2. Submit triggers POST /api/user/login → token returned
-//   3. GET /api/user/me → user data returned
-//   4. Role-based redirect occurs
+
+
+
+
+
+
+
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';

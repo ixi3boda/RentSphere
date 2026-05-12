@@ -4,10 +4,7 @@ import com.example.RentSphere.SecurityConfig.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/**
- * Test helper for generating valid JWT tokens for different roles.
- * Use in MockMvc tests via: "Bearer " + jwtHelper.adminToken()
- */
+
 @Component
 public class JwtTestHelper {
 

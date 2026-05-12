@@ -1,12 +1,12 @@
-// src/tests/components/RentRequestModal.test.jsx
-//
-// Tests RentRequestModal:
-//   - renders correctly with property info
-//   - validates desiredStart and desiredMonths
-//   - submits correct payload to POST /api/rent/request
-//   - shows success state after submission
-//   - shows error state on API failure
-//   - closes on Escape key
+
+
+
+
+
+
+
+
+
 
 import React from 'react';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
@@ -79,7 +79,7 @@ describe('RentRequestModal', () => {
 
     await user.click(screen.getByRole('button', { name: /submit|send request/i }));
 
-    expect(await screen.findByText(/sent|submitted|success/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Request Submitted!/i)).toBeInTheDocument();
   });
 
   it('shows error message on API failure', async () => {

@@ -84,16 +84,16 @@ class UserRepositoryTest {
     @Test
     @DisplayName("updateActiveState modifies is_active")
     void updateActiveState_modifiesActiveFlag() {
-        // Find existing tenant
+        
         Optional<User> userOpt = userRepository.findByEmail("tenant@test.com");
         assertThat(userOpt).isPresent();
         int userId = userOpt.get().getUser_id();
         
-        // Deactivate
+        
         int rows = userRepository.updateActiveState(userId, false);
         assertThat(rows).isEqualTo(1);
         
-        // Verify
+        
         User updated = userRepository.findByEmail("tenant@test.com").get();
         assertThat(updated.is_active()).isFalse();
     }

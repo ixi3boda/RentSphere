@@ -1,17 +1,14 @@
-// src/tests/test-utils/factory.js
-//
-// Reusable factory builders for test data.
-// Each factory accepts optional overrides so tests only specify what's relevant.
+
+
+
+
 
 let _idSeq = 100;
 const nextId = () => ++_idSeq;
 
-// ── User factory ────────────────────────────────────────────────────
 
-/**
- * Creates a frontend-mapped user (as returned by mapUserToFrontend).
- * @param {Partial<object>} overrides
- */
+
+
 export const createMockUser = (overrides = {}) => ({
   id: nextId(),
   email: `user${_idSeq}@test.com`,
@@ -31,7 +28,7 @@ export const createMockAdmin   = (overrides = {}) => createMockUser({ role: 'adm
 export const createMockTenant  = (overrides = {}) => createMockUser({ role: 'tenant',  role_name: 'TENANT',  ...overrides });
 export const createMockVisitor = (overrides = {}) => createMockUser({ role: 'visitor', role_name: 'VISITOR', ...overrides });
 
-// ── Raw backend User DTO factory ────────────────────────────────────
+
 
 export const createRawUser = (overrides = {}) => ({
   user_id: nextId(),
@@ -47,11 +44,9 @@ export const createRawUser = (overrides = {}) => ({
   ...overrides,
 });
 
-// ── Property factory ────────────────────────────────────────────────
 
-/**
- * Creates a PropertyDetails object (as returned by GET /api/properties/all).
- */
+
+
 export const createMockPropertyDetails = (overrides = {}) => {
   const id = nextId();
   const defaults = {
@@ -73,8 +68,8 @@ export const createMockPropertyDetails = (overrides = {}) => {
       createdAt: '2024-01-01T10:00:00',
       updatedAt: '2024-01-01T10:00:00',
     },
-    propertyImages: [`https://cdn.test/img-${id}.jpg`],
-    coverPic: `https://cdn.test/img-${id}.jpg`,
+    propertyImages: [`https://via.placeholder.com/400`],
+    coverPic: `https://via.placeholder.com/400`
   };
 
   if (overrides.property) {
@@ -84,9 +79,7 @@ export const createMockPropertyDetails = (overrides = {}) => {
   return { ...defaults, ...overrides };
 };
 
-/**
- * Creates a frontend-mapped property (as returned by mapPropertyToFrontend).
- */
+
 export const createMockProperty = (overrides = {}) => {
   const id = nextId();
   return {
@@ -105,15 +98,15 @@ export const createMockProperty = (overrides = {}) => {
     latitude: 24.688,
     longitude: 46.722,
     ownerId: 1,
-    images: [`https://cdn.test/img-${id}.jpg`],
-    coverPic: `https://cdn.test/img-${id}.jpg`,
+    images: [`https://via.placeholder.com/400`],
+    coverPic: `https://via.placeholder.com/400`,
     createdAt: '2024-01-01T10:00:00',
     updatedAt: '2024-01-01T10:00:00',
     ...overrides,
   };
 };
 
-// ── Rental Request factory ──────────────────────────────────────────
+
 
 export const createMockRentalRequest = (overrides = {}) => ({
   rentalReqId: nextId(),
@@ -129,7 +122,7 @@ export const createMockRentalRequest = (overrides = {}) => ({
   ...overrides,
 });
 
-// ── Contract factory ────────────────────────────────────────────────
+
 
 export const createMockContract = (overrides = {}) => ({
   contractId: nextId(),
@@ -149,7 +142,7 @@ export const createMockContract = (overrides = {}) => ({
   ...overrides,
 });
 
-// ── Favorite factory ────────────────────────────────────────────────
+
 
 export const createMockFavorite = (userOverrides = {}, propertyOverrides = {}) => ({
   user: createRawUser(userOverrides),

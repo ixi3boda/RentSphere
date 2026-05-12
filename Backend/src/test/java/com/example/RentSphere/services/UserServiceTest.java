@@ -22,11 +22,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Unit tests for UserService.
- * All dependencies (UserRepository, JwtService, PasswordEncoder, AuthenticationManager)
- * are mocked with Mockito — zero Spring context needed.
- */
+
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UserService Unit Tests")
 class UserServiceTest {
@@ -42,10 +38,10 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(jwtService.generateToken(anyString(), anyString())).thenReturn(MOCK_TOKEN);
+        lenient().when(jwtService.generateToken(anyString(), anyString())).thenReturn(MOCK_TOKEN);
     }
 
-    // ── register ───────────────────────────────────────────────────
+    
 
     @Test
     @DisplayName("register — success returns AuthResponse with token")
@@ -160,7 +156,7 @@ class UserServiceTest {
         assertThat(captor.getValue().getEmail()).isEqualTo("upper@test.com");
     }
 
-    // ── login ──────────────────────────────────────────────────────
+    
 
     @Test
     @DisplayName("login — valid credentials returns token")
@@ -206,7 +202,7 @@ class UserServiceTest {
                 .hasMessageContaining("Invalid email or password");
     }
 
-    // ── getCurrentUser ─────────────────────────────────────────────
+    
 
     @Test
     @DisplayName("getCurrentUser — returns user by email")
@@ -227,7 +223,7 @@ class UserServiceTest {
                 .hasMessageContaining("User not found");
     }
 
-    // ── updateCurrentUser ──────────────────────────────────────────
+    
 
     @Test
     @DisplayName("updateCurrentUser — null request throws IllegalArgumentException")
@@ -275,7 +271,7 @@ class UserServiceTest {
         verify(userRepository).update(any(User.class));
     }
 
-    // ── logout ─────────────────────────────────────────────────────
+    
 
     @Test
     @DisplayName("logout — sets user inactive")

@@ -1,11 +1,11 @@
-// src/tests/pages/TenantDashboard.test.jsx
-//
-// Tests TenantDashboard:
-//   - renders page heading ("Dashboard")
-//   - renders favorites section with items
-//   - shows empty state for favorites
-//   - loading state while fetching
-//   - recently viewed section
+
+
+
+
+
+
+
+
 
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
@@ -60,7 +60,7 @@ describe('TenantDashboard — API error', () => {
 
     renderInRouter(<TenantDashboard />, { user: MOCK_TENANT });
     await waitFor(() => {
-      // Dashboard should still render without crashing
+      
       expect(screen.queryByRole('heading', { name: /dashboard/i })).toBeInTheDocument();
     });
   });

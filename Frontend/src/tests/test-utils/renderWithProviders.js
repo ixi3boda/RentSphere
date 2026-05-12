@@ -1,22 +1,19 @@
-// src/tests/test-utils/renderWithProviders.js
-//
-// Custom RTL render utility that wraps the component under test with:
-//   - MemoryRouter (for useNavigate / useLocation / Link)
-//   - AuthContext.Provider (pre-seeded with a mock user)
-//
-// Usage:
-//   renderWithProviders(<Login />, { user: MOCK_TENANT, route: '/login' })
-//   renderWithProviders(<Navbar />) // unauthenticated by default
+
+
+
+
+
+
+
+
+
 
 import React from 'react';
 import { render } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import AuthContext from '../../context/AuthContext';
 
-/**
- * Build a mock AuthContext value.
- * Any key can be overridden via `authOverrides`.
- */
+
 export function buildAuthValue({
   user = null,
   loading = false,
@@ -40,14 +37,7 @@ export function buildAuthValue({
   };
 }
 
-/**
- * @param {React.ReactElement} ui - Component to render
- * @param {object} options
- * @param {object|null} options.user - Mapped frontend user (or null for unauthenticated)
- * @param {string}  options.route - Initial URL (default '/')
- * @param {string}  options.path  - Route path pattern (for :params)
- * @param {object}  options.authOverrides - Override specific AuthContext values
- */
+
 export function renderWithProviders(
   ui,
   { user = null, route = '/', path = '*', authOverrides = {} } = {}
@@ -67,9 +57,7 @@ export function renderWithProviders(
   return render(ui, { wrapper: Wrapper });
 }
 
-/**
- * Simpler wrapper for components that don't need a specific route path.
- */
+
 export function renderInRouter(ui, { user = null, route = '/', authOverrides = {} } = {}) {
   const authValue = buildAuthValue({ user, ...authOverrides });
 

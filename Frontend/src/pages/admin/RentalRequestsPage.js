@@ -1,11 +1,11 @@
-// src/pages/admin/RentalRequestsPage.js
-//
-// Admin page — view all rental requests, accept or reject them.
-// Routes: /admin/requests
-//
-// GET  /api/rent/requests/all         → list RentalRequest[]
-// PUT  /api/rent/requests/{id}/accept → accept → creates a Contract
-// PUT  /api/rent/requests/{id}/reject → reject
+
+
+
+
+
+
+
+
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -14,9 +14,9 @@ import { useAuth } from '../../context/AuthContext';
 import { AnimatedPage, LoadingSpinner } from '../../components/AnimatedPage';
 import { rentApi } from '../../utils/api';
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+
+
+
 const STATUS_STYLES = {
   PENDING:  'bg-yellow-100 text-yellow-700 border border-yellow-200',
   ACCEPTED: 'bg-green-100  text-green-700  border border-green-200',
@@ -36,9 +36,9 @@ function formatDate(val) {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Confirm action modal (reusable for accept/reject)
-// ---------------------------------------------------------------------------
+
+
+
 function ConfirmModal({ title, message, confirmLabel, confirmClass, onConfirm, onCancel, loading }) {
   useEffect(() => {
     const h = (e) => e.key === 'Escape' && onCancel();
@@ -88,9 +88,9 @@ function ConfirmModal({ title, message, confirmLabel, confirmClass, onConfirm, o
   );
 }
 
-// ---------------------------------------------------------------------------
-// Request card
-// ---------------------------------------------------------------------------
+
+
+
 function RequestCard({ req, onAccept, onReject, actionLoading, index }) {
   const isPending = req.reqStatus === 'PENDING';
 
@@ -101,7 +101,7 @@ function RequestCard({ req, onAccept, onReject, actionLoading, index }) {
       transition={{ delay: index * 0.05 }}
       className="glass-effect rounded-2xl p-5 shadow-md flex flex-col gap-4"
     >
-      {/* Top row: ID + Status */}
+      {}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <span className="text-xs text-gray-400 font-mono">REQ #{req.rentalReqId}</span>
         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_STYLES[req.reqStatus] || 'bg-gray-100 text-gray-600'}`}>
@@ -109,7 +109,7 @@ function RequestCard({ req, onAccept, onReject, actionLoading, index }) {
         </span>
       </div>
 
-      {/* Details grid */}
+      {}
       <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
         <div>
           <p className="text-xs text-gray-400 uppercase tracking-wide">Property ID</p>
@@ -143,14 +143,14 @@ function RequestCard({ req, onAccept, onReject, actionLoading, index }) {
         )}
       </div>
 
-      {/* Message */}
+      {}
       {req.message && (
         <div className="bg-gray-50 rounded-xl p-3 text-sm text-gray-600 italic border border-gray-100">
           "{req.message}"
         </div>
       )}
 
-      {/* Actions (only for PENDING) */}
+      {}
       {isPending && (
         <div className="flex gap-3 pt-1">
           <motion.button
@@ -181,9 +181,9 @@ function RequestCard({ req, onAccept, onReject, actionLoading, index }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// RentalRequestsPage
-// ---------------------------------------------------------------------------
+
+
+
 function RentalRequestsPage() {
   const { user } = useAuth();
   const navigate  = useNavigate();
@@ -191,26 +191,26 @@ function RentalRequestsPage() {
   const [requests, setRequests]       = useState([]);
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState('');
-  const [actionLoading, setActionLoading] = useState(null); // rentalReqId being acted on
+  const [actionLoading, setActionLoading] = useState(null); 
   const [toast, setToast]             = useState(null);
-  const [confirm, setConfirm]         = useState(null); // { type: 'accept'|'reject', req }
+  const [confirm, setConfirm]         = useState(null); 
   const [filterStatus, setFilterStatus] = useState('ALL');
 
-  // Redirect non-admins
+  
   useEffect(() => {
     if (user && user.role !== 'admin') navigate('/');
   }, [user, navigate]);
 
-  // ---------------------------------------------------------------------------
-  // Fetch
-  // ---------------------------------------------------------------------------
+  
+  
+  
   const fetchRequests = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
       const res  = await rentApi.getAllRequests();
       const list = Array.isArray(res.data) ? res.data : [];
-      // Sort newest first
+      
       setRequests(list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load rental requests.');
@@ -221,17 +221,17 @@ function RentalRequestsPage() {
 
   useEffect(() => { fetchRequests(); }, [fetchRequests]);
 
-  // ---------------------------------------------------------------------------
-  // Helpers
-  // ---------------------------------------------------------------------------
+  
+  
+  
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3500);
   };
 
-  // ---------------------------------------------------------------------------
-  // Accept
-  // ---------------------------------------------------------------------------
+  
+  
+  
   const handleAccept = (req) => setConfirm({ type: 'accept', req });
 
   const doAccept = async () => {
@@ -241,7 +241,7 @@ function RentalRequestsPage() {
     try {
       await rentApi.acceptRequest(req.rentalReqId);
       showToast(`Request #${req.rentalReqId} accepted — contract created.`);
-      // Update local state immediately
+      
       setRequests((prev) =>
         prev.map((r) => r.rentalReqId === req.rentalReqId ? { ...r, reqStatus: 'ACCEPTED', reviewedAt: new Date().toISOString() } : r)
       );
@@ -252,9 +252,9 @@ function RentalRequestsPage() {
     }
   };
 
-  // ---------------------------------------------------------------------------
-  // Reject
-  // ---------------------------------------------------------------------------
+  
+  
+  
   const handleReject = (req) => setConfirm({ type: 'reject', req });
 
   const doReject = async () => {
@@ -274,9 +274,9 @@ function RentalRequestsPage() {
     }
   };
 
-  // ---------------------------------------------------------------------------
-  // Filtered list
-  // ---------------------------------------------------------------------------
+  
+  
+  
   const filtered = filterStatus === 'ALL'
     ? requests
     : requests.filter((r) => r.reqStatus === filterStatus);
@@ -288,15 +288,15 @@ function RentalRequestsPage() {
     REJECTED: requests.filter((r) => r.reqStatus === 'REJECTED').length,
   };
 
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
+  
+  
+  
   return (
     <AnimatedPage>
       <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
 
-          {/* Header */}
+          {}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -324,7 +324,7 @@ function RentalRequestsPage() {
             </motion.button>
           </motion.div>
 
-          {/* Stats */}
+          {}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -355,7 +355,7 @@ function RentalRequestsPage() {
             ))}
           </motion.div>
 
-          {/* Error */}
+          {}
           {error && (
             <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg flex items-center gap-3">
               <span>⚠️</span>
@@ -364,10 +364,10 @@ function RentalRequestsPage() {
             </div>
           )}
 
-          {/* Loading */}
+          {}
           {loading && requests.length === 0 && <LoadingSpinner />}
 
-          {/* Empty */}
+          {}
           {!loading && filtered.length === 0 && !error && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -386,7 +386,7 @@ function RentalRequestsPage() {
             </motion.div>
           )}
 
-          {/* Request grid */}
+          {}
           {filtered.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {filtered.map((req, i) => (
@@ -404,7 +404,7 @@ function RentalRequestsPage() {
         </div>
       </div>
 
-      {/* Confirm modal */}
+      {}
       <AnimatePresence>
         {confirm && (
           <ConfirmModal
@@ -427,7 +427,7 @@ function RentalRequestsPage() {
         )}
       </AnimatePresence>
 
-      {/* Toast */}
+      {}
       <AnimatePresence>
         {toast && (
           <motion.div

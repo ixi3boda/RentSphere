@@ -1,4 +1,4 @@
-// src/App.js
+
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -26,16 +26,16 @@ function App() {
         <PropertyProvider>
           <Navbar />
           <Routes>
-            {/* Public routes — no token needed */}
+            {}
             <Route path="/" element={<HomeRedirect />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
 
-            {/* Public property browsing — backend allows unauthenticated GET */}
+            {}
             <Route path="/properties" element={<PropertyList />} />
             <Route path="/properties/:id" element={<PropertyDetail />} />
 
-            {/* Protected favorites page */}
+            {}
             <Route
               path="/favorites"
               element={
@@ -45,7 +45,7 @@ function App() {
               }
             />
 
-            {/* Protected — must be logged in */}
+            {}
             <Route
               path="/profile"
               element={
@@ -55,7 +55,7 @@ function App() {
               }
             />
 
-            {/* Protected admin routes — must be logged in */}
+            {}
             <Route
               path="/admin/dashboard"
               element={
@@ -98,7 +98,7 @@ function App() {
               }
             />
 
-            {/* PayPal callback — public but only meaningful after a payment flow */}
+            {}
             <Route path="/paypal/callback" element={<PayPalCallbackPage />} />
           </Routes>
         </PropertyProvider>
@@ -109,9 +109,9 @@ function App() {
 
 export default App;
 
-// Small helper component so root path redirects to /login when not authenticated
+
 function HomeRedirect() {
   const { initializing } = useAuth();
-  if (initializing) return null; // wait for auth restoration
+  if (initializing) return null; 
   return <Home />;
 }

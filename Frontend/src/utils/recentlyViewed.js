@@ -1,4 +1,4 @@
-// src/utils/recentlyViewed.js
+
 
 const RECENTLY_VIEWED_KEY = 'rentsphere_recently_viewed';
 const MAX_RECENTLY_VIEWED = 6;

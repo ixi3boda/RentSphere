@@ -19,10 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Unit tests for RentService.
- * Mocks: RentRepository, PropertyService, ContractService.
- */
+
 @ExtendWith(MockitoExtension.class)
 @DisplayName("RentService Unit Tests")
 class RentServiceTest {
@@ -33,7 +30,7 @@ class RentServiceTest {
 
     @InjectMocks private RentService rentService;
 
-    // ── createRentalRequest ────────────────────────────────────────
+    
 
     @Test
     @DisplayName("createRentalRequest — null payload throws IllegalArgumentException")
@@ -117,7 +114,7 @@ class RentServiceTest {
         assertThatNoException().isThrownBy(() -> rentService.createRentalRequest(req, 2));
     }
 
-    // ── getById ────────────────────────────────────────────────────
+    
 
     @Test
     @DisplayName("getById — throws RuntimeException when not found")
@@ -138,7 +135,7 @@ class RentServiceTest {
         assertThat(result.getRentalReqId()).isEqualTo(1);
     }
 
-    // ── acceptRequest ──────────────────────────────────────────────
+    
 
     @Test
     @DisplayName("acceptRequest — throws when request not PENDING")
@@ -155,15 +152,15 @@ class RentServiceTest {
     @Test
     @DisplayName("acceptRequest — throws when caller is not the property owner")
     void acceptRequest_throws_whenNotOwner() {
-        RentalRequest req = TestFixtures.pendingRentalRequest(); // propertyId=1
+        RentalRequest req = TestFixtures.pendingRentalRequest(); 
         when(rentRepository.findById(1L)).thenReturn(Optional.of(req));
 
-        Property prop = TestFixtures.testProperty(); // ownerId=1
+        Property prop = TestFixtures.testProperty(); 
         PropertyDetails pd = new PropertyDetails();
         pd.setProperty(prop);
         when(propertyService.getById(1L)).thenReturn(pd);
 
-        // caller is userId=99 (not the owner)
+        
         assertThatThrownBy(() -> rentService.acceptRequest(1L, 99))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("property owner");
@@ -172,10 +169,10 @@ class RentServiceTest {
     @Test
     @DisplayName("acceptRequest — creates contract for valid accept")
     void acceptRequest_createsContract() {
-        RentalRequest req = TestFixtures.pendingRentalRequest(); // propertyId=1
+        RentalRequest req = TestFixtures.pendingRentalRequest(); 
         when(rentRepository.findById(1L)).thenReturn(Optional.of(req));
 
-        Property prop = TestFixtures.testProperty(); // ownerId=1
+        Property prop = TestFixtures.testProperty(); 
         PropertyDetails pd = new PropertyDetails();
         pd.setProperty(prop);
         when(propertyService.getById(1L)).thenReturn(pd);
@@ -184,12 +181,12 @@ class RentServiceTest {
         Contract contract = TestFixtures.activeContract();
         when(contractService.createContractForApprovedRequest(req, pd)).thenReturn(contract);
 
-        Contract result = rentService.acceptRequest(1L, 1); // owner's userId=1
+        Contract result = rentService.acceptRequest(1L, 1); 
         assertThat(result.getContractStatus()).isEqualTo("ACTIVE");
         verify(contractService).createContractForApprovedRequest(req, pd);
     }
 
-    // ── rejectRequest ──────────────────────────────────────────────
+    
 
     @Test
     @DisplayName("rejectRequest — throws when request not PENDING")
@@ -209,7 +206,7 @@ class RentServiceTest {
         RentalRequest req = TestFixtures.pendingRentalRequest();
         when(rentRepository.findById(1L)).thenReturn(Optional.of(req));
 
-        Property prop = TestFixtures.testProperty(); // ownerId=1
+        Property prop = TestFixtures.testProperty(); 
         PropertyDetails pd = new PropertyDetails();
         pd.setProperty(prop);
         when(propertyService.getById(1L)).thenReturn(pd);
@@ -225,7 +222,7 @@ class RentServiceTest {
         RentalRequest req = TestFixtures.pendingRentalRequest();
         when(rentRepository.findById(1L)).thenReturn(Optional.of(req));
 
-        Property prop = TestFixtures.testProperty(); // ownerId=1
+        Property prop = TestFixtures.testProperty(); 
         PropertyDetails pd = new PropertyDetails();
         pd.setProperty(prop);
         when(propertyService.getById(1L)).thenReturn(pd);
@@ -236,7 +233,7 @@ class RentServiceTest {
                 .hasMessageContaining("Unable to reject");
     }
 
-    // ── getAllRentalRequests ────────────────────────────────────────
+    
 
     @Test
     @DisplayName("getAllRentalRequests — returns list from repository")

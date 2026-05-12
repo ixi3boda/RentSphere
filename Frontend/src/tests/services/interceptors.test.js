@@ -1,15 +1,15 @@
-// src/tests/services/interceptors.test.js
-//
-// Tests the Axios request interceptor in src/utils/api.js.
-// Verifies that JWT is correctly attached from sessionStorage / localStorage
-// and that absence of token sends no Authorization header.
+
+
+
+
+
 
 import apiClient from '../../utils/api';
 import { rest } from 'msw';
 import { server } from '../mocks/server';
 import { MOCK_TOKEN } from '../mocks/authMocks';
 
-// We use a test-only endpoint to capture request headers
+
 const TEST_ENDPOINT = '/api/user/me';
 
 describe('Axios JWT Interceptor', () => {
@@ -82,7 +82,7 @@ describe('Axios JWT Interceptor', () => {
     try {
       await apiClient.get(TEST_ENDPOINT);
     } catch (_) {
-      // 401 is expected
+      
     }
 
     expect(capturedAuth).toBeNull();

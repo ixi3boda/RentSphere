@@ -1,4 +1,4 @@
-// src/pages/Profile.js
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { AnimatedPage, AnimatedButton } from '../components/AnimatedPage';
@@ -41,7 +41,7 @@ function Profile() {
         email: user.email || '',
         phone: user.phone || ''
       });
-      // Load existing profile picture if any
+      
       if (user.avatar) {
         setProfilePicturePreview(user.avatar);
       }
@@ -63,13 +63,13 @@ function Profile() {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Check file type
+    
     if (!file.type.startsWith('image/')) {
       alert('Please upload an image file');
       return;
     }
 
-    const MAX_BYTES = 2 * 1024 * 1024; // 2MB
+    const MAX_BYTES = 2 * 1024 * 1024; 
 
     const compressImage = (fileToCompress, maxBytes) => {
       return new Promise((resolve, reject) => {
@@ -81,31 +81,31 @@ function Profile() {
             let ctx = canvas.getContext('2d');
             let [w, h] = [img.naturalWidth, img.naturalHeight];
 
-            // Start with original dimensions
+            
             canvas.width = w;
             canvas.height = h;
             ctx.drawImage(img, 0, 0, w, h);
 
             const mime = fileToCompress.type || 'image/jpeg';
 
-            // helper to get blob at given quality
+            
             const toBlob = (quality) =>
               new Promise((res) => canvas.toBlob(res, mime, quality));
 
-            // Try decreasing quality first
+            
             let quality = 0.92;
             let blob = await toBlob(quality);
 
-            // If still too large, iteratively reduce quality and dimensions
+            
             let attempts = 0;
             while ((blob && blob.size > maxBytes) && attempts < 12) {
               attempts += 1;
-              // reduce quality
+              
               quality = Math.max(0.4, quality - 0.12);
               blob = await toBlob(quality);
               if (blob && blob.size <= maxBytes) break;
 
-              // if quality floor reached and still large, scale down dimensions by 0.85
+              
               w = Math.floor(w * 0.85);
               h = Math.floor(h * 0.85);
               canvas.width = w;
@@ -115,12 +115,12 @@ function Profile() {
               blob = await toBlob(quality);
             }
 
-            // If compression succeeded, return a File (preserve original name)
+            
             if (blob) {
               const outFile = new File([blob], fileToCompress.name, { type: mime });
               resolve(outFile);
             } else {
-              // fallback: return original file
+              
               resolve(fileToCompress);
             }
           } catch (err) {
@@ -150,14 +150,14 @@ function Profile() {
       }
 
       setProfilePicture(finalFile);
-      // Create preview URL
+      
       const previewUrl = URL.createObjectURL(finalFile);
       setProfilePicturePreview(previewUrl);
     })();
 
   };
 
-  // Function to convert image to base64 (for demo - use Cloudinary in production)
+  
   const convertToBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -175,12 +175,12 @@ function Profile() {
     try {
       let profilePictureBase64 = null;
       
-      // Convert image to base64 if a new one was selected
+      
       if (profilePicture) {
         profilePictureBase64 = await convertToBase64(profilePicture);
       }
       
-      // Prepare update data
+      
       const updateData = {
         full_name: formData.name,
         username: formData.username,
@@ -196,7 +196,7 @@ function Profile() {
       setSuccessMessage('Profile updated successfully!');
       setIsEditing(false);
       
-      // Clear success message after 3 seconds
+      
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Update failed:', error);
@@ -206,7 +206,7 @@ function Profile() {
     }
   };
 
-  // Cleanup preview URL on unmount
+  
   useEffect(() => {
     return () => {
       if (profilePicturePreview && profilePicturePreview.startsWith('blob:')) {
@@ -219,7 +219,7 @@ function Profile() {
     <AnimatedPage>
       <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
+          {}
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -242,7 +242,7 @@ function Profile() {
             </motion.div>
           ) : (
             <>
-              {/* Success Message */}
+              {}
               {successMessage && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
@@ -253,17 +253,17 @@ function Profile() {
                 </motion.div>
               )}
 
-              {/* Profile Card */}
+              {}
               <motion.div
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.1 }}
                 className="glass-effect rounded-2xl overflow-hidden shadow-2xl"
               >
-            {/* Cover Image Section */}
+            {}
             <div className="relative h-32 bg-gradient-to-r from-rentsphere-teal to-rentsphere-orange">
               <div className="absolute -bottom-12 left-8">
-                {/* Profile Picture - Clickable in edit mode */}
+                {}
                 <motion.div 
                   className={`relative ${isEditing ? 'cursor-pointer group' : ''}`}
                   whileHover={isEditing ? { scale: 1.05 } : {}}
@@ -284,7 +284,7 @@ function Profile() {
                       </div>
                     )}
                   </div>
-                  {/* Status Indicator Circle */}
+                  {}
                   <div className="absolute top-0 right-0 w-6 h-6 rounded-full border-2 border-white shadow-lg bg-green-500" title="Online" />
                   {isEditing && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
@@ -292,7 +292,7 @@ function Profile() {
                     </div>
                   )}
                 </motion.div>
-                {/* Hidden file input */}
+                {}
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -303,10 +303,10 @@ function Profile() {
               </div>
             </div>
 
-            {/* Profile Content */}
+            {}
             <div className="pt-16 pb-8 px-8">
               {!isEditing ? (
-                // View Mode
+                
                 <div>
                   <div className="flex justify-between items-start mb-6">
                     <div>
@@ -367,7 +367,7 @@ function Profile() {
                   </div>
                 </div>
               ) : (
-                // Edit Mode
+                
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -428,7 +428,7 @@ function Profile() {
                     </div>
                   </div>
 
-                  {/* Image Upload Info */}
+                  {}
                   <div className="bg-blue-50 rounded-lg p-4">
                     <p className="text-sm text-blue-800">
                       💡 Tip: Click on your profile picture above to upload a new image. 
@@ -443,7 +443,7 @@ function Profile() {
                       type="button"
                       onClick={() => {
                         setIsEditing(false);
-                        // Reset image preview if cancelled
+                        
                         if (user?.avatar) {
                           setProfilePicturePreview(user.avatar);
                         } else {
@@ -464,7 +464,7 @@ function Profile() {
             </div>
           </motion.div>
 
-          {/* Stats Section */}
+          {}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

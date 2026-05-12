@@ -1,12 +1,12 @@
-// src/pages/PayPalCallbackPage.js
-//
-// Handles the PayPal return redirect after a user approves a payment.
-//
-// PayPal redirects to this page with:
-//   ?paymentId=PAY-xxx&PayerID=yyy
-//
-// We stored the contractId in sessionStorage before the redirect.
-// We call POST /api/rent/contracts/{contractId}/paypal/execute and show result.
+
+
+
+
+
+
+
+
+
 
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -17,20 +17,20 @@ import { rentApi } from '../utils/api';
 function PayPalCallbackPage() {
   const navigate = useNavigate();
 
-  const [status, setStatus]   = useState('processing'); // 'processing' | 'success' | 'error' | 'cancelled'
+  const [status, setStatus]   = useState('processing'); 
   const [message, setMessage] = useState('');
 
   useEffect(() => {
     const params      = new URLSearchParams(window.location.search);
     const paymentId   = params.get('paymentId');
-    const payerId     = params.get('PayerID'); // PayPal uses 'PayerID' (capital Y)
+    const payerId     = params.get('PayerID'); 
     const contractId  = sessionStorage.getItem('paypal_contract_id');
 
-    // Clean up session keys immediately
+    
     sessionStorage.removeItem('paypal_contract_id');
     sessionStorage.removeItem('paypal_payment_id');
 
-    // Cancelled flow — PayPal redirects with no PayerID when user cancels
+    
     if (!payerId) {
       setStatus('cancelled');
       setMessage('You cancelled the PayPal payment. No charge was made.');
@@ -43,13 +43,13 @@ function PayPalCallbackPage() {
       return;
     }
 
-    // Execute the payment
+    
     (async () => {
       try {
         await rentApi.executePayPalPayment(Number(contractId), paymentId, payerId);
         setStatus('success');
         setMessage(`Payment for Contract #${contractId} was completed successfully!`);
-        // Auto-redirect after 4 s
+        
         setTimeout(() => navigate('/contracts'), 4000);
       } catch (err) {
         setStatus('error');
@@ -60,11 +60,11 @@ function PayPalCallbackPage() {
         );
       }
     })();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); 
 
-  // ---------------------------------------------------------------------------
-  // Render states
-  // ---------------------------------------------------------------------------
+  
+  
+  
   const stateConfig = {
     processing: {
       icon:      '⏳',
@@ -107,7 +107,7 @@ function PayPalCallbackPage() {
           transition={{ type: 'spring', damping: 24, stiffness: 280 }}
           className="glass-effect rounded-3xl p-10 max-w-md w-full text-center shadow-2xl"
         >
-          {/* Icon */}
+          {}
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -117,7 +117,7 @@ function PayPalCallbackPage() {
             {cfg.icon}
           </motion.div>
 
-          {/* Spinner ring (processing only) */}
+          {}
           {cfg.spinner && (
             <motion.div
               animate={{ rotate: 360 }}
@@ -129,12 +129,12 @@ function PayPalCallbackPage() {
           <h1 className="text-2xl font-bold text-gray-800 mb-2">{cfg.title}</h1>
           <p className="text-gray-500 mb-8 leading-relaxed">{cfg.sub}</p>
 
-          {/* Success note */}
+          {}
           {status === 'success' && (
             <p className="text-sm text-gray-400 mb-6">Redirecting to contracts in a moment…</p>
           )}
 
-          {/* Actions */}
+          {}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               to="/contracts"

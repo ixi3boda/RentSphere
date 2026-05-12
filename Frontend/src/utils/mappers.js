@@ -1,18 +1,10 @@
-// src/utils/mappers.js
-//
-// Field translators between the Spring Boot backend DTOs and the
-// frontend component's expected property shape.
-// ---------------------------------------------------------------------------
 
-/**
- * Backend GET /api/properties/all  →  List<PropertyDetails>
- * PropertyDetails = { property: Property, propertyImages: string[], coverPic: string }
- * Property        = { propertyId, ownerId, propertyType, title, propertyDescription,
- *                     pricePerMonth, city, district, address, latitude, longitude,
- *                     numRooms, areaSqm, isAvailable, createdAt, updatedAt }
- *
- * Maps a single PropertyDetails object to the frontend shape used by all pages.
- */
+
+
+
+
+
+
 export function mapPropertyToFrontend(pd) {
   if (!pd) return null;
   const p = pd.property || {};
@@ -53,25 +45,16 @@ export function mapPropertyToFrontend(pd) {
   };
 }
 
-/**
- * Frontend PropertyForm fields  →  Backend CreatePropertyRequest / UpdatePropertyRequest body
- *
- * Used by:
- *   POST /api/properties/add          (createProperty)
- *   PUT  /api/properties/{id}/update  (updateProperty)
- *
- * Field names match CreatePropertyRequest exactly (camelCase).
- * NOTE: caller is responsible for spreading in { coverPic } before sending.
- */
+
 export function mapFormToBackend(formData) {
   return {
-    propertyType:        (formData.propertyType || '').toUpperCase(), // APARTMENT|STUDIO|VILLA|DUPLEX|OFFICE|SHOP|WAREHOUSE
+    propertyType:        (formData.propertyType || '').toUpperCase(), 
     title:               formData.title || '',
-    propertyDescription: formData.propertyDescription || '',          // matches EMPTY_FORM key
-    pricePerMonth:       formData.pricePerMonth ? Number(formData.pricePerMonth) : null, // matches EMPTY_FORM key
+    propertyDescription: formData.propertyDescription || '',          
+    pricePerMonth:       formData.pricePerMonth ? Number(formData.pricePerMonth) : null, 
     city:                formData.city || '',
     district:            formData.district || '',
-    address:             formData.address || '',                       // NOT NULL in DB
+    address:             formData.address || '',                       
     latitude:            formData.latitude  ? Number(formData.latitude)  : null,
     longitude:           formData.longitude ? Number(formData.longitude) : null,
     numRooms:            formData.numRooms  ? Number(formData.numRooms)  : null,
@@ -80,9 +63,7 @@ export function mapFormToBackend(formData) {
   };
 }
 
-/**
- * Backend User DTO → frontend user shape stored in AuthContext / localStorage
- */
+
 export function mapUserToFrontend(u) {
   if (!u) return null;
   const activeValue =

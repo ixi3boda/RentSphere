@@ -29,7 +29,7 @@ class ContractRepositoryTest {
     @Test
     @DisplayName("findAll returns contracts")
     void findAll_returnsContracts() {
-        // data-test.sql does not seed contracts yet, so we test empty or after insert
+        
         List<Contract> list = contractRepository.findAll();
         assertThat(list).isNotNull();
     }
@@ -38,12 +38,12 @@ class ContractRepositoryTest {
     @DisplayName("createContract persists new contract")
     void createContract_persistsContract() {
         Contract contract = Contract.builder()
-                .rentalRequestId(1)
-                .propertyId(1)
-                .ownerId(1)
-                .tenantId(2)
+                .rentalRequestId(1L)
+                .propertyId(1L)
+                .ownerId(1L)
+                .tenantId(2L)
                 .contractStatus("ACTIVE")
-                .rentAmount(1500.0)
+                .rentAmount(new java.math.BigDecimal("1500.0"))
                 .durationMonths(12)
                 .startDate(LocalDate.now())
                 .endDate(LocalDate.now().plusMonths(12))
@@ -61,34 +61,34 @@ class ContractRepositoryTest {
 
     @Test
     @DisplayName("updateStatus changes contract status")
-    void updateStatus_modifiesStatus() {
+    void cancelContract_modifiesStatus() {
         Contract contract = Contract.builder()
-                .rentalRequestId(1).propertyId(1).ownerId(1).tenantId(2)
-                .contractStatus("PENDING").rentAmount(1500.0).durationMonths(1)
+                .rentalRequestId(1L).propertyId(1L).ownerId(1L).tenantId(2L)
+                .contractStatus("PENDING").rentAmount(new java.math.BigDecimal("1500.0")).durationMonths(1)
                 .startDate(LocalDate.now()).endDate(LocalDate.now().plusMonths(1))
                 .build();
         Contract saved = contractRepository.createContract(contract);
         long id = saved.getContractId();
         
-        int rows = contractRepository.updateStatus(id, "ACTIVE");
+        int rows = contractRepository.cancelContract(id);
         assertThat(rows).isEqualTo(1);
         
         Contract updated = contractRepository.findById(id).get();
-        assertThat(updated.getContractStatus()).isEqualTo("ACTIVE");
+        assertThat(updated.getContractStatus()).isEqualTo("CANCELLED");
     }
 
     @Test
     @DisplayName("createPaymentSchedule populates payments table")
     void createPaymentSchedule_insertsPayments() {
         Contract contract = Contract.builder()
-                .rentalRequestId(1).propertyId(1).ownerId(1).tenantId(2)
-                .contractStatus("ACTIVE").rentAmount(1500.0).durationMonths(3)
+                .rentalRequestId(1L).propertyId(1L).ownerId(1L).tenantId(2L)
+                .contractStatus("ACTIVE").rentAmount(new java.math.BigDecimal("1500.0")).durationMonths(3)
                 .startDate(LocalDate.now()).endDate(LocalDate.now().plusMonths(3))
                 .build();
         Contract saved = contractRepository.createContract(contract);
         long id = saved.getContractId();
         
-        contractRepository.createPaymentSchedule(id, 1500.0, 3, LocalDate.now());
+        contractRepository.createPaymentSchedule(id, new java.math.BigDecimal("1500.0"), 3, LocalDate.now());
         
         int pendingCount = contractRepository.countPendingPayments(id);
         assertThat(pendingCount).isEqualTo(3);

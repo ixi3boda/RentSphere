@@ -2,6 +2,7 @@
 -- H2-compatible schema for tests (mirrors MySQL production schema)
 -- RentSphere test database DDL
 -- ─────────────────────────────────────────────────────────────────
+DROP ALL OBJECTS;
 
 CREATE TABLE IF NOT EXISTS roles (
     role_id   INT AUTO_INCREMENT PRIMARY KEY,
@@ -52,10 +53,11 @@ CREATE TABLE IF NOT EXISTS property_images (
 
 CREATE TABLE IF NOT EXISTS favorites (
     favorite_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id     INT NOT NULL,
+    tenant_id     INT NOT NULL,
     property_id INT NOT NULL,
-    UNIQUE (user_id, property_id),
-    FOREIGN KEY (user_id)     REFERENCES users(user_id),
+    saved_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (tenant_id, property_id),
+    FOREIGN KEY (tenant_id)     REFERENCES users(user_id),
     FOREIGN KEY (property_id) REFERENCES properties(property_id)
 );
 
@@ -93,6 +95,22 @@ CREATE TABLE IF NOT EXISTS contracts (
     FOREIGN KEY (property_id)       REFERENCES properties(property_id),
     FOREIGN KEY (owner_id)          REFERENCES users(user_id),
     FOREIGN KEY (tenant_id)         REFERENCES users(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+    payment_id      INT AUTO_INCREMENT PRIMARY KEY,
+    contract_id     INT NOT NULL,
+    payment_status  VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    installment_no  INT NOT NULL,
+    due_date        DATE NOT NULL,
+    paid_date       TIMESTAMP,
+    amount_due      DECIMAL(10,2) NOT NULL,
+    amount_paid     DECIMAL(10,2) DEFAULT 0.00,
+    transaction_ref VARCHAR(255),
+    notes           TEXT,
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (contract_id) REFERENCES contracts(contract_id)
 );
 
 CREATE TABLE IF NOT EXISTS notifications (

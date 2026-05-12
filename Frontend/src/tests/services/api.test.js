@@ -1,8 +1,8 @@
-// src/tests/services/api.test.js
-//
-// Tests the Axios service layer (src/utils/api.js).
-// Verifies correct endpoints, methods, and payload shapes.
-// MSW intercepts all calls — no real network traffic.
+
+
+
+
+
 
 import { authApi, propertyApi, rentApi } from '../../utils/api';
 import { clearStorage, seedSessionStorage } from '../test-utils/mockLocalStorage';
@@ -12,7 +12,7 @@ beforeEach(() => {
   clearStorage();
 });
 
-// ── Auth API ──────────────────────────────────────────────────────
+
 
 describe('authApi', () => {
   describe('register', () => {
@@ -75,7 +75,7 @@ describe('authApi', () => {
   });
 });
 
-// ── Property API ──────────────────────────────────────────────────
+
 
 describe('propertyApi', () => {
   beforeEach(() => seedSessionStorage(MOCK_TENANT, MOCK_TOKEN));
@@ -120,7 +120,7 @@ describe('propertyApi', () => {
   });
 });
 
-// ── Rent API ──────────────────────────────────────────────────────
+
 
 describe('rentApi', () => {
   beforeEach(() => seedSessionStorage(MOCK_TENANT, MOCK_TOKEN));

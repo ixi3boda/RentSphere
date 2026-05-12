@@ -1,12 +1,12 @@
-// src/tests/pages/PropertyDetail.test.jsx
-//
-// Tests PropertyDetail page:
-//   - loads and renders property info
-//   - shows "Request Rental" button for TENANT
-//   - shows "Tenants Only" for VISITOR
-//   - shows "Dashboard" link for ADMIN
-//   - shows "Login to Request" for unauthenticated
-//   - renders not-found state on 404
+
+
+
+
+
+
+
+
+
 
 import React from 'react';
 import { screen } from '@testing-library/react';
@@ -44,12 +44,16 @@ describe('PropertyDetail — loading and content', () => {
 
   it('shows price per month', async () => {
     renderDetail(MOCK_TENANT);
-    expect(await screen.findByText(/1,500/)).toBeInTheDocument();
+    
+    const elements = await screen.findAllByText(/1,500/);
+    expect(elements.length).toBeGreaterThan(0);
   });
 
   it('shows property location', async () => {
     renderDetail(MOCK_TENANT);
-    expect(await screen.findByText(/Riyadh/)).toBeInTheDocument();
+    
+    const elements = await screen.findAllByText(/Riyadh/);
+    expect(elements.length).toBeGreaterThan(0);
   });
 });
 

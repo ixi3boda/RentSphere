@@ -1,9 +1,9 @@
-// src/tests/components/PrivateRoute.test.jsx
-//
-// Tests that PrivateRoute:
-//   - renders children when authenticated
-//   - redirects to /login when not authenticated
-//   - renders nothing while initializing (prevents flash)
+
+
+
+
+
+
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';

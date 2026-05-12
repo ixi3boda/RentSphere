@@ -1,4 +1,4 @@
-// src/context/PropertyContext.js
+
 import React, { createContext, useState, useContext, useCallback } from 'react';
 import { propertyApi } from '../utils/api';
 import { mapPropertyToFrontend, mapFormToBackend } from '../utils/mappers';
@@ -14,9 +14,9 @@ export function PropertyProvider({ children }) {
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState(null);
 
-  // -------------------------------------------------------------------------
-  // Fetch all properties  GET /api/properties/all
-  // -------------------------------------------------------------------------
+  
+  
+  
   const fetchOwnerProperties = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -34,12 +34,12 @@ export function PropertyProvider({ children }) {
     }
   }, []);
 
-  // -------------------------------------------------------------------------
-  // Get single property  GET /api/properties/:id
-  // -------------------------------------------------------------------------
+  
+  
+  
   const getPropertyById = useCallback(
     async (id) => {
-      // Check local cache first
+      
       const local = properties.find((p) => p.id === String(id));
       if (local) return { success: true, data: local };
 
@@ -53,9 +53,9 @@ export function PropertyProvider({ children }) {
     [properties]
   );
 
-  // -------------------------------------------------------------------------
-  // Create property  POST /api/properties/add
-  // -------------------------------------------------------------------------
+  
+  
+  
   const createProperty = async (formData) => {
     setLoading(true);
     setError(null);
@@ -66,7 +66,7 @@ export function PropertyProvider({ children }) {
       };
       const res = await propertyApi.create(backendPayload);
 
-      // Refetch list to get the new property with its server-assigned id
+      
       await fetchOwnerProperties();
       return { success: true, data: res.data };
     } catch (err) {
@@ -78,10 +78,10 @@ export function PropertyProvider({ children }) {
     }
   };
 
-  // -------------------------------------------------------------------------
-  // Update property  PUT /api/properties/{id}/update
-  // Backend accepts all fields as optional in the JSON body (camelCase).
-  // -------------------------------------------------------------------------
+  
+  
+  
+  
   const updateProperty = async (id, formData) => {
     setLoading(true);
     setError(null);
@@ -101,12 +101,12 @@ export function PropertyProvider({ children }) {
         isAvailable:         formData.isAvailable !== undefined ? formData.isAvailable : undefined,
       };
 
-      // Strip undefined fields so they aren't serialised as null
+      
       Object.keys(body).forEach((k) => body[k] === undefined && delete body[k]);
 
       await propertyApi.update(id, body);
 
-      // Update local state
+      
       setProperties((prev) =>
         prev.map((p) =>
           p.id === String(id) ? { ...p, ...mapFormToBackend(formData), id: String(id) } : p
@@ -122,9 +122,9 @@ export function PropertyProvider({ children }) {
     }
   };
 
-  // -------------------------------------------------------------------------
-  // Delete property  DELETE /api/properties/delete/:id
-  // -------------------------------------------------------------------------
+  
+  
+  
   const deleteProperty = async (id) => {
     setLoading(true);
     setError(null);

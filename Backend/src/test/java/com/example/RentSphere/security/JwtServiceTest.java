@@ -6,11 +6,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Unit tests for JwtService.
- * No Spring context — pure unit test of JWT logic.
- */
+
 @DisplayName("JwtService Unit Tests")
 class JwtServiceTest {
 
@@ -21,7 +19,7 @@ class JwtServiceTest {
         jwtService = new JwtService();
     }
 
-    // ── Token generation ───────────────────────────────────────────
+    
 
     @Test
     @DisplayName("generateToken returns a non-blank token string")
@@ -42,12 +40,12 @@ class JwtServiceTest {
     @DisplayName("generateToken includes role claim")
     void generateToken_includesRoleClaim() {
         String token = jwtService.generateToken("admin@test.com", "ADMIN");
-        // extractClaim can read the role claim
+        
         String role = jwtService.extractClaim(token, claims -> claims.get("role", String.class));
         assertThat(role).isEqualTo("ADMIN");
     }
 
-    // ── Token validation ───────────────────────────────────────────
+    
 
     @Test
     @DisplayName("isTokenValid returns true for correct username")
@@ -81,13 +79,13 @@ class JwtServiceTest {
     @Test
     @DisplayName("token generated for different roles have different role claims")
     void differentRoles_differentClaims() {
-        String adminToken   = jwtService.generateToken("a@t.com", "ADMIN");
-        String tenantToken  = jwtService.generateToken("b@t.com", "TENANT");
+        String adminToken = jwtService.generateToken("a@t.com", "ADMIN");
+        String tenantToken = jwtService.generateToken("b@t.com", "TENANT");
         String visitorToken = jwtService.generateToken("c@t.com", "VISITOR");
 
-        assertThat(jwtService.extractClaim(adminToken,   c -> c.get("role", String.class))).isEqualTo("ADMIN");
-        assertThat(jwtService.extractClaim(tenantToken,  c -> c.get("role", String.class))).isEqualTo("TENANT");
-        assertThat(jwtService.extractClaim(visitorToken, c -> c.get("role", String.class))).isEqualTo("VISITOR");
+        assertThat((String) jwtService.extractClaim(adminToken, c -> c.get("role", String.class))).isEqualTo("ADMIN");
+        assertThat((String) jwtService.extractClaim(tenantToken, c -> c.get("role", String.class))).isEqualTo("TENANT");
+        assertThat((String) jwtService.extractClaim(visitorToken, c -> c.get("role", String.class))).isEqualTo("VISITOR");
     }
 
     @Test

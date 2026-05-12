@@ -1,12 +1,12 @@
-// src/tests/test-utils/mockLocalStorage.js
-//
-// Helpers for controlling localStorage / sessionStorage in tests.
-// Jest already provides localStorage via JSDOM but having helpers
-// makes tests cleaner and self-documenting.
+
+
+
+
+
 
 import { MOCK_TOKEN, MOCK_TENANT, MOCK_ADMIN } from '../mocks/authMocks';
 
-// ── localStorage helpers ──────────────────────────────────────────
+
 
 export const seedLocalStorage = (user = MOCK_TENANT, token = MOCK_TOKEN) => {
   localStorage.setItem('token', token);
@@ -35,7 +35,7 @@ export const getStoredUser = (storage = 'session') => {
   return raw ? JSON.parse(raw) : null;
 };
 
-// ── Cookie helpers ────────────────────────────────────────────────
+
 
 export const clearAuthCookie = () => {
   document.cookie = 'rentsphere_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';

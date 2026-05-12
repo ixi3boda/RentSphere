@@ -1,8 +1,8 @@
-// src/tests/services/contracts.test.js
-//
-// Backend/frontend contract validation tests.
-// Ensures that API responses match expected DTO shapes so frontend/backend
-// mismatches are caught immediately. Uses MSW to simulate backend responses.
+
+
+
+
+
 
 import { propertyApi, rentApi, authApi } from '../../utils/api';
 import { seedSessionStorage } from '../test-utils/mockLocalStorage';
@@ -12,7 +12,7 @@ beforeEach(() => {
   seedSessionStorage(MOCK_TENANT, MOCK_TOKEN);
 });
 
-// ── PropertyDetails DTO ────────────────────────────────────────────
+
 
 describe('PropertyDetails DTO contract', () => {
   it('getAll response items match PropertyDetails shape', async () => {
@@ -30,7 +30,7 @@ describe('PropertyDetails DTO contract', () => {
         isAvailable: expect.any(Boolean),
       }),
       propertyImages: expect.any(Array),
-      // coverPic can be null or string
+      
     });
   });
 
@@ -43,7 +43,7 @@ describe('PropertyDetails DTO contract', () => {
   });
 });
 
-// ── Favorite DTO ──────────────────────────────────────────────────
+
 
 describe('Favorite DTO contract', () => {
   it('getFavorites response items match Favorite shape', async () => {
@@ -64,7 +64,7 @@ describe('Favorite DTO contract', () => {
   });
 });
 
-// ── RentalRequest DTO ─────────────────────────────────────────────
+
 
 describe('RentalRequest DTO contract', () => {
   it('createRequest response matches RentalRequest shape', async () => {
@@ -83,7 +83,7 @@ describe('RentalRequest DTO contract', () => {
       desiredStart: expect.any(String),
       desiredMonths: expect.any(Number),
     });
-    // Ensure reqStatus is one of the valid enum values
+    
     expect(['PENDING', 'ACCEPTED', 'REJECTED']).toContain(res.data.reqStatus);
   });
 
@@ -96,7 +96,7 @@ describe('RentalRequest DTO contract', () => {
   });
 });
 
-// ── Contract DTO ──────────────────────────────────────────────────
+
 
 describe('Contract DTO contract', () => {
   it('getAllContracts response items match Contract shape', async () => {
@@ -113,7 +113,7 @@ describe('Contract DTO contract', () => {
       startDate: expect.any(String),
       endDate: expect.any(String),
     });
-    // Validate contractStatus enum
+    
     expect(['ACTIVE', 'PENDING_PAYMENT', 'TERMINATED', 'EXPIRED', 'COMPLETED'])
       .toContain(contract.contractStatus);
   });
@@ -125,7 +125,7 @@ describe('Contract DTO contract', () => {
   });
 });
 
-// ── User DTO ──────────────────────────────────────────────────────
+
 
 describe('User DTO contract', () => {
   it('getMe response matches User DTO shape', async () => {
@@ -136,12 +136,12 @@ describe('User DTO contract', () => {
       email: expect.any(String),
       role_name: expect.any(String),
     });
-    // Validate role_name is one of the three known roles
+    
     expect(['ADMIN', 'TENANT', 'VISITOR']).toContain(res.data.role_name);
   });
 });
 
-// ── PayPal DTO ────────────────────────────────────────────────────
+
 
 describe('PayPal DTO contract', () => {
   it('createPayPalPayment response contains approvalUrl and paymentId', async () => {

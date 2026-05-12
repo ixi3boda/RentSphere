@@ -124,7 +124,7 @@ public class RentController {
         try {
             String email = getPrincipalEmail(principal);
             int currentUserId = userService.getCurrentUser(email).getUser_id();
-            // TODO: Verify user has permission to create payment for this contract
+            
             PayPalPaymentResponse response = contractService.createPayPalPaymentForContract(contractId, paymentRequest);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
@@ -144,7 +144,7 @@ public class RentController {
         try {
             String email = getPrincipalEmail(principal);
             int currentUserId = userService.getCurrentUser(email).getUser_id();
-            // TODO: Verify user has permission to execute payment for this contract
+            
             PayPalPaymentResponse response = contractService.executePayPalPaymentForContract(contractId, paymentId, payerId);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {

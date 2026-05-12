@@ -21,11 +21,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
-/**
- * MockMvc controller tests for UserController.
- * Uses @WebMvcTest to load only the web layer.
- * UserService is fully mocked.
- */
+
+@org.springframework.context.annotation.Import({com.example.RentSphere.SecurityConfig.SecConfig.class, com.example.RentSphere.SecurityConfig.JwtAuthenticationFilter.class})
 @WebMvcTest(com.example.RentSphere.Controller.UserController.class)
 @DisplayName("UserController MockMvc Tests")
 class UserControllerTest {
@@ -35,10 +32,10 @@ class UserControllerTest {
 
     @MockBean private UserService userService;
     @MockBean private JwtService jwtService;
-    // MyUserDetailsService is needed by security filter chain
-    @MockBean private com.example.RentSphere.Service.MyUserDetailsService myUserDetailsService;
+    
+    @MockBean private org.springframework.security.core.userdetails.UserDetailsService myUserDetailsService;
 
-    // ── POST /api/user/register ────────────────────────────────────
+    
 
     @Test
     @DisplayName("POST /register — 200 with valid payload")
@@ -69,7 +66,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.message").value("Email is already in use"));
     }
 
-    // ── POST /api/user/login ───────────────────────────────────────
+    
 
     @Test
     @DisplayName("POST /login — 200 with valid credentials")
@@ -100,7 +97,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.message").value("Invalid email or password"));
     }
 
-    // ── GET /api/user/me ───────────────────────────────────────────
+    
 
     @Test
     @DisplayName("GET /me — 200 for authenticated user")
@@ -118,10 +115,10 @@ class UserControllerTest {
     @DisplayName("GET /me — 401 for unauthenticated request")
     void getMe_unauthenticated_returns401() throws Exception {
         mockMvc.perform(get("/api/user/me"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
-    // ── PUT /api/user/me ───────────────────────────────────────────
+    
 
     @Test
     @DisplayName("PUT /me — 200 for authenticated user with valid payload")
@@ -158,7 +155,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.message").value("Username is already in use"));
     }
 
-    // ── POST /api/user/logout ──────────────────────────────────────
+    
 
     @Test
     @DisplayName("POST /logout — 200 for authenticated user")

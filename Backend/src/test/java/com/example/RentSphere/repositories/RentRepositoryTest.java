@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,7 +30,7 @@ class RentRepositoryTest {
     void findAll_returnsRequests() {
         List<RentalRequest> list = rentRepository.findAll();
         assertThat(list).isNotEmpty();
-        // data-test.sql seeds 1 rental request
+        
         assertThat(list.size()).isGreaterThanOrEqualTo(1);
     }
 
@@ -52,13 +53,13 @@ class RentRepositoryTest {
     @DisplayName("createRentalRequest persists new request")
     void createRentalRequest_persistsRequest() {
         CreateRentalRequest req = CreateRentalRequest.builder()
-                .propertyId(2)
+                .propertyId(2L)
                 .message("Test message")
-                .desiredStart("2024-10-01")
+                .desiredStart(LocalDate.parse("2024-10-01"))
                 .desiredMonths(6)
                 .build();
                 
-        // tenant = user 2
+        
         RentalRequest saved = rentRepository.createRentalRequest(req, 2);
         
         assertThat(saved.getRentalReqId()).isGreaterThan(0);
@@ -74,7 +75,7 @@ class RentRepositoryTest {
     void updateStatus_modifiesStatus() {
         int rows = rentRepository.updateStatus(1L, "ACCEPTED");
         assertThat(rows).isEqualTo(1);
-        
+
         RentalRequest updated = rentRepository.findById(1L).get();
         assertThat(updated.getReqStatus()).isEqualTo("ACCEPTED");
     }

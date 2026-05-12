@@ -1,10 +1,10 @@
-// src/tests/integration/navigationFlow.test.jsx
-//
-// Tests navigation and routing:
-//   - PrivateRoute blocks unauthenticated access and redirects to /login
-//   - Role-based routes redirect correctly
-//   - Navigation between pages works
-//   - Invalid routes fall back gracefully
+
+
+
+
+
+
+
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';

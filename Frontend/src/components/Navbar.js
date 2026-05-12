@@ -1,4 +1,4 @@
-// src/components/Navbar.js
+
 import React, { useState, useEffect } from 'react';
 
 import { Link, useNavigate } from 'react-router-dom';
@@ -11,7 +11,7 @@ function Navbar() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-// Add ESC key handler
+
 useEffect(() => {
   const handleEsc = (e) => {
     if (e.key === 'Escape' && showLogoutConfirm) {
@@ -45,7 +45,7 @@ useEffect(() => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16">
-            {/* Logo with Rotation Animation */}
+            {}
             <div className="flex items-center">
               <Link to="/" className="flex items-center space-x-3 group">
               <motion.img 
@@ -71,7 +71,7 @@ useEffect(() => {
             </Link>
             </div>
 
-            {/* Center: Welcome (desktop) */}
+            {}
             <div className="hidden md:flex md:flex-1 md:justify-center">
               {isAuthenticated && (
                 <div className="flex items-center gap-3">
@@ -105,13 +105,13 @@ useEffect(() => {
               )}
             </div>
 
-            {/* Desktop Menu (right) */}
+            {}
             <div className="hidden md:flex items-center space-x-6 md:ml-auto">
               {isAuthenticated ? (
                 <>
                   
                   
-                  {/* Browse Properties — visible to all logged-in users */}
+                  {}
                   <Link to="/properties">
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -169,7 +169,7 @@ useEffect(() => {
                     </Link>
                   )}
                   
-                  {/* Profile Link */}
+                  {}
                   <Link to="/profile">
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -180,7 +180,7 @@ useEffect(() => {
                     </motion.button>
                   </Link>
                   
-                  {/* Logout Button with Confirmation */}
+                  {}
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -223,7 +223,7 @@ useEffect(() => {
               )}
             </div>
 
-            {/* Mobile menu button */}
+            {}
             <div className="md:hidden">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -240,7 +240,7 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Mobile Menu */}
+          {}
           {isMobileMenuOpen && (
             <motion.div 
               initial={{ opacity: 0, y: -20 }}
@@ -250,7 +250,7 @@ useEffect(() => {
               {isAuthenticated ? (
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3 mb-4">
-                    {/* Profile Picture in Mobile Menu */}
+                    {}
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-rentsphere-teal to-rentsphere-orange overflow-hidden">
                       {user?.avatar ? (
                         <img 
@@ -320,7 +320,7 @@ useEffect(() => {
         </div>
       </motion.nav>
 
-      {/* Logout Confirmation Modal */}
+      {}
       <AnimatePresence>
         {showLogoutConfirm && (
           <motion.div
@@ -329,7 +329,7 @@ useEffect(() => {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center px-4"
           >
-            {/* Backdrop */}
+            {}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -338,7 +338,7 @@ useEffect(() => {
               className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             />
             
-            {/* Modal */}
+            {}
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -347,7 +347,7 @@ useEffect(() => {
               className="relative glass-effect rounded-2xl p-6 max-w-md w-full shadow-2xl"
             >
               <div className="text-center">
-                {/* Icon */}
+                {}
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -359,15 +359,15 @@ useEffect(() => {
                   </svg>
                 </motion.div>
                 
-                {/* Title */}
+                {}
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">Ready to Leave?</h3>
                 
-                {/* Message */}
+                {}
                 <p className="text-gray-600 mb-6">
                   Are you sure you want to logout? You'll need to sign in again to access your account.
                 </p>
                 
-                {/* Buttons */}
+                {}
                 <div className="flex gap-4">
                   <motion.button
                     whileHover={{ scale: 1.02 }}

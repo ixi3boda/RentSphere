@@ -1,12 +1,12 @@
-// src/tests/integration/rentalRequestFlow.test.jsx
-//
-// Integration test for the tenant rental request workflow:
-//   1. TENANT views PropertyDetail
-//   2. Clicks "Request Rental"
-//   3. Modal appears
-//   4. Fills form and submits
-//   5. POST /api/rent/request is called
-//   6. Success message shown
+
+
+
+
+
+
+
+
+
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -37,13 +37,13 @@ describe('Rental Request Flow', () => {
     const user = userEvent.setup();
     renderTenantDetail();
 
-    // Wait for property to load
+    
     await screen.findByText('Cozy Downtown Apartment');
 
-    // Click the request button
+    
     await user.click(screen.getByRole('button', { name: /request rental/i }));
 
-    // Modal should appear
+    
     expect(await screen.findByRole('heading', { name: /request rental/i })).toBeInTheDocument();
   });
 
@@ -54,20 +54,20 @@ describe('Rental Request Flow', () => {
     await screen.findByText('Cozy Downtown Apartment');
     await user.click(screen.getByRole('button', { name: /request rental/i }));
 
-    // Fill modal form
+    
     const dateInput = await screen.findByLabelText(/start date/i);
     await user.clear(dateInput);
-    // Set a future date (1 year from now)
+    
     const futureDate = new Date();
     futureDate.setFullYear(futureDate.getFullYear() + 1);
     const dateStr = futureDate.toISOString().split('T')[0];
     await user.type(dateInput, dateStr);
 
-    // Submit form
+    
     await user.click(screen.getByRole('button', { name: /submit|send request/i }));
 
-    // Should show success
-    expect(await screen.findByText(/sent|submitted|success/i)).toBeInTheDocument();
+    
+    expect(await screen.findByText(/Request Submitted!/i)).toBeInTheDocument();
   });
 
   it('shows error when API returns 403 (visitor role blocked)', async () => {
@@ -84,6 +84,6 @@ describe('Rental Request Flow', () => {
     await user.click(screen.getByRole('button', { name: /request rental/i }));
     await user.click(screen.getByRole('button', { name: /submit|send request/i }));
 
-    expect(await screen.findByText(/denied|failed|forbidden/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Access Denied/i)).toBeInTheDocument();
   });
 });

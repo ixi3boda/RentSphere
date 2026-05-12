@@ -1,7 +1,7 @@
-// src/tests/components/Navbar.test.jsx
-//
-// Tests role-based navigation link rendering in the Navbar.
-// Verifies: Admin links, Tenant/Visitor links, unauthenticated links, logout flow.
+
+
+
+
 
 import React from 'react';
 import { screen } from '@testing-library/react';
@@ -65,9 +65,9 @@ describe('Navbar — TENANT user', () => {
     expect(dashboardBtns.length).toBeGreaterThan(0);
   });
 
-  it('does NOT show Requests or Contracts links', () => {
+  it('shows Contracts link but NOT Requests', () => {
     expect(screen.queryByRole('button', { name: /requests/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /contracts/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /contracts/i })).toBeInTheDocument();
   });
 
   it('shows Logout button', () => {
@@ -98,7 +98,7 @@ describe('Navbar — logout flow', () => {
 
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: /logout/i }));
-    // Confirm modal should appear
+    
     const confirmBtn = await screen.findByRole('button', { name: /yes.*logout/i });
     await user.click(confirmBtn);
     expect(mockLogout).toHaveBeenCalledTimes(1);

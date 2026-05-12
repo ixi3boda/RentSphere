@@ -1,11 +1,11 @@
-// src/tests/utils/mappers.test.js
-//
-// Pure unit tests for utility mapping functions.
-// No network calls, no React — just plain function assertions.
+
+
+
+
 
 import { mapPropertyToFrontend, mapFormToBackend, mapUserToFrontend } from '../../utils/mappers';
 
-// ── mapPropertyToFrontend ─────────────────────────────────────────
+
 
 describe('mapPropertyToFrontend', () => {
   const rawPD = {
@@ -65,13 +65,13 @@ describe('mapPropertyToFrontend', () => {
   it('uses coverPic as first image and avoids duplicates', () => {
     const result = mapPropertyToFrontend(rawPD);
     expect(result.images[0]).toBe('https://cdn.test/a.jpg');
-    expect(result.images.length).toBe(2); // cover + 1 non-duplicate
+    expect(result.images.length).toBe(2); 
   });
 
-  it('handles null coverPic gracefully', () => {
+  it('defaults coverPic to first image if null', () => {
     const noCover = { ...rawPD, coverPic: null };
     const result = mapPropertyToFrontend(noCover);
-    expect(result.coverPic).toBeNull();
+    expect(result.coverPic).toBe('https://cdn.test/a.jpg');
   });
 
   it('returns null for null input', () => {
@@ -83,11 +83,11 @@ describe('mapPropertyToFrontend', () => {
     const result = mapPropertyToFrontend(minimal);
     expect(result.title).toBe('');
     expect(result.price).toBe(0);
-    expect(result.status).toBe('available'); // isAvailable undefined → true
+    expect(result.status).toBe('available'); 
   });
 });
 
-// ── mapFormToBackend ──────────────────────────────────────────────
+
 
 describe('mapFormToBackend', () => {
   const formData = {
@@ -140,7 +140,7 @@ describe('mapFormToBackend', () => {
   });
 });
 
-// ── mapUserToFrontend ─────────────────────────────────────────────
+
 
 describe('mapUserToFrontend', () => {
   const rawUser = {

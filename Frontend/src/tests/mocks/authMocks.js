@@ -1,9 +1,9 @@
-// src/tests/mocks/authMocks.js
-//
-// Pre-built mock user objects that mirror the backend User DTO shape.
-// Used by renderWithProviders and individual tests.
 
-/** Raw backend User DTO — as returned by GET /api/user/me */
+
+
+
+
+
 export const RAW_ADMIN_USER = {
   user_id: 1,
   email: 'admin@rentsphere.com',
@@ -43,7 +43,7 @@ export const RAW_VISITOR_USER = {
   updated_at: '2024-01-01T00:00:00',
 };
 
-/** Frontend-mapped user objects (as stored in AuthContext after mapUserToFrontend) */
+
 export const MOCK_ADMIN = {
   id: 1,
   email: 'admin@rentsphere.com',
@@ -80,5 +80,5 @@ export const MOCK_VISITOR = {
   active: true,
 };
 
-/** Mock JWT token */
+
 export const MOCK_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.mock.token';

@@ -1,4 +1,4 @@
-// src/pages/Home.js
+
 import Hero from '../components/Hero';
 import { AnimatedPage } from '../components/AnimatedPage';
 

@@ -1,11 +1,11 @@
-// src/pages/PropertyList.js
-//
-// Public property browsing page.
-// Route: /properties
-//
-// Rich local filtering/sorting over the fetched dataset:
-// search across title/description/location/type, city/type filters,
-// price/rooms constraints, availability toggle, and pagination.
+
+
+
+
+
+
+
+
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,12 +15,12 @@ import { useAuth } from "../context/AuthContext";
 import { propertyApi } from "../utils/api";
 import { mapPropertyToFrontend } from "../utils/mappers";
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-// Property type filter values — must match backend CHECK constraint exactly:
-// ('APARTMENT','STUDIO','VILLA','DUPLEX','OFFICE','SHOP','WAREHOUSE')
-// mapPropertyToFrontend lowercases these for display, so we compare lowercase here.
+
+
+
+
+
+
 const PROPERTY_TYPES = [
   { value: '',          label: 'All Types' },
   { value: 'apartment', label: '🏢 Apartment' },
@@ -34,9 +34,9 @@ const PROPERTY_TYPES = [
 
 const PAGE_SIZE = 9;
 
-// ---------------------------------------------------------------------------
-// Skeleton card — mirrors PropertyCard dimensions for no-layout-shift loading
-// ---------------------------------------------------------------------------
+
+
+
 function SkeletonCard() {
   return (
     <div className="glass-effect rounded-2xl overflow-hidden shadow-lg animate-pulse">
@@ -64,9 +64,9 @@ function FilterChip({ label, onRemove }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// PropertyList Page
-// ---------------------------------------------------------------------------
+
+
+
 function PropertyList() {
   const { isAuthenticated } = useAuth();
   const [properties, setProperties] = useState([]);
@@ -74,7 +74,7 @@ function PropertyList() {
   const [error, setError] = useState("");
   const [favoriteIds, setFavoriteIds] = useState(new Set());
 
-  // Search / filter state
+  
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [cityFilter, setCityFilter] = useState("");
@@ -84,12 +84,12 @@ function PropertyList() {
   const [availableOnly, setAvailableOnly] = useState(false);
   const [sortBy, setSortBy] = useState("newest");
 
-  // Pagination
+  
   const [page, setPage] = useState(1);
 
-  // ---------------------------------------------------------------------------
-  // Fetch
-  // ---------------------------------------------------------------------------
+  
+  
+  
   const fetchProperties = useCallback(async () => {
     setLoading(true);
     setError("");
@@ -127,7 +127,7 @@ function PropertyList() {
     }
   }, [isAuthenticated]);
 
-  // Initial load
+  
   useEffect(() => {
     fetchProperties();
   }, [fetchProperties]);
@@ -136,14 +136,14 @@ function PropertyList() {
     fetchFavorites();
   }, [fetchFavorites]);
 
-  // Reset to page 1 whenever filters/search changes
+  
   useEffect(() => {
     setPage(1);
   }, [search, typeFilter, cityFilter, maxPrice, minPrice, minRooms, availableOnly, sortBy]);
 
-  // ---------------------------------------------------------------------------
-  // Client-side filter + sort + paginate
-  // ---------------------------------------------------------------------------
+  
+  
+  
   const cityOptions = useMemo(
     () =>
       Array.from(new Set(properties.map((p) => p.city).filter(Boolean))).sort((a, b) =>
@@ -220,16 +220,16 @@ function PropertyList() {
     setSortBy("newest");
   };
 
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
+  
+  
+  
   return (
     <AnimatedPage>
       <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          {/* ---------------------------------------------------------------- */}
-          {/* Header                                                            */}
-          {/* ---------------------------------------------------------------- */}
+          {}
+          {}
+          {}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -244,9 +244,9 @@ function PropertyList() {
             </p>
           </motion.div>
 
-          {/* ---------------------------------------------------------------- */}
-          {/* Filter bar                                                        */}
-          {/* ---------------------------------------------------------------- */}
+          {}
+          {}
+          {}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -424,9 +424,9 @@ function PropertyList() {
             </AnimatePresence>
           </motion.div>
 
-          {/* ---------------------------------------------------------------- */}
-          {/* Error                                                             */}
-          {/* ---------------------------------------------------------------- */}
+          {}
+          {}
+          {}
           {error && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -447,9 +447,9 @@ function PropertyList() {
             </motion.div>
           )}
 
-          {/* ---------------------------------------------------------------- */}
-          {/* Loading skeletons                                                 */}
-          {/* ---------------------------------------------------------------- */}
+          {}
+          {}
+          {}
           {loading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: PAGE_SIZE }).map((_, i) => (
@@ -458,9 +458,9 @@ function PropertyList() {
             </div>
           )}
 
-          {/* ---------------------------------------------------------------- */}
-          {/* Empty state                                                       */}
-          {/* ---------------------------------------------------------------- */}
+          {}
+          {}
+          {}
           {!loading && !error && filtered.length === 0 && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -487,12 +487,12 @@ function PropertyList() {
             </motion.div>
           )}
 
-          {/* ---------------------------------------------------------------- */}
-          {/* Property grid                                                     */}
-          {/* ---------------------------------------------------------------- */}
+          {}
+          {}
+          {}
           {!loading && !error && paginated.length > 0 && (
             <>
-              {/* Result count — shows search keyword when active */}
+              {}
               <p className="text-sm text-gray-400 mb-4">
                 {activeSearch ? (
                   <>
@@ -532,7 +532,7 @@ function PropertyList() {
                 ))}
               </div>
 
-              {/* Pagination */}
+              {}
               {totalPages > 1 && (
                 <motion.div
                   initial={{ opacity: 0 }}

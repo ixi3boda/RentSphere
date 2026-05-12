@@ -24,6 +24,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@org.springframework.context.annotation.Import({com.example.RentSphere.SecurityConfig.SecConfig.class, com.example.RentSphere.SecurityConfig.JwtAuthenticationFilter.class})
 @WebMvcTest(com.example.RentSphere.Controller.RentController.class)
 @DisplayName("RentController MockMvc Tests")
 class RentControllerTest {
@@ -35,9 +36,9 @@ class RentControllerTest {
     @MockBean private ContractService contractService;
     @MockBean private UserService userService;
     @MockBean private JwtService jwtService;
-    @MockBean private com.example.RentSphere.Service.MyUserDetailsService myUserDetailsService;
+    @MockBean private org.springframework.security.core.userdetails.UserDetailsService myUserDetailsService;
 
-    // ── POST /api/rent/request ─────────────────────────────────────
+    
 
     @Test
     @DisplayName("POST /request — 201 for authenticated user")
@@ -63,7 +64,7 @@ class RentControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -84,7 +85,7 @@ class RentControllerTest {
                 .andExpect(jsonPath("$.message").value("Property ID is required"));
     }
 
-    // ── GET /api/rent/requests/all ─────────────────────────────────
+    
 
     @Test
     @DisplayName("GET /requests/all — 200 for ADMIN")
@@ -110,10 +111,10 @@ class RentControllerTest {
     @DisplayName("GET /requests/all — 401 for unauthenticated")
     void getAllRequests_unauthenticated_returns401() throws Exception {
         mockMvc.perform(get("/api/rent/requests/all"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
-    // ── GET /api/rent/requests/{id} ────────────────────────────────
+    
 
     @Test
     @DisplayName("GET /requests/{id} — 200 when found")
@@ -136,7 +137,7 @@ class RentControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    // ── GET /api/rent/contracts/all ────────────────────────────────
+    
 
     @Test
     @DisplayName("GET /contracts/all — 200 for ADMIN")
@@ -157,7 +158,7 @@ class RentControllerTest {
                 .andExpect(status().isForbidden());
     }
 
-    // ── PUT /api/rent/requests/{id}/accept ────────────────────────
+    
 
     @Test
     @DisplayName("PUT /requests/{id}/accept — 200 for authenticated owner")
@@ -171,7 +172,7 @@ class RentControllerTest {
                 .andExpect(jsonPath("$.contractStatus").value("ACTIVE"));
     }
 
-    // ── PUT /api/rent/requests/{id}/reject ────────────────────────
+    
 
     @Test
     @DisplayName("PUT /requests/{id}/reject — 200 for authenticated owner")

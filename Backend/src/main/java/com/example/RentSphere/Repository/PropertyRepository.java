@@ -339,16 +339,16 @@ public class PropertyRepository {
     }
 
     public Favorite favorite(int propertyId, int tenantId) {
-        // Check if already favorited
+        
         String checkSql = "SELECT COUNT(*) FROM favorites WHERE tenant_id = ? AND property_id = ?";
         Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class, tenantId, propertyId);
         
         if (count != null && count > 0) {
-            // Already favorited - remove it (toggle unfavorite)
+            
             String deleteSql = "DELETE FROM favorites WHERE tenant_id = ? AND property_id = ?";
             jdbcTemplate.update(deleteSql, tenantId, propertyId);
         } else {
-            // Not favorited - add it (toggle favorite)
+            
             String insertSql = "INSERT INTO favorites (tenant_id, property_id) VALUES (?, ?)";
             int rows = jdbcTemplate.update(insertSql, tenantId, propertyId);
             if (rows == 0) {

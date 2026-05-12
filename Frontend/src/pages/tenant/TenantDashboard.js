@@ -1,4 +1,4 @@
-// src/pages/tenant/TenantDashboard.js
+
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -12,7 +12,6 @@ import { getRecentlyViewed } from '../../utils/recentlyViewed';
 
 function TenantDashboard() {
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const [favorites, setFavorites] = useState([]);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
@@ -23,7 +22,7 @@ function TenantDashboard() {
     setLoading(true);
     setError('');
     try {
-      // Only fetch favorites if user is authenticated
+      
       if (!user) {
         setFavorites([]);
         return;
@@ -36,7 +35,7 @@ function TenantDashboard() {
           .filter(Boolean),
       );
     } catch (err) {
-      // If not authenticated (401), just show empty instead of error
+      
       if (err.response?.status === 401) {
         setFavorites([]);
       } else {

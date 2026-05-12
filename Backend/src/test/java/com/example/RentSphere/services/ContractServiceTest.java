@@ -24,11 +24,15 @@ import static org.mockito.Mockito.*;
 @DisplayName("ContractService Unit Tests")
 class ContractServiceTest {
 
-    @Mock private ContractRepository contractRepository;
-    @Mock private UserRepository userRepository;
-    @Mock private PayPalService payPalService;
+    @Mock
+    private ContractRepository contractRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private PayPalService payPalService;
 
-    @InjectMocks private ContractService contractService;
+    @InjectMocks
+    private ContractService contractService;
 
     @Test
     @DisplayName("createContractForApprovedRequest — throws when request is null")
@@ -56,14 +60,14 @@ class ContractServiceTest {
         pd.setProperty(TestFixtures.testProperty());
 
         Contract savedContract = TestFixtures.activeContract();
-        savedContract.setContractId(1);
+        savedContract.setContractId(1L);
         when(contractRepository.createContract(any())).thenReturn(savedContract);
 
         Contract result = contractService.createContractForApprovedRequest(req, pd);
 
         assertThat(result.getContractStatus()).isEqualTo("ACTIVE");
         verify(contractRepository).createContract(any());
-        verify(contractRepository).createPaymentSchedule(eq(1), anyDouble(), eq(12), any());
+        verify(contractRepository).createPaymentSchedule(eq(1L), any(BigDecimal.class), eq(12), any());
         verify(userRepository).updateRole(eq(2), eq("TENANT"));
     }
 
@@ -92,7 +96,7 @@ class ContractServiceTest {
     void createPayPalPayment_succeeds() throws Exception {
         Contract contract = TestFixtures.activeContract();
         when(contractRepository.findById(1L)).thenReturn(Optional.of(contract));
-        
+
         PaymentDto paymentDto = new PaymentDto();
         paymentDto.setAmountDue(new BigDecimal("1500.00"));
         paymentDto.setInstallmentNo(1);

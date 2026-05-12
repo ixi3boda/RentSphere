@@ -1,8 +1,8 @@
-// src/pages/admin/AdminDashboard.js
-//
-// RS-14 — Admin Dashboard UI
-// Displays key stats (Total Properties, Pending Requests, Active Contracts),
-// quick action buttons, and the full property management list.
+
+
+
+
+
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -13,9 +13,9 @@ import { AnimatedPage, LoadingSpinner } from '../../components/AnimatedPage';
 import StatsCard from '../../components/StatsCard';
 import { rentApi } from '../../utils/api';
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
+
+
+
 const PROPERTY_TYPE_LABELS = {
   apartment: '🏢 Apartment',
   house:     '🏡 House',
@@ -32,9 +32,9 @@ const STATUS_COLORS = {
 };
 
 
-// ---------------------------------------------------------------------------
-// Quick Action Button — consistent with btn-primary / btn-secondary pattern
-// ---------------------------------------------------------------------------
+
+
+
 function QuickAction({ to, icon, label, variant = 'secondary' }) {
   return (
     <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
@@ -53,9 +53,9 @@ function QuickAction({ to, icon, label, variant = 'secondary' }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Delete Confirmation Modal
-// ---------------------------------------------------------------------------
+
+
+
 function DeleteModal({ property, onConfirm, onCancel, loading }) {
   useEffect(() => {
     const handler = (e) => e.key === 'Escape' && onCancel();
@@ -132,9 +132,9 @@ function DeleteModal({ property, onConfirm, onCancel, loading }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Property Row Card (admin-specific — has Edit / Delete actions)
-// ---------------------------------------------------------------------------
+
+
+
 function AdminPropertyCard({ property, onDelete, index }) {
   const navigate = useNavigate();
 
@@ -145,7 +145,7 @@ function AdminPropertyCard({ property, onDelete, index }) {
       transition={{ delay: index * 0.07 }}
       className="glass-effect rounded-2xl overflow-hidden shadow-lg card-hover group"
     >
-      {/* Image */}
+      {}
       <div className="relative h-44 bg-gradient-to-br from-rentsphere-teal/20 to-rentsphere-orange/20 overflow-hidden">
         {property.images?.[0] ? (
           <img
@@ -163,7 +163,7 @@ function AdminPropertyCard({ property, onDelete, index }) {
         </span>
       </div>
 
-      {/* Content */}
+      {}
       <div className="p-5">
         <h3 className="text-lg font-bold text-gray-800 truncate mb-1">{property.title}</h3>
         <p className="text-sm text-gray-500 mb-1">📍 {property.location || 'No location set'}</p>
@@ -199,43 +199,43 @@ function AdminPropertyCard({ property, onDelete, index }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Admin Dashboard — RS-14
-// ---------------------------------------------------------------------------
+
+
+
 function AdminDashboard() {
   const { user } = useAuth();
   const { properties, loading: propsLoading, error: propsError, fetchOwnerProperties, deleteProperty } = useProperty();
   const navigate = useNavigate();
 
-  // Dashboard stats (fetched separately from the property list)
+  
   const [stats, setStats]           = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
   const [statsError, setStatsError] = useState('');
 
-  // Delete modal
+  
   const [deleteTarget, setDeleteTarget]   = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // Toast
+  
   const [toast, setToast] = useState(null);
 
-  // -------------------------------------------------------------------------
-  // Redirect non-admins
-  // -------------------------------------------------------------------------
+  
+  
+  
   useEffect(() => {
     if (user && user.role !== 'admin') navigate('/');
   }, [user, navigate]);
 
-  // -------------------------------------------------------------------------
-  // Fetch property list (existing PropertyContext)
-  // -------------------------------------------------------------------------
+  
+  
+  
   useEffect(() => {
     fetchOwnerProperties();
   }, [fetchOwnerProperties]);
 
-  // -------------------------------------------------------------------------
-  // Fetch dashboard stats from API (RS-14)
-  // -------------------------------------------------------------------------
+  
+  
+  
   const fetchStats = useCallback(async () => {
     setStatsLoading(true);
     setStatsError('');
@@ -261,16 +261,16 @@ function AdminDashboard() {
 
   useEffect(() => { fetchStats(); }, [fetchStats]);
 
-  // Once properties are loaded, update the totalProperties stat from the real count
+  
   useEffect(() => {
     if (!propsLoading && stats) {
       setStats((prev) => ({ ...prev, totalProperties: properties.length }));
     }
-  }, [propsLoading, properties.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [propsLoading, properties.length]); 
 
-  // -------------------------------------------------------------------------
-  // Helpers
-  // -------------------------------------------------------------------------
+  
+  
+  
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3500);
@@ -292,9 +292,9 @@ function AdminDashboard() {
     }
   };
 
-  // -------------------------------------------------------------------------
-  // Stat cards config (derives from fetched stats + properties)
-  // -------------------------------------------------------------------------
+  
+  
+  
   const statCards = [
     {
       icon: '🏠',
@@ -326,17 +326,17 @@ function AdminDashboard() {
     },
   ];
 
-  // -------------------------------------------------------------------------
-  // Render
-  // -------------------------------------------------------------------------
+  
+  
+  
   return (
     <AnimatedPage>
       <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
 
-          {/* ---------------------------------------------------------------- */}
-          {/* Header                                                            */}
-          {/* ---------------------------------------------------------------- */}
+          {}
+          {}
+          {}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}

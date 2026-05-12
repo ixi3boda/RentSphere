@@ -1,6 +1,7 @@
 package com.example.RentSphere.integration;
 
 import com.example.RentSphere.Dto.CreatePropertyRequest;
+import java.math.BigDecimal;
 import com.example.RentSphere.Dto.CreateRentalRequest;
 import com.example.RentSphere.Dto.RentalRequest;
 import com.example.RentSphere.Dto.Contract;
@@ -17,10 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * End-to-end service integration test for the core Tenant/Admin journey.
- * Uses real DB (H2 test profile), real Services, real Repositories.
- */
+
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
@@ -35,14 +33,18 @@ class CoreWorkflowIntegrationTest {
     @Test
     @DisplayName("Full Rental Journey: Admin creates property -> Tenant requests -> Admin accepts -> Contract created")
     void fullRentalJourney() {
-        // 1. Admin creates a new property
-        int adminUserId = 1; // From data-test.sql
+        
+        int adminUserId = 1; 
         CreatePropertyRequest newPropReq = CreatePropertyRequest.builder()
                 .title("Workflow Test Villa")
                 .propertyType("VILLA")
-                .pricePerMonth(8000.0)
+                .propertyDescription("Luxurious workflow test villa")
+                .pricePerMonth(new java.math.BigDecimal("8000.0"))
                 .city("Jeddah")
                 .district("Al Shati")
+                .address("Corniche Road 123")
+                .numRooms(5)
+                .areaSqm(new java.math.BigDecimal("450.0"))
                 .isAvailable(true)
                 .build();
         
@@ -50,15 +52,15 @@ class CoreWorkflowIntegrationTest {
         long newPropertyId = propertyDetails.getProperty().getPropertyId();
         assertThat(newPropertyId).isGreaterThan(0);
 
-        // 2. Tenant browses and favorites the property
-        int tenantUserId = 2; // From data-test.sql
+        
+        int tenantUserId = 2; 
         propertyService.favorite((int) newPropertyId, tenantUserId);
         
-        // 3. Tenant submits a rental request
+        
         CreateRentalRequest rentReq = CreateRentalRequest.builder()
-                .propertyId((int) newPropertyId)
+                .propertyId(newPropertyId)
                 .message("I want to rent this workflow villa")
-                .desiredStart("2025-01-01")
+                .desiredStart(java.time.LocalDate.parse("2025-01-01"))
                 .desiredMonths(12)
                 .build();
                 
@@ -66,16 +68,16 @@ class CoreWorkflowIntegrationTest {
         long requestId = rentalRequest.getRentalReqId();
         assertThat(rentalRequest.getReqStatus()).isEqualTo("PENDING");
 
-        // 4. Admin reviews and accepts the request
+        
         Contract contract = rentService.acceptRequest(requestId, adminUserId);
         
-        // 5. Verify the contract is created properly
+        
         assertThat(contract).isNotNull();
         assertThat(contract.getContractStatus()).isEqualTo("ACTIVE");
-        assertThat(contract.getRentAmount()).isEqualTo(8000.0);
+        assertThat(contract.getRentAmount()).isEqualByComparingTo(new BigDecimal("8000.0"));
         assertThat(contract.getDurationMonths()).isEqualTo(12);
         
-        // 6. Verify Tenant's role (RentService/ContractService updates it to TENANT)
+        
         var tenantUser = userService.getCurrentUser("tenant@test.com");
         assertThat(tenantUser.getRole_name()).isEqualTo("TENANT");
     }
@@ -86,20 +88,20 @@ class CoreWorkflowIntegrationTest {
         int adminUserId = 1; 
         int tenantUserId = 2; 
         
-        // Use property 1 seeded from data-test.sql
+        
         int propertyId = 1; 
 
         CreateRentalRequest rentReq = CreateRentalRequest.builder()
-                .propertyId(propertyId)
+                .propertyId((long) propertyId)
                 .message("Lowball offer")
-                .desiredStart("2024-10-01")
+                .desiredStart(java.time.LocalDate.parse("2024-10-01"))
                 .desiredMonths(6)
                 .build();
                 
         RentalRequest rentalRequest = rentService.createRentalRequest(rentReq, tenantUserId);
         long requestId = rentalRequest.getRentalReqId();
         
-        // Admin rejects
+        
         RentalRequest rejected = rentService.rejectRequest(requestId, adminUserId);
         
         assertThat(rejected.getReqStatus()).isEqualTo("REJECTED");

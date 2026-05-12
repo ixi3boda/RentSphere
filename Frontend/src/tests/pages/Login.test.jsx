@@ -1,12 +1,12 @@
-// src/tests/pages/Login.test.jsx
-//
-// Tests the Login page:
-//   - form rendering
-//   - successful login with role-based redirect
-//   - invalid credentials error
-//   - missing fields validation (browser-native required)
-//   - token stored in sessionStorage after login
-//   - state.from redirect (PrivateRoute back-redirect)
+
+
+
+
+
+
+
+
+
 
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
@@ -17,7 +17,7 @@ import { MOCK_TOKEN, RAW_ADMIN_USER, RAW_TENANT_USER } from '../mocks/authMocks'
 import { renderInRouter } from '../test-utils/renderWithProviders';
 import { server } from '../mocks/server';
 
-// Helper that seeds the /api/user/me response with a specific raw user
+
 const mockMeAs = (rawUser) =>
   rest.get('/api/user/me', (req, res, ctx) =>
     res(ctx.status(200), ctx.json(rawUser))
@@ -46,20 +46,23 @@ describe('Login page — rendering', () => {
 
 describe('Login page — invalid credentials', () => {
   it('shows error message for wrong credentials', async () => {
-    server.use(
-      rest.post('/api/user/login', (req, res, ctx) =>
-        res(ctx.status(401), ctx.json({ message: 'Invalid credentials' }))
-      )
-    );
+    const mockLogin = jest.fn().mockResolvedValue({ 
+      success: false, 
+      error: 'Invalid credentials' 
+    });
 
     const user = userEvent.setup();
-    renderInRouter(<Login />, { user: null });
+    renderInRouter(<Login />, { 
+      user: null,
+      authOverrides: { login: mockLogin }
+    });
 
     await user.type(screen.getByPlaceholderText(/you@example\.com/i), 'wrong@test.com');
     await user.type(screen.getByPlaceholderText(/•{4,}/), 'badpass');
     await user.click(screen.getByRole('button', { name: /sign in/i }));
 
     expect(await screen.findByText(/invalid credentials/i)).toBeInTheDocument();
+    expect(mockLogin).toHaveBeenCalledWith('wrong@test.com', 'badpass', false);
   });
 });
 

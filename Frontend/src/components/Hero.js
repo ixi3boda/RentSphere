@@ -1,4 +1,4 @@
-// src/components/Hero.js
+
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -41,7 +41,7 @@ function Hero() {
             transition={{ delay: 0.4, duration: 0.6 }}
             className="flex gap-4 justify-center flex-wrap"
           >
-            {/** Hide "Get Started" if the user is already logged in */}
+            {}
             {!isAuthenticated && (
               <Link to="/signup">
                 <motion.button
@@ -66,7 +66,7 @@ function Hero() {
           </motion.div>
         </motion.div>
 
-        {/* Animated floating elements */}
+        {}
         <motion.div
           animate={{ y: [0, -20, 0] }}
           transition={{ duration: 4, repeat: Infinity }}

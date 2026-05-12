@@ -21,10 +21,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Integration tests for the Login workflow.
- * Tests the full HTTP request → Security filter → Controller → Service chain.
- */
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -36,7 +33,7 @@ class LoginWorkflowTest {
     @Autowired private JwtService jwtService;
 
     @MockBean private UserService userService;
-    @MockBean private com.example.RentSphere.Service.MyUserDetailsService myUserDetailsService;
+    @MockBean private org.springframework.security.core.userdetails.UserDetailsService myUserDetailsService;
 
     @Test
     @DisplayName("POST /login — returns JWT token for valid admin credentials")
