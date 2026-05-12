@@ -33,6 +33,18 @@ public class PropertyService {
         propertyRepository.saveImage(propertyId, imageUrl, isCover);
     }
 
+    public void addImageByOwner(Long propertyId, String imageUrl, boolean isCover, int currentUserId) {
+        PropertyDetails propertyDetails = getById(propertyId);
+        if (propertyDetails == null || propertyDetails.getProperty() == null) {
+            throw new RuntimeException("Property not found");
+        }
+        if (propertyDetails.getProperty().getOwnerId() == null || 
+            !propertyDetails.getProperty().getOwnerId().equals((long) currentUserId)) {
+            throw new IllegalArgumentException("You do not have permission to add images to this property");
+        }
+        addImage(propertyId, imageUrl, isCover);
+    }
+
     public void update(Long propertyId, UpdatePropertyRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Update payload is required");
@@ -43,11 +55,35 @@ public class PropertyService {
         }
     }
 
+    public void updateByOwner(Long propertyId, UpdatePropertyRequest request, int currentUserId) {
+        PropertyDetails propertyDetails = getById(propertyId);
+        if (propertyDetails == null || propertyDetails.getProperty() == null) {
+            throw new RuntimeException("Property not found");
+        }
+        if (propertyDetails.getProperty().getOwnerId() == null || 
+            !propertyDetails.getProperty().getOwnerId().equals((long) currentUserId)) {
+            throw new IllegalArgumentException("You do not have permission to update this property");
+        }
+        update(propertyId, request);
+    }
+
     public void delete(Long id) {
         int deleted = propertyRepository.delete(id);
         if (deleted == 0) {
             throw new RuntimeException("Property not found");
         }
+    }
+
+    public void deleteByOwner(Long id, int currentUserId) {
+        PropertyDetails propertyDetails = getById(id);
+        if (propertyDetails == null || propertyDetails.getProperty() == null) {
+            throw new RuntimeException("Property not found");
+        }
+        if (propertyDetails.getProperty().getOwnerId() == null || 
+            !propertyDetails.getProperty().getOwnerId().equals((long) currentUserId)) {
+            throw new IllegalArgumentException("You do not have permission to delete this property");
+        }
+        delete(id);
     }
 
     public List<PropertyDetails> filterProperties(

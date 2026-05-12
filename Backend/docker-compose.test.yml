@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  backend-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: rentsphere_backend_test
+    environment:
+      - SPRING_PROFILES_ACTIVE=test
+    volumes:
+      - ./.m2:/root/.m2 # Cache maven dependencies locally
+# cd Backend docker-compose -f docker-compose.test.yml up --build

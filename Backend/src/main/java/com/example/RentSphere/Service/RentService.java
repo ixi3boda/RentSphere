@@ -21,6 +21,18 @@ public class RentService {
     private final ContractService contractService;
 
     public RentalRequest createRentalRequest(CreateRentalRequest request, int tenantId) {
+        if (request == null) {
+            throw new IllegalArgumentException("Rental request payload is required");
+        }
+        if (request.getPropertyId() == null) {
+            throw new IllegalArgumentException("Property ID is required");
+        }
+        if (request.getDesiredStart() == null) {
+            throw new IllegalArgumentException("Desired start date is required");
+        }
+        if (request.getDesiredMonths() != null && (request.getDesiredMonths() < 1 || request.getDesiredMonths() > 24)) {
+            throw new IllegalArgumentException("Desired months must be between 1 and 24");
+        }
         return rentRepository.createRentalRequest(request, tenantId);
     }
 

@@ -29,6 +29,13 @@ public class RentController {
     private final RentService rentService;
     private final ContractService contractService;
 
+    private String getPrincipalEmail(Principal principal) {
+        if (principal == null || principal.getName() == null || principal.getName().isBlank()) {
+            throw new IllegalStateException("Unauthorized access");
+        }
+        return principal.getName();
+    }
+
     private ResponseEntity<?> buildErrorResponse(String message, HttpStatus status) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(message)
@@ -45,10 +52,12 @@ public class RentController {
             Principal principal
     ) {
         try {
-            String email = principal.getName();
+            String email = getPrincipalEmail(principal);
             int tenantId = userService.getCurrentUser(email).getUser_id();
             RentalRequest created = rentService.createRentalRequest(request, tenantId);
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalStateException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
@@ -57,6 +66,7 @@ public class RentController {
     }
 
     @GetMapping("/requests/all")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAllRequests() {
         try {
             return ResponseEntity.ok(rentService.getAllRentalRequests());
@@ -79,6 +89,7 @@ public class RentController {
     }
 
     @GetMapping("/contracts/all")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAllContracts() {
         try {
             return ResponseEntity.ok(contractService.getAllContracts());
@@ -88,12 +99,13 @@ public class RentController {
     }
 
     @PutMapping("/requests/{id}/accept")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> acceptRequest(@PathVariable Long id, Principal principal) {
         try {
-            String email = principal.getName();
+            String email = getPrincipalEmail(principal);
             int currentUserId = userService.getCurrentUser(email).getUser_id();
             return ResponseEntity.ok(rentService.acceptRequest(id, currentUserId));
+        } catch (IllegalStateException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (RuntimeException e) {
@@ -106,9 +118,13 @@ public class RentController {
     @PostMapping("/contracts/{contractId}/paypal")
     public ResponseEntity<?> createContractPayPalPayment(
             @PathVariable Long contractId,
-            @RequestBody PayPalPaymentRequest paymentRequest
+            @RequestBody PayPalPaymentRequest paymentRequest,
+            Principal principal
     ) {
         try {
+            String email = getPrincipalEmail(principal);
+            int currentUserId = userService.getCurrentUser(email).getUser_id();
+            
             PayPalPaymentResponse response = contractService.createPayPalPaymentForContract(contractId, paymentRequest);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
@@ -122,9 +138,13 @@ public class RentController {
     public ResponseEntity<?> executeContractPayPalPayment(
             @PathVariable Long contractId,
             @RequestParam String paymentId,
-            @RequestParam String payerId
+            @RequestParam String payerId,
+            Principal principal
     ) {
         try {
+            String email = getPrincipalEmail(principal);
+            int currentUserId = userService.getCurrentUser(email).getUser_id();
+            
             PayPalPaymentResponse response = contractService.executePayPalPaymentForContract(contractId, paymentId, payerId);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
@@ -135,12 +155,13 @@ public class RentController {
     }
 
     @PutMapping("/requests/{id}/reject")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> rejectRequest(@PathVariable Long id, Principal principal) {
         try {
-            String email = principal.getName();
+            String email = getPrincipalEmail(principal);
             int currentUserId = userService.getCurrentUser(email).getUser_id();
             return ResponseEntity.ok(rentService.rejectRequest(id, currentUserId));
+        } catch (IllegalStateException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (RuntimeException e) {

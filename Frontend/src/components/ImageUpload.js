@@ -1,43 +1,43 @@
-// src/components/ImageUpload.js
-//
-// RS-9 — Image Upload UI (Cloudinary)
-//
-// Props:
-//   value      {Array<string>}        – current list of Cloudinary URLs (controlled)
-//   onChange   {(urls: string[])=>void} – called whenever the URL list changes
-//   error      {string}               – validation error message from parent
-//   disabled   {boolean}              – lock the component during form submit
-//
-// Internal flow per file:
-//   1. User selects / drops files
-//   2. Client-side validation (type, count)
-//   3. Each valid file is uploaded individually to POST /api/uploads
-//   4. Backend returns a Cloudinary URL → stored in parent via onChange()
-//   5. Per-image progress bar shown during upload
-//   6. Error per image shown inline if upload fails
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import React, { useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { uploadApi } from '../utils/api';
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
+
+
+
 const MAX_IMAGES = 5;
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png'];
 const ACCEPTED_LABEL = 'JPG, PNG only';
 
-// ---------------------------------------------------------------------------
-// Per-image status shape:
-//   { id, file, preview, status: 'uploading'|'done'|'error', progress, url, errorMsg }
-// ---------------------------------------------------------------------------
+
+
+
+
 
 let _idCounter = 0;
 const makeId = () => `img-${Date.now()}-${++_idCounter}`;
 
-// ---------------------------------------------------------------------------
-// ProgressBar — matches existing RentSphere teal/orange palette
-// ---------------------------------------------------------------------------
+
+
+
 function ProgressBar({ percent }) {
   return (
     <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1 overflow-hidden">
@@ -51,21 +51,21 @@ function ProgressBar({ percent }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// ImageUpload
-// ---------------------------------------------------------------------------
+
+
+
 function ImageUpload({ value = [], onChange, error, disabled = false }) {
   const inputRef = useRef(null);
 
-  // Local state: tracks in-flight / failed items (items with status 'done' are
-  // reflected back to the parent through onChange and removed from local state).
-  const [queue, setQueue] = useState([]); // Array<{id,file,preview,status,progress,errorMsg}>
+  
+  
+  const [queue, setQueue] = useState([]); 
   const [dragOver, setDragOver] = useState(false);
   const [validationError, setValidationError] = useState('');
 
-  // ---------------------------------------------------------------------------
-  // Helpers
-  // ---------------------------------------------------------------------------
+  
+  
+  
   const totalCount = value.length + queue.filter((q) => q.status !== 'error').length;
   const canAddMore = totalCount < MAX_IMAGES && !disabled;
 
@@ -73,32 +73,32 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
     setQueue((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)));
   }, []);
 
-  // ---------------------------------------------------------------------------
-  // Upload a single file → returns Cloudinary URL or throws
-  // ---------------------------------------------------------------------------
+  
+  
+  
   const uploadFile = useCallback(
     async (queueItem) => {
       const { id, file } = queueItem;
 
-      // --- mock mode: when backend not yet available ---
-      // Remove this block and uncomment the real call below once /api/uploads is ready.
-      const MOCK_MODE = true; // flip to false when backend is ready
+      
+      
+      const MOCK_MODE = true; 
       if (MOCK_MODE) {
-        // Simulate upload delay + progress
+        
         for (let p = 0; p <= 100; p += 20) {
           await new Promise((r) => setTimeout(r, 80));
           updateQueueItem(id, { progress: p });
         }
-        const mockUrl = URL.createObjectURL(file); // blob URL as stand-in
+        const mockUrl = URL.createObjectURL(file); 
         return mockUrl;
       }
 
-      // --- real upload ---
+      
       try {
         const res = await uploadApi.uploadOne(file, (percent) => {
           updateQueueItem(id, { progress: percent });
         });
-        // Backend contract: { url: string } or { urls: [string] }
+        
         return res.data?.url || res.data?.urls?.[0];
       } catch (err) {
         throw new Error(err.response?.data?.message || 'Upload failed');
@@ -107,22 +107,22 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
     [updateQueueItem]
   );
 
-  // ---------------------------------------------------------------------------
-  // Handle file selection (from input or drop)
-  // ---------------------------------------------------------------------------
+  
+  
+  
   const handleFiles = useCallback(
     async (files) => {
       setValidationError('');
       const fileList = Array.from(files);
 
-      // 1. Type validation
+      
       const invalid = fileList.filter((f) => !ACCEPTED_TYPES.includes(f.type));
       if (invalid.length) {
         setValidationError(`Only ${ACCEPTED_LABEL} files are allowed.`);
         return;
       }
 
-      // 2. Count validation
+      
       const slotsLeft = MAX_IMAGES - totalCount;
       if (slotsLeft <= 0) {
         setValidationError(`Maximum ${MAX_IMAGES} images allowed.`);
@@ -133,7 +133,7 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
         setValidationError(`Only ${slotsLeft} more image(s) can be added (max ${MAX_IMAGES}).`);
       }
 
-      // 3. Build queue items and add them immediately (shows placeholders)
+      
       const newItems = toProcess.map((file) => ({
         id: makeId(),
         file,
@@ -146,14 +146,14 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
 
       setQueue((prev) => [...prev, ...newItems]);
 
-      // 4. Upload each file independently
+      
       for (const item of newItems) {
         try {
           const cloudinaryUrl = await uploadFile(item);
-          // Mark done in queue and promote URL to parent
+          
           updateQueueItem(item.id, { status: 'done', progress: 100, url: cloudinaryUrl });
           onChange([...value, cloudinaryUrl]);
-          // Remove from local queue after a short visual delay
+          
           setTimeout(() => {
             setQueue((prev) => prev.filter((q) => q.id !== item.id));
           }, 800);
@@ -165,19 +165,19 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
     [totalCount, uploadFile, updateQueueItem, onChange, value]
   );
 
-  // ---------------------------------------------------------------------------
-  // Remove an already-uploaded URL (from parent value[])
-  // ---------------------------------------------------------------------------
+  
+  
+  
   const removeUploaded = (url) => {
     onChange(value.filter((u) => u !== url));
   };
 
-  // Remove a failed queue item
+  
   const removeQueueItem = (id) => {
     setQueue((prev) => prev.filter((q) => q.id !== id));
   };
 
-  // Retry a failed item
+  
   const retryItem = (item) => {
     updateQueueItem(item.id, { status: 'uploading', progress: 0, errorMsg: '' });
     uploadFile(item)
@@ -191,18 +191,18 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
       });
   };
 
-  // ---------------------------------------------------------------------------
-  // Drag & drop handlers
-  // ---------------------------------------------------------------------------
+  
+  
+  
   const handleDrop = (e) => {
     e.preventDefault();
     setDragOver(false);
     if (!disabled) handleFiles(e.dataTransfer.files);
   };
 
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
+  
+  
+  
   const allError = validationError || error;
 
   return (
@@ -214,7 +214,7 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
         </span>
       </label>
 
-      {/* Drop zone — only shown when more slots available */}
+      {}
       {canAddMore && (
         <motion.div
           whileHover={{ scale: 1.01 }}
@@ -250,12 +250,12 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
         </motion.div>
       )}
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Uploaded images (from parent value[]) — Cloudinary URLs             */}
-      {/* ------------------------------------------------------------------ */}
+      {}
+      {}
+      {}
       {(value.length > 0 || queue.length > 0) && (
         <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-          {/* Already-uploaded thumbnails */}
+          {}
           <AnimatePresence>
             {value.map((url, i) => (
               <motion.div
@@ -270,13 +270,13 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
                   alt={`uploaded-${i}`}
                   className="w-full h-full object-cover"
                 />
-                {/* Cover badge on first image */}
+                {}
                 {i === 0 && (
                   <span className="absolute bottom-1 left-1 bg-rentsphere-teal text-white text-xs px-1.5 py-0.5 rounded">
                     Cover
                   </span>
                 )}
-                {/* Remove button */}
+                {}
                 {!disabled && (
                   <button
                     type="button"
@@ -291,7 +291,7 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
             ))}
           </AnimatePresence>
 
-          {/* In-flight / error queue items */}
+          {}
           <AnimatePresence>
             {queue.map((item) => (
               <motion.div
@@ -302,7 +302,7 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
                 className={`relative aspect-square rounded-lg overflow-hidden border
                   ${item.status === 'error' ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
               >
-                {/* Dim preview */}
+                {}
                 <img
                   src={item.preview}
                   alt="uploading"
@@ -310,7 +310,7 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
                     ${item.status === 'uploading' ? 'opacity-50' : item.status === 'error' ? 'opacity-30' : 'opacity-100'}`}
                 />
 
-                {/* Uploading overlay */}
+                {}
                 {item.status === 'uploading' && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 px-2">
                     <div className="text-white text-xs font-semibold mb-1">{item.progress}%</div>
@@ -318,14 +318,14 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
                   </div>
                 )}
 
-                {/* Done flash */}
+                {}
                 {item.status === 'done' && (
                   <div className="absolute inset-0 flex items-center justify-center bg-green-500/40">
                     <span className="text-white text-xl">✓</span>
                   </div>
                 )}
 
-                {/* Error overlay */}
+                {}
                 {item.status === 'error' && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-red-500/30 px-1">
                     <span className="text-white text-xs font-bold text-center leading-tight">
@@ -357,7 +357,7 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
         </div>
       )}
 
-      {/* Validation / upload error message */}
+      {}
       <AnimatePresence>
         {allError && (
           <motion.p

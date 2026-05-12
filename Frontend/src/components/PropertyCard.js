@@ -1,20 +1,21 @@
-// src/components/PropertyCard.js
-//
-// RS-10 — Reusable property summary card.
-// Used by: PropertyList (tenant browse) and OwnerDashboard (owner view).
-//
-// Props:
-//   property  {object}   – property data object
-//   index     {number}   – stagger animation index
-//   actions   {node}     – optional bottom-row action buttons (owner CRUD, etc.)
 
-import React, { useState } from 'react';
+
+
+
+
+
+
+
+
+
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import FavoriteButton from './FavoriteButton';
 
-// ---------------------------------------------------------------------------
-// Shared label maps (kept in sync with PropertyForm constants)
-// ---------------------------------------------------------------------------
+
+
+
 const PROPERTY_TYPE_LABELS = {
   apartment: '🏢 Apartment',
   house:     '🏡 House',
@@ -24,23 +25,16 @@ const PROPERTY_TYPE_LABELS = {
   other:     '📦 Other',
 };
 
-// ---------------------------------------------------------------------------
-// PropertyCard
-// ---------------------------------------------------------------------------
-function PropertyCard({ property, index = 0, actions }) {
+
+
+
+function PropertyCard({ property, index = 0, actions, initialFavorited = false, onFavoriteToggle }) {
   const navigate = useNavigate();
-  const [favorited, setFavorited] = useState(false);
 
   const handleCardClick = (e) => {
-    // Don't navigate when clicking buttons inside the card
+    
     if (e.target.closest('button')) return;
     navigate(`/properties/${property.id}`);
-  };
-
-  const handleFavorite = (e) => {
-    e.stopPropagation();
-    setFavorited((prev) => !prev);
-    // TODO: POST /api/favorites when backend is ready
   };
 
   return (
@@ -52,9 +46,9 @@ function PropertyCard({ property, index = 0, actions }) {
       id={`property-card-${property.id}`}
       className="glass-effect rounded-2xl overflow-hidden shadow-lg card-hover group cursor-pointer"
     >
-      {/* ------------------------------------------------------------------ */}
-      {/* Image                                                                */}
-      {/* ------------------------------------------------------------------ */}
+      {}
+      {}
+      {}
       <div className="relative h-48 bg-gradient-to-br from-rentsphere-teal/20 to-rentsphere-orange/20 overflow-hidden">
         {property.images?.[0] ? (
           <img
@@ -68,19 +62,17 @@ function PropertyCard({ property, index = 0, actions }) {
           </div>
         )}
 
-        {/* Favorite button */}
-        <button
-          onClick={handleFavorite}
-          id={`favorite-${property.id}`}
-          aria-label={favorited ? 'Remove from favorites' : 'Add to favorites'}
-          className="absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow transition-transform hover:scale-110 active:scale-95"
-        >
-          <span className={`text-base transition-colors ${favorited ? 'text-red-500' : 'text-gray-400'}`}>
-            {favorited ? '❤️' : '🤍'}
-          </span>
-        </button>
+        {}
+        <div className="absolute top-3 left-3">
+          <FavoriteButton
+            propertyId={property.id}
+            initialFavorited={initialFavorited}
+            onToggle={onFavoriteToggle}
+            compact
+          />
+        </div>
 
-        {/* Status badge */}
+        {}
         {property.status && (
           <span
             className={`absolute top-3 right-3 text-xs font-semibold px-2.5 py-1 rounded-full
@@ -94,34 +86,34 @@ function PropertyCard({ property, index = 0, actions }) {
         )}
       </div>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Content                                                              */}
-      {/* ------------------------------------------------------------------ */}
+      {}
+      {}
+      {}
       <div className="p-5">
-        {/* Type label */}
+        {}
         <p className="text-xs text-gray-400 mb-1">
           {PROPERTY_TYPE_LABELS[property.propertyType] ?? '📦 Other'}
         </p>
 
-        {/* Title */}
+        {}
         <h3 className="text-lg font-bold text-gray-800 truncate mb-1 group-hover:text-rentsphere-teal transition-colors">
           {property.title}
         </h3>
 
-        {/* Location */}
+        {}
         <p className="text-sm text-gray-500 flex items-center gap-1 mb-3">
           <span>📍</span>
           <span className="truncate">{property.location || 'No location set'}</span>
         </p>
 
-        {/* Price */}
+        {}
         <div className="flex items-center justify-between">
           <span className="text-xl font-bold gradient-text">
             ${Number(property.price || 0).toLocaleString()}
             <span className="text-sm font-normal text-gray-500">/mo</span>
           </span>
 
-          {/* "View" hint — only shown when no custom actions provided */}
+          {}
           {!actions && (
             <span className="text-xs text-rentsphere-teal font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
               View details →
@@ -129,7 +121,7 @@ function PropertyCard({ property, index = 0, actions }) {
           )}
         </div>
 
-        {/* Optional actions slot (e.g. owner Edit / Delete buttons) */}
+        {}
         {actions && <div className="mt-4">{actions}</div>}
       </div>
     </motion.div>

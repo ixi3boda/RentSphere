@@ -1,6 +1,6 @@
-// src/pages/Login.js
+
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AnimatedPage, AnimatedButton } from '../components/AnimatedPage';
 
@@ -9,27 +9,37 @@ import { motion } from 'framer-motion';
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [staySignedIn, setStaySignedIn] = useState(false);
   const [error, setError] = useState('');
   const { login, loading } = useAuth();
   const navigate = useNavigate();
+  
+  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     
-    const result = await login(email, password);
-    
+    const result = await login(email, password, staySignedIn);
+
     if (result.success) {
-      navigate('/');
+      
+      const from = location.state?.from?.pathname;
+      if (from) { navigate(from, { replace: true }); return; }
+      
+      const role = result.role || 
+        JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user') || '{}')?.role;
+      if (role === 'admin')  { navigate('/admin/dashboard');  return; }
+      navigate('/tenant/dashboard'); 
     } else {
-      setError('Login failed. Please try again.');
+      setError(result.error || 'Login failed. Please try again.');
     }
   };
 
   return (
     <AnimatedPage>
       <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        {/* Background decoration */}
+        {}
         <div className="absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-rentsphere-teal rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
           <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-rentsphere-orange rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
@@ -91,6 +101,19 @@ function Login() {
                 placeholder="••••••••"
                 required
               />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                id="stay-signed-in"
+                type="checkbox"
+                checked={staySignedIn}
+                onChange={(e) => setStaySignedIn(e.target.checked)}
+                className="h-4 w-4 text-rentsphere-teal rounded"
+              />
+              <label htmlFor="stay-signed-in" className="text-sm text-gray-600">
+                Stay signed in
+              </label>
             </div>
 
             <AnimatedButton type="submit" loading={loading}>
