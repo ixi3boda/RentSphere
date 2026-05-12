@@ -1,29 +1,36 @@
-// src/pages/Signup.js
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { AnimatedPage, AnimatedButton } from '../components/AnimatedPage';
-import { motion } from 'framer-motion';
+
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { AnimatedPage, AnimatedButton } from "../components/AnimatedPage";
+import { motion } from "framer-motion";
 
 function Signup() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('tenant');
-  const [error, setError] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [error, setError] = useState("");
   const { signup, loading } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    
-    const result = await signup(name, email, password, role);
-    
+    setError("");
+
+    if (password !== repeatPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    const result = await signup(name, email, password, phone, avatarUrl);
+
     if (result.success) {
-      navigate('/');
+      navigate("/");
     } else {
-      setError('Signup failed. Please try again.');
+      setError(result.error || "Signup failed. Please try again.");
     }
   };
 
@@ -35,14 +42,14 @@ function Signup() {
           <div className="absolute bottom-20 right-1/4 w-72 h-72 bg-rentsphere-orange rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
         </div>
 
-        <motion.div 
+        <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
           className="glass-effect rounded-2xl p-8 max-w-md w-full space-y-8 shadow-2xl"
         >
           <div className="text-center">
-            <motion.h2 
+            <motion.h2
               initial={{ y: -20 }}
               animate={{ y: 0 }}
               className="text-4xl font-bold gradient-text mb-2"
@@ -53,7 +60,7 @@ function Signup() {
           </div>
 
           {error && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded"
@@ -110,17 +117,45 @@ function Signup() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                I am a
+                Repeat Password
               </label>
-              <motion.select 
+              <motion.input
                 whileFocus={{ scale: 1.02 }}
-                value={role} 
-                onChange={(e) => setRole(e.target.value)}
-                className="input-field cursor-pointer"
-              >
-                <option value="tenant">🏠 Tenant - Looking to rent</option>
-                <option value="owner">🔑 Owner - Have properties to list</option>
-              </motion.select>
+                type="password"
+                value={repeatPassword}
+                onChange={(e) => setRepeatPassword(e.target.value)}
+                className="input-field"
+                placeholder="Repeat your password"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number
+              </label>
+              <motion.input
+                whileFocus={{ scale: 1.02 }}
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="input-field"
+                placeholder="Optional: +1 234 567 8900"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Profile Picture URL
+              </label>
+              <motion.input
+                whileFocus={{ scale: 1.02 }}
+                type="url"
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+                className="input-field"
+                placeholder="Optional: https://example.com/avatar.jpg"
+              />
             </div>
 
             <AnimatedButton type="submit" loading={loading}>
@@ -130,8 +165,11 @@ function Signup() {
 
           <div className="text-center">
             <p className="text-gray-600">
-              Already have an account?{' '}
-              <Link to="/login" className="text-rentsphere-teal hover:text-rentsphere-orange font-semibold transition-colors">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="text-rentsphere-teal hover:text-rentsphere-orange font-semibold transition-colors"
+              >
                 Sign in
               </Link>
             </p>

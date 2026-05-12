@@ -1,22 +1,26 @@
-// src/pages/PropertyDetail.js
-//
-// RS-10 — Single property detail page.
-// Route: /properties/:id
-//
-// Displays full property info with ImageCarousel, metadata grid,
-// and loading / error / not-found states.
+
+
+
+
+
+
+
 
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedPage } from "../components/AnimatedPage";
 import ImageCarousel from "../components/ImageCarousel";
+import FavoriteButton from "../components/FavoriteButton";
+import RentRequestModal from "../components/RentRequestModal";
 import { propertyApi } from "../utils/api";
 import { mapPropertyToFrontend } from "../utils/mappers";
+import { recordRecentlyViewed } from "../utils/recentlyViewed";
+import { useAuth } from "../context/AuthContext";
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
+
+
+
 const PROPERTY_TYPE_LABELS = {
   apartment: "🏢 Apartment",
   house: "🏡 House",
@@ -26,9 +30,9 @@ const PROPERTY_TYPE_LABELS = {
   other: "📦 Other",
 };
 
-// ---------------------------------------------------------------------------
-// Info tile — used in the detail metadata grid
-// ---------------------------------------------------------------------------
+
+
+
 function InfoTile({ icon, label, value }) {
   return (
     <div className="glass-effect rounded-xl p-4">
@@ -41,17 +45,19 @@ function InfoTile({ icon, label, value }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// PropertyDetail
-// ---------------------------------------------------------------------------
+
+
+
 function PropertyDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
 
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [favorited, setFavorited] = useState(false);
+  const [showRentModal, setShowRentModal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -81,9 +87,43 @@ function PropertyDetail() {
     };
   }, [id]);
 
-  // ---------------------------------------------------------------------------
-  // Loading skeleton
-  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (property) {
+      recordRecentlyViewed(property);
+    }
+  }, [property]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchFavoriteState = async () => {
+      if (!property) return;
+      
+      if (!isAuthenticated) {
+        if (!cancelled) setFavorited(false);
+        return;
+      }
+      try {
+        const res = await propertyApi.getFavorites();
+        const list = Array.isArray(res.data) ? res.data : [];
+        const isSaved = list.some(
+          (item) => String(item?.propertyDetails?.property?.propertyId) === String(id),
+        );
+        if (!cancelled) setFavorited(isSaved);
+      } catch (err) {
+        if (!cancelled) setFavorited(false);
+      }
+    };
+
+    fetchFavoriteState();
+    return () => {
+      cancelled = true;
+    };
+  }, [property, id, isAuthenticated]);
+
+  
+  
+  
   if (loading) {
     return (
       <AnimatedPage>
@@ -114,9 +154,9 @@ function PropertyDetail() {
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Not found
-  // ---------------------------------------------------------------------------
+  
+  
+  
   if (error === "not_found") {
     return (
       <AnimatedPage>
@@ -141,9 +181,9 @@ function PropertyDetail() {
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Error
-  // ---------------------------------------------------------------------------
+  
+  
+  
   if (error) {
     return (
       <AnimatedPage>
@@ -173,9 +213,9 @@ function PropertyDetail() {
 
   if (!property) return null;
 
-  // ---------------------------------------------------------------------------
-  // Derived values
-  // ---------------------------------------------------------------------------
+  
+  
+  
   const isAvailable = property.status === "available";
   const statusColor =
     property.status === "available"
@@ -186,14 +226,14 @@ function PropertyDetail() {
           ? "bg-yellow-100 text-yellow-700"
           : "bg-gray-100  text-gray-600";
 
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
+  
+  
+  
   return (
     <AnimatedPage>
       <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          {/* Back link */}
+          {}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -207,7 +247,7 @@ function PropertyDetail() {
             </button>
           </motion.div>
 
-          {/* Image Carousel */}
+          {}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -220,7 +260,7 @@ function PropertyDetail() {
             />
           </motion.div>
 
-          {/* Title row */}
+          {}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -247,7 +287,7 @@ function PropertyDetail() {
               </p>
             </div>
 
-            {/* Price + actions */}
+            {}
             <div className="flex flex-col items-end gap-3">
               <div className="text-right">
                 <div className="text-3xl font-bold gradient-text">
@@ -256,30 +296,17 @@ function PropertyDetail() {
                 <div className="text-sm text-gray-400">per month</div>
               </div>
 
-              {/* Favorite button */}
-              <button
-                onClick={async () => {
-                  try {
-                    await propertyApi.favorite(id);
-                    setFavorited((f) => !f);
-                  } catch (err) {
-                    console.error("Favorite failed:", err);
-                  }
-                }}
-                id="detail-favorite-btn"
-                className={`flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl border transition-all
-                  ${
-                    favorited
-                      ? "border-red-300 bg-red-50 text-red-500"
-                      : "border-gray-200 bg-white/60 text-gray-500 hover:border-red-300 hover:text-red-400"
-                  }`}
-              >
-                {favorited ? "❤️ Saved" : "🤍 Save"}
-              </button>
+              <FavoriteButton
+                propertyId={id}
+                initialFavorited={favorited}
+                onToggle={setFavorited}
+                showLabel
+                className="px-4 py-2 rounded-xl"
+              />
             </div>
           </motion.div>
 
-          {/* Metadata grid */}
+          {}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -312,7 +339,7 @@ function PropertyDetail() {
             />
           </motion.div>
 
-          {/* Description */}
+          {}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -327,7 +354,7 @@ function PropertyDetail() {
             </p>
           </motion.div>
 
-          {/* CTA */}
+          {}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -336,23 +363,42 @@ function PropertyDetail() {
           >
             <div>
               <h3 className="text-lg font-bold text-gray-800">
-                Interested in this property?
+                {user?.role === 'admin' ? 'Your Property' : 'Interested in this property?'}
               </h3>
               <p className="text-gray-500 text-sm">
-                Contact the owner to schedule a viewing.
+                {user?.role === 'admin'
+                  ? 'You manage this listing from the admin dashboard.'
+                  : user?.role === 'visitor' && isAvailable
+                  ? 'Rental requests are available to tenants. Browse more properties and contact admin.'
+                  : isAvailable
+                  ? 'Submit a rental request and the admin will get back to you.'
+                  : 'This property is currently not available for rent.'}
               </p>
             </div>
             <div className="flex gap-3 flex-shrink-0">
-              {isAvailable ? (
-                <button
-                  id="contact-owner-btn"
+              {user?.role === 'admin' ? (
+                <Link to="/admin/dashboard" className="btn-secondary !py-2.5 !px-6">
+                  📊 Dashboard
+                </Link>
+              ) : isAvailable && isAuthenticated && user?.role === 'tenant' ? (
+                <motion.button
+                  id="request-rental-btn"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setShowRentModal(true)}
                   className="btn-primary !py-2.5 !px-6"
-                  onClick={() => {
-                    /* TODO: open contact modal / navigate to inquiry form */
-                  }}
                 >
-                  Contact Owner
-                </button>
+                  📋 Request Rental
+                </motion.button>
+              ) : isAvailable && isAuthenticated && user?.role === 'visitor' ? (
+                
+                <span className="btn-secondary !py-2.5 !px-6 opacity-60 cursor-not-allowed" title="Your account must be promoted to Tenant before you can submit rental requests.">
+                  🔒 Tenants Only
+                </span>
+              ) : isAvailable && !isAuthenticated ? (
+                <Link to="/login" className="btn-primary !py-2.5 !px-6">
+                  🔑 Login to Request
+                </Link>
               ) : (
                 <span className="btn-secondary !py-2.5 !px-6 opacity-60 cursor-not-allowed">
                   Not Available
@@ -363,6 +409,16 @@ function PropertyDetail() {
               </Link>
             </div>
           </motion.div>
+
+          {}
+          <AnimatePresence>
+            {showRentModal && property && (
+              <RentRequestModal
+                property={property}
+                onClose={() => setShowRentModal(false)}
+              />
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </AnimatedPage>

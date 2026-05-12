@@ -26,6 +26,13 @@ public class PropertyController {
     private final PropertyService propertyService;
     private final UserService userService;
 
+    private String getPrincipalEmail(Principal principal) {
+        if (principal == null || principal.getName() == null || principal.getName().isBlank()) {
+            throw new IllegalStateException("Unauthorized access");
+        }
+        return principal.getName();
+    }
+
     private ResponseEntity<?> buildErrorResponse(String message, HttpStatus status) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(message)
@@ -43,10 +50,12 @@ public class PropertyController {
             Principal principal
     ) {
         try {
-            String email = principal.getName();
+            String email = getPrincipalEmail(principal);
             int userId = userService.getCurrentUser(email).getUser_id();
             PropertyDetails created = propertyService.addProperty(request, userId);
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalStateException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
@@ -55,17 +64,23 @@ public class PropertyController {
     }
 
     @PostMapping("/{id}/images/add")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addPropertyImage(
             @PathVariable Long id,
             @RequestParam String image_url,
-            @RequestParam(defaultValue = "false") boolean is_cover
+            @RequestParam(defaultValue = "false") boolean is_cover,
+            Principal principal
     ) {
         try {
-            propertyService.addImage(id, image_url, is_cover);
+            String email = getPrincipalEmail(principal);
+            int currentUserId = userService.getCurrentUser(email).getUser_id();
+            propertyService.addImageByOwner(id, image_url, is_cover, currentUserId);
             return ResponseEntity.ok("Image added successfully");
+        } catch (IllegalStateException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
-            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return buildErrorResponse(e.getMessage(), HttpStatus.FORBIDDEN);
+        } catch (RuntimeException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return buildErrorResponse("Failed to add image: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -94,16 +109,20 @@ public class PropertyController {
     }
 
     @PutMapping("/{id}/update")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> update(
             @PathVariable Long id,
-            @RequestBody UpdatePropertyRequest request
+            @RequestBody UpdatePropertyRequest request,
+            Principal principal
     ) {
         try {
-            propertyService.update(id, request);
+            String email = getPrincipalEmail(principal);
+            int currentUserId = userService.getCurrentUser(email).getUser_id();
+            propertyService.updateByOwner(id, request, currentUserId);
             return ResponseEntity.ok("Property updated successfully");
+        } catch (IllegalStateException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
-            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return buildErrorResponse(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (RuntimeException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
@@ -112,11 +131,16 @@ public class PropertyController {
     }
 
     @DeleteMapping("/{id}/delete")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    public ResponseEntity<?> delete(@PathVariable Long id, Principal principal) {
         try {
-            propertyService.delete(id);
+            String email = getPrincipalEmail(principal);
+            int currentUserId = userService.getCurrentUser(email).getUser_id();
+            propertyService.deleteByOwner(id, currentUserId);
             return ResponseEntity.ok("Property deleted successfully");
+        } catch (IllegalStateException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch (IllegalArgumentException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (RuntimeException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
@@ -166,9 +190,11 @@ public class PropertyController {
             Principal principal
     ) {
         try {
-            String email = principal.getName();
+            String email = getPrincipalEmail(principal);
             int tenantId = userService.getCurrentUser(email).getUser_id();
             return ResponseEntity.ok(propertyService.favorite(propertyId, tenantId));
+        } catch (IllegalStateException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
@@ -179,9 +205,11 @@ public class PropertyController {
     @GetMapping("/favorites/all")
     public ResponseEntity<?> getAllFavorites(Principal principal) {
         try {
-            String email = principal.getName();
+            String email = getPrincipalEmail(principal);
             int tenantId = userService.getCurrentUser(email).getUser_id();
             return ResponseEntity.ok(propertyService.getAllFavorites(tenantId));
+        } catch (IllegalStateException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {

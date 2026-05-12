@@ -1,0 +1,13 @@
+FROM maven:3.9.6-eclipse-temurin-17 AS builder
+
+WORKDIR /app
+
+# Copy pom.xml and source code
+COPY pom.xml .
+COPY src ./src
+
+# Download dependencies (cache layer)
+RUN mvn dependency:go-offline -B
+
+# Command to run tests when container starts
+CMD ["mvn", "test"]

@@ -1,4 +1,4 @@
-// src/pages/owner/PropertyForm.js
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,11 +6,13 @@ import { useAuth } from '../../context/AuthContext';
 import { useProperty } from '../../context/PropertyContext';
 import { AnimatedPage, AnimatedButton } from '../../components/AnimatedPage';
 import ImageUpload from '../../components/ImageUpload';
+import { mapFormToBackend } from '../../utils/mappers';
+import { propertyApi } from '../../utils/api';
 
-// ---------------------------------------------------------------------------
-// Constants — values MUST match backend CHECK constraint exactly:
-// ('APARTMENT','STUDIO','VILLA','DUPLEX','OFFICE','SHOP','WAREHOUSE')
-// ---------------------------------------------------------------------------
+
+
+
+
 const PROPERTY_TYPES = [
   { value: '',          label: 'Select a type…' },
   { value: 'APARTMENT', label: '🏢 Apartment' },
@@ -24,22 +26,21 @@ const PROPERTY_TYPES = [
 
 const MAX_IMAGES = 5;
 
-// All fields required by backend Property DTO
 const EMPTY_FORM = {
-  title:       '',
-  description: '',
-  price:       '',
-  city:        '',
-  district:    '',
-  address:     '',
-  propertyType: '',
-  numRooms:    '',
-  areaSqm:     '',
+  title:               '',
+  propertyDescription: '',
+  pricePerMonth:       '',
+  city:                '',
+  district:            '',
+  address:             '',
+  propertyType:        '',
+  numRooms:            '',
+  areaSqm:             '',
 };
 
-// ---------------------------------------------------------------------------
-// Inline field error
-// ---------------------------------------------------------------------------
+
+
+
 function FieldError({ message }) {
   if (!message) return null;
   return (
@@ -53,10 +54,10 @@ function FieldError({ message }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// PropertyForm — handles Create (/owner/properties/new)
-//                     and Edit  (/owner/properties/edit/:id)
-// ---------------------------------------------------------------------------
+
+
+
+
 function PropertyForm() {
   const { id } = useParams();
   const isEditMode = Boolean(id);
@@ -71,12 +72,12 @@ function PropertyForm() {
   const [submitError, setSubmitError] = useState('');
   const [fetchLoading, setFetchLoading] = useState(isEditMode);
 
-  // Redirect non-owners
+  
   useEffect(() => {
-    if (user && user.role !== 'owner') navigate('/');
+    if (user && user.role !== 'admin') navigate('/');
   }, [user, navigate]);
 
-  // Pre-fill form in edit mode
+  
   useEffect(() => {
     if (!isEditMode) return;
 
@@ -88,15 +89,15 @@ function PropertyForm() {
       if (result.success) {
         const p = result.data;
         setFormData({
-          title:        p.title || '',
-          description:  p.description || '',
-          price:        p.price?.toString() || '',
-          city:         p.city || '',
-          district:     p.district || '',
-          address:      p.address || '',
-          propertyType: (p.propertyType || '').toUpperCase(),
-          numRooms:     p.numRooms?.toString() || '',
-          areaSqm:      p.areaSqm?.toString() || '',
+          title:               p.title || '',
+          propertyDescription: p.propertyDescription || '',
+          pricePerMonth:       p.pricePerMonth?.toString() || '',
+          city:                p.city || '',
+          district:            p.district || '',
+          address:             p.address || '',
+          propertyType:        (p.propertyType || '').toUpperCase(),
+          numRooms:            p.numRooms?.toString() || '',
+          areaSqm:             p.areaSqm?.toString() || '',
         });
         if (p.images?.length) setImages(p.images);
       } else {
@@ -113,20 +114,20 @@ function PropertyForm() {
     }
   };
 
-  // ---------------------------------------------------------------------------
-  // Validation — matches backend NOT NULL + CHECK constraints
-  // ---------------------------------------------------------------------------
+  
+  
+  
   const validate = () => {
     const errs = {};
-    if (!formData.title.trim())        errs.title = 'Title is required.';
-    if (!formData.description.trim())  errs.description = 'Description is required.';
-    if (!formData.city.trim())         errs.city = 'City is required.';
-    if (!formData.address.trim())      errs.address = 'Address is required.';
-    if (!formData.propertyType)        errs.propertyType = 'Please select a property type.';
-    if (!formData.price) {
-      errs.price = 'Monthly rent is required.';
-    } else if (isNaN(Number(formData.price)) || Number(formData.price) <= 0) {
-      errs.price = 'Rent must be a positive number.';
+    if (!formData.title.trim())               errs.title = 'Title is required.';
+    if (!formData.propertyDescription.trim()) errs.propertyDescription = 'Description is required.';
+    if (!formData.city.trim())                errs.city = 'City is required.';
+    if (!formData.address.trim())             errs.address = 'Address is required.';
+    if (!formData.propertyType)               errs.propertyType = 'Please select a property type.';
+    if (!formData.pricePerMonth) {
+      errs.pricePerMonth = 'Monthly rent is required.';
+    } else if (isNaN(Number(formData.pricePerMonth)) || Number(formData.pricePerMonth) <= 0) {
+      errs.pricePerMonth = 'Rent must be a positive number.';
     }
     if (!formData.numRooms) {
       errs.numRooms = 'Number of rooms is required.';
@@ -144,9 +145,9 @@ function PropertyForm() {
     return errs;
   };
 
-  // ---------------------------------------------------------------------------
-  // Submit — builds payload matching backend Property DTO exactly
-  // ---------------------------------------------------------------------------
+  
+  
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError('');
@@ -157,37 +158,45 @@ function PropertyForm() {
       return;
     }
 
-    // Payload field names match mapFormToBackend in mappers.js
-    const payload = {
-      title:        formData.title.trim(),
-      description:  formData.description.trim(),
-      price:        Number(formData.price),
-      city:         formData.city.trim(),
-      district:     formData.district.trim(),
-      // mappers.js reads formData.location or formData.address for the address field
-      address:      formData.address.trim(),
-      location:     formData.address.trim(), // alias so mapper picks it up too
-      propertyType: formData.propertyType,   // already uppercase e.g. 'APARTMENT'
-      numRooms:     Number(formData.numRooms),
-      areaSqm:      Number(formData.areaSqm),
-      isAvailable:  true,
-      images,
-    };
-
-    const result = isEditMode
-      ? await updateProperty(id, payload)
-      : await createProperty(payload);
-
-    if (result.success) {
-      navigate('/owner/dashboard');
+    if (isEditMode) {
+      
+      const payload = {
+        ...mapFormToBackend(formData),
+        coverPic: images[0] || null,
+      };
+      const result = await updateProperty(id, payload);
+      if (result.success) {
+        navigate('/admin/dashboard');
+      } else {
+        setSubmitError(result.error || 'An error occurred. Please try again.');
+      }
     } else {
-      setSubmitError(result.error || 'An error occurred. Please try again.');
+      
+      
+      
+      const result = await createProperty({ ...formData, images });
+      if (!result.success) {
+        setSubmitError(result.error || 'An error occurred. Please try again.');
+        return;
+      }
+
+      
+      
+      
+      const newId = result.data?.property?.propertyId ?? result.data?.id;
+      if (newId && images.length > 1) {
+        for (let i = 1; i < images.length; i++) {
+          await propertyApi.addImage(newId, images[i], false);
+        }
+      }
+
+      navigate('/admin/dashboard');
     }
   };
 
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
+  
+  
+  
   if (fetchLoading) {
     return (
       <AnimatedPage>
@@ -203,14 +212,14 @@ function PropertyForm() {
       <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
 
-          {/* Header */}
+          {}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
             <Link
-              to="/owner/dashboard"
+              to="/admin/dashboard"
               className="inline-flex items-center gap-1 text-gray-500 hover:text-rentsphere-teal transition-colors text-sm mb-4"
             >
               ← Back to Dashboard
@@ -225,7 +234,7 @@ function PropertyForm() {
             </p>
           </motion.div>
 
-          {/* Form Card */}
+          {}
           <motion.div
             initial={{ scale: 0.97, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -233,7 +242,7 @@ function PropertyForm() {
             className="glass-effect rounded-2xl p-8 shadow-2xl"
           >
 
-            {/* Global submit error */}
+            {}
             <AnimatePresence>
               {submitError && (
                 <motion.div
@@ -249,7 +258,7 @@ function PropertyForm() {
 
             <form onSubmit={handleSubmit} className="space-y-6" noValidate>
 
-              {/* Title */}
+              {}
               <div>
                 <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
                   Property Title <span className="text-red-500">*</span>
@@ -268,27 +277,27 @@ function PropertyForm() {
                 <FieldError message={fieldErrors.title} />
               </div>
 
-              {/* Description */}
+              {}
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="propertyDescription" className="block text-sm font-medium text-gray-700 mb-2">
                   Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
+                  id="propertyDescription"
+                  name="propertyDescription"
+                  value={formData.propertyDescription}
                   onChange={handleChange}
                   rows={4}
-                  className={`input-field resize-none ${fieldErrors.description ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : ''}`}
+                  className={`input-field resize-none ${fieldErrors.propertyDescription ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : ''}`}
                   placeholder="Describe the property, amenities, nearby facilities…"
                 />
-                <FieldError message={fieldErrors.description} />
+                <FieldError message={fieldErrors.propertyDescription} />
               </div>
 
-              {/* Price + Property Type */}
+              {}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="pricePerMonth" className="block text-sm font-medium text-gray-700 mb-2">
                     Monthly Rent (USD) <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
@@ -296,16 +305,16 @@ function PropertyForm() {
                     <motion.input
                       whileFocus={{ scale: 1.01 }}
                       type="number"
-                      id="price"
-                      name="price"
-                      value={formData.price}
+                      id="pricePerMonth"
+                      name="pricePerMonth"
+                      value={formData.pricePerMonth}
                       onChange={handleChange}
                       min={1}
-                      className={`input-field pl-7 ${fieldErrors.price ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : ''}`}
+                      className={`input-field pl-7 ${fieldErrors.pricePerMonth ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : ''}`}
                       placeholder="1200"
                     />
                   </div>
-                  <FieldError message={fieldErrors.price} />
+                  <FieldError message={fieldErrors.pricePerMonth} />
                 </div>
 
                 <div>
@@ -329,7 +338,7 @@ function PropertyForm() {
                 </div>
               </div>
 
-              {/* Rooms + Area */}
+              {}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="numRooms" className="block text-sm font-medium text-gray-700 mb-2">
@@ -369,7 +378,7 @@ function PropertyForm() {
                 </div>
               </div>
 
-              {/* City + District */}
+              {}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
@@ -405,7 +414,7 @@ function PropertyForm() {
                 </div>
               </div>
 
-              {/* Address */}
+              {}
               <div>
                 <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
                   Street Address <span className="text-red-500">*</span>
@@ -423,7 +432,7 @@ function PropertyForm() {
                 <FieldError message={fieldErrors.address} />
               </div>
 
-              {/* Images */}
+              {}
               <ImageUpload
                 value={images}
                 onChange={setImages}
@@ -431,13 +440,13 @@ function PropertyForm() {
                 disabled={loading}
               />
 
-              {/* Actions */}
+              {}
               <div className="flex gap-4 pt-2">
                 <motion.button
                   type="button"
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => navigate('/owner/dashboard')}
+                  onClick={() => navigate('/admin/dashboard')}
                   className="flex-1 btn-secondary"
                 >
                   Cancel

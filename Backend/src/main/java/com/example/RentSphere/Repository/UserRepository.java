@@ -1,15 +1,10 @@
 package com.example.RentSphere.Repository;
 
 import com.example.RentSphere.Dto.User;
-import com.example.RentSphere.Dto.*;
-import jakarta.transaction.Transactional;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -51,6 +46,18 @@ public class UserRepository {
         }
     }
 
+    public boolean existsByEmail(String email) {
+        String sql = "SELECT COUNT(1) FROM users WHERE email = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, email);
+        return count != null && count > 0;
+    }
+
+    public boolean existsByUsername(String username) {
+        String sql = "SELECT COUNT(1) FROM users WHERE username = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, username);
+        return count != null && count > 0;
+    }
+
 
     public void save(User user) {
 
@@ -67,6 +74,28 @@ public class UserRepository {
                 user.getAvatar_url(),
                 user.is_active()
         );
+    }
 
+    public void update(User user) {
+        String sql = "UPDATE users SET full_name = ?, username = ?, email = ?, password_hash = ?, mobile_number = ?, avatar_url = ?, updated_at = NOW() WHERE user_id = ?";
+        jdbcTemplate.update(sql,
+                user.getFull_name(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getPassword_hash(),
+                user.getMobile_number(),
+                user.getAvatar_url(),
+                user.getUser_id()
+        );
+    }
+
+    public int updateActiveState(int userId, boolean isActive) {
+        String sql = "UPDATE users SET is_active = ?, updated_at = NOW() WHERE user_id = ?";
+        return jdbcTemplate.update(sql, isActive, userId);
+    }
+
+    public int updateRole(int userId, String roleName) {
+        String sql = "UPDATE users SET role_name = ?, updated_at = NOW() WHERE user_id = ?";
+        return jdbcTemplate.update(sql, roleName, userId);
     }
 }

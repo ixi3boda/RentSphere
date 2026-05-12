@@ -15,7 +15,7 @@ target/
 .idea/
 .vscode/
 *.iml
-
+*.class
 # OS
 .DS_Store
 Thumbs.db
@@ -32,3 +32,4 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+target/

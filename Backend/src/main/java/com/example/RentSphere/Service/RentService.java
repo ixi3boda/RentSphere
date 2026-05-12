@@ -1,9 +1,12 @@
 package com.example.RentSphere.Service;
 
+import com.example.RentSphere.Dto.Contract;
 import com.example.RentSphere.Dto.CreateRentalRequest;
 import com.example.RentSphere.Dto.PropertyDetails;
 import com.example.RentSphere.Dto.RentalRequest;
 import com.example.RentSphere.Repository.RentRepository;
+import com.example.RentSphere.Service.ContractService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +18,21 @@ public class RentService {
 
     private final RentRepository rentRepository;
     private final PropertyService propertyService;
+    private final ContractService contractService;
 
     public RentalRequest createRentalRequest(CreateRentalRequest request, int tenantId) {
+        if (request == null) {
+            throw new IllegalArgumentException("Rental request payload is required");
+        }
+        if (request.getPropertyId() == null) {
+            throw new IllegalArgumentException("Property ID is required");
+        }
+        if (request.getDesiredStart() == null) {
+            throw new IllegalArgumentException("Desired start date is required");
+        }
+        if (request.getDesiredMonths() != null && (request.getDesiredMonths() < 1 || request.getDesiredMonths() > 24)) {
+            throw new IllegalArgumentException("Desired months must be between 1 and 24");
+        }
         return rentRepository.createRentalRequest(request, tenantId);
     }
 
@@ -29,7 +45,8 @@ public class RentService {
                 .orElseThrow(() -> new RuntimeException("Rental request not found"));
     }
 
-    public RentalRequest acceptRequest(Long id, int currentUserId) {
+    @Transactional
+    public Contract acceptRequest(Long id, int currentUserId) {
         RentalRequest request = getById(id);
         if (!"PENDING".equalsIgnoreCase(request.getReqStatus())) {
             throw new IllegalArgumentException("Only pending rental requests can be accepted");
@@ -47,7 +64,8 @@ public class RentService {
         if (updated == 0) {
             throw new RuntimeException("Unable to accept rental request");
         }
-        return getById(id);
+
+        return contractService.createContractForApprovedRequest(request, propertyDetails);
     }
 
     public RentalRequest rejectRequest(Long id, int currentUserId) {

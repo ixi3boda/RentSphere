@@ -1,4 +1,4 @@
-// src/components/Navbar.js
+
 import React, { useState, useEffect } from 'react';
 
 import { Link, useNavigate } from 'react-router-dom';
@@ -11,7 +11,7 @@ function Navbar() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-// Add ESC key handler
+
 useEffect(() => {
   const handleEsc = (e) => {
     if (e.key === 'Escape' && showLogoutConfirm) {
@@ -44,9 +44,10 @@ useEffect(() => {
         className="glass-effect sticky top-0 z-50 shadow-lg"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo with Rotation Animation */}
-            <Link to="/" className="flex items-center space-x-3 group">
+          <div className="flex items-center h-16">
+            {}
+            <div className="flex items-center">
+              <Link to="/" className="flex items-center space-x-3 group">
               <motion.img 
                 src="/rentSphereLogo.png" 
                 alt="RentSphere Logo" 
@@ -68,22 +69,22 @@ useEffect(() => {
                 RentSphere
               </span>
             </Link>
+            </div>
 
-            {/* Desktop Menu */}
-            <div className="hidden md:flex items-center space-x-6">
-              {isAuthenticated ? (
-                <>
-                  {/* Profile Picture Thumbnail */}
+            {}
+            <div className="hidden md:flex md:flex-1 md:justify-center">
+              {isAuthenticated && (
+                <div className="flex items-center gap-3">
                   <Link to="/profile">
                     <motion.div
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
                       className="w-8 h-8 rounded-full bg-gradient-to-r from-rentsphere-teal to-rentsphere-orange overflow-hidden cursor-pointer"
                     >
-                      {user?.profilePicture ? (
-                        <img 
-                          src={user.profilePicture} 
-                          alt="Profile" 
+                      {user?.avatar ? (
+                        <img
+                          src={user.avatar}
+                          alt="Profile"
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -93,15 +94,24 @@ useEffect(() => {
                       )}
                     </motion.div>
                   </Link>
-                  
+
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     className="text-gray-700 font-medium"
                   >
                     👋 Welcome, {user?.name || user?.email?.split('@')[0]}
                   </motion.div>
+                </div>
+              )}
+            </div>
+
+            {}
+            <div className="hidden md:flex items-center space-x-6 md:ml-auto">
+              {isAuthenticated ? (
+                <>
                   
-                  {/* Browse Properties — visible to all logged-in users */}
+                  
+                  {}
                   <Link to="/properties">
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -112,19 +122,30 @@ useEffect(() => {
                     </motion.button>
                   </Link>
 
-                  {user?.role === 'owner' && (
-                    <Link to="/owner/dashboard">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="text-gray-700 hover:text-rentsphere-teal transition-colors"
-                      >
-                        📊 Dashboard
-                      </motion.button>
-                    </Link>
+                  {user?.role === 'admin' && (
+                    <>
+                      <Link to="/admin/dashboard">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="text-gray-700 hover:text-rentsphere-teal transition-colors"
+                        >
+                          📊 Dashboard
+                        </motion.button>
+                      </Link>
+                      <Link to="/admin/requests">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="text-gray-700 hover:text-rentsphere-teal transition-colors"
+                        >
+                          📬 Requests
+                        </motion.button>
+                      </Link>
+                    </>
                   )}
                   
-                  {user?.role === 'tenant' && (
+                  {user?.role !== 'admin' && (
                     <Link to="/tenant/dashboard">
                       <motion.button
                         whileHover={{ scale: 1.05 }}
@@ -136,7 +157,19 @@ useEffect(() => {
                     </Link>
                   )}
                   
-                  {/* Profile Link */}
+                  {(user?.role === 'admin' || user?.role === 'tenant') && (
+                    <Link to="/contracts">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="text-gray-700 hover:text-rentsphere-teal transition-colors"
+                      >
+                        📋 Contracts
+                      </motion.button>
+                    </Link>
+                  )}
+                  
+                  {}
                   <Link to="/profile">
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -147,7 +180,7 @@ useEffect(() => {
                     </motion.button>
                   </Link>
                   
-                  {/* Logout Button with Confirmation */}
+                  {}
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -159,6 +192,15 @@ useEffect(() => {
                 </>
               ) : (
                 <>
+                  <Link to="/properties">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="text-gray-700 hover:text-rentsphere-teal transition-colors"
+                    >
+                      🏘️ Browse
+                    </motion.button>
+                  </Link>
                   <Link to="/login">
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -181,7 +223,7 @@ useEffect(() => {
               )}
             </div>
 
-            {/* Mobile menu button */}
+            {}
             <div className="md:hidden">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -198,7 +240,7 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Mobile Menu */}
+          {}
           {isMobileMenuOpen && (
             <motion.div 
               initial={{ opacity: 0, y: -20 }}
@@ -208,11 +250,11 @@ useEffect(() => {
               {isAuthenticated ? (
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3 mb-4">
-                    {/* Profile Picture in Mobile Menu */}
+                    {}
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-rentsphere-teal to-rentsphere-orange overflow-hidden">
-                      {user?.profilePicture ? (
+                      {user?.avatar ? (
                         <img 
-                          src={user.profilePicture} 
+                          src={user.avatar} 
                           alt="Profile" 
                           className="w-full h-full object-cover"
                         />
@@ -226,9 +268,27 @@ useEffect(() => {
                       Welcome, {user?.name || user?.email}
                     </div>
                   </div>
-                  <Link to="/dashboard">
-                    <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Dashboard</button>
-                  </Link>
+                  {user?.role === 'admin' ? (
+                    <Link to="/admin/dashboard">
+                      <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Dashboard</button>
+                    </Link>
+                  ) : (
+                    <Link to="/tenant/dashboard">
+                      <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Dashboard</button>
+                    </Link>
+                  )}
+                  {user?.role === 'admin' && (
+                    <>
+                      <Link to="/admin/requests">
+                        <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">📬 Rental Requests</button>
+                      </Link>
+                    </>
+                  )}
+                  {(user?.role === 'admin' || user?.role === 'tenant') && (
+                    <Link to="/contracts">
+                      <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">📋 Contracts</button>
+                    </Link>
+                  )}
                   <Link to="/properties">
                     <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">🏘️ Browse</button>
                   </Link>
@@ -244,6 +304,9 @@ useEffect(() => {
                 </div>
               ) : (
                 <div className="space-y-3">
+                  <Link to="/properties">
+                    <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">🏘️ Browse</button>
+                  </Link>
                   <Link to="/login">
                     <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Login</button>
                   </Link>
@@ -257,7 +320,7 @@ useEffect(() => {
         </div>
       </motion.nav>
 
-      {/* Logout Confirmation Modal */}
+      {}
       <AnimatePresence>
         {showLogoutConfirm && (
           <motion.div
@@ -266,7 +329,7 @@ useEffect(() => {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center px-4"
           >
-            {/* Backdrop */}
+            {}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -275,7 +338,7 @@ useEffect(() => {
               className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             />
             
-            {/* Modal */}
+            {}
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -284,7 +347,7 @@ useEffect(() => {
               className="relative glass-effect rounded-2xl p-6 max-w-md w-full shadow-2xl"
             >
               <div className="text-center">
-                {/* Icon */}
+                {}
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -296,15 +359,15 @@ useEffect(() => {
                   </svg>
                 </motion.div>
                 
-                {/* Title */}
+                {}
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">Ready to Leave?</h3>
                 
-                {/* Message */}
+                {}
                 <p className="text-gray-600 mb-6">
                   Are you sure you want to logout? You'll need to sign in again to access your account.
                 </p>
                 
-                {/* Buttons */}
+                {}
                 <div className="flex gap-4">
                   <motion.button
                     whileHover={{ scale: 1.02 }}

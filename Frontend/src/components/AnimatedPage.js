@@ -1,7 +1,7 @@
-// src/components/AnimatedPage.js
+
 import { motion } from 'framer-motion';
 
-// Install framer-motion first: npm install framer-motion
+
 
 export const AnimatedPage = ({ children }) => {
   return (

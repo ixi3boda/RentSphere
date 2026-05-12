@@ -339,21 +339,25 @@ public class PropertyRepository {
     }
 
     public Favorite favorite(int propertyId, int tenantId) {
-
-        String insertSql = """
-        INSERT INTO favorites (tenant_id, property_id)
-        VALUES (?, ?)
-    """;
-
-        int rows = jdbcTemplate.update(insertSql, tenantId, propertyId);
-
-        if (rows == 0) {
-            throw new RuntimeException("Failed to add property to favorites");
+        
+        String checkSql = "SELECT COUNT(*) FROM favorites WHERE tenant_id = ? AND property_id = ?";
+        Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class, tenantId, propertyId);
+        
+        if (count != null && count > 0) {
+            
+            String deleteSql = "DELETE FROM favorites WHERE tenant_id = ? AND property_id = ?";
+            jdbcTemplate.update(deleteSql, tenantId, propertyId);
+        } else {
+            
+            String insertSql = "INSERT INTO favorites (tenant_id, property_id) VALUES (?, ?)";
+            int rows = jdbcTemplate.update(insertSql, tenantId, propertyId);
+            if (rows == 0) {
+                throw new RuntimeException("Failed to add property to favorites");
+            }
         }
 
         RowMapper<User> userMapper = (rs, rowNum) -> {
             User user = new User();
-
             user.setUser_id(rs.getInt("user_id"));
             user.setFull_name(rs.getString("full_name"));
             user.setEmail(rs.getString("email"));
@@ -364,12 +368,10 @@ public class PropertyRepository {
             user.set_active(rs.getBoolean("is_active"));
             user.setCreated_at(rs.getTimestamp("created_at").toLocalDateTime());
             user.setUpdated_at(rs.getTimestamp("updated_at").toLocalDateTime());
-
             return user;
         };
 
         String userSql = "SELECT * FROM users WHERE user_id = ?";
-
         User user = jdbcTemplate.query(userSql, userMapper, tenantId)
                 .stream()
                 .findFirst()

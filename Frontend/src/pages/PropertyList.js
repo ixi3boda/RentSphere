@@ -1,25 +1,26 @@
-// src/pages/PropertyList.js
-//
-// RS-10 — Tenant property browsing page.
-// Route: /properties
-//
-// Shows all available properties in a responsive grid with search/filter,
-// pagination, loading skeletons, empty state, and error handling.
 
-import React, { useState, useEffect, useCallback } from "react";
+
+
+
+
+
+
+
+
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedPage } from "../components/AnimatedPage";
 import PropertyCard from "../components/PropertyCard";
+import { useAuth } from "../context/AuthContext";
 import { propertyApi } from "../utils/api";
 import { mapPropertyToFrontend } from "../utils/mappers";
-import useDebounce from "../hooks/useDebounce";
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-// Property type filter values — must match backend CHECK constraint exactly:
-// ('APARTMENT','STUDIO','VILLA','DUPLEX','OFFICE','SHOP','WAREHOUSE')
-// mapPropertyToFrontend lowercases these for display, so we compare lowercase here.
+
+
+
+
+
+
 const PROPERTY_TYPES = [
   { value: '',          label: 'All Types' },
   { value: 'apartment', label: '🏢 Apartment' },
@@ -33,9 +34,9 @@ const PROPERTY_TYPES = [
 
 const PAGE_SIZE = 9;
 
-// ---------------------------------------------------------------------------
-// Skeleton card — mirrors PropertyCard dimensions for no-layout-shift loading
-// ---------------------------------------------------------------------------
+
+
+
 function SkeletonCard() {
   return (
     <div className="glass-effect rounded-2xl overflow-hidden shadow-lg animate-pulse">
@@ -50,48 +51,51 @@ function SkeletonCard() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// PropertyList Page
-// ---------------------------------------------------------------------------
+function FilterChip({ label, onRemove }) {
+  return (
+    <button
+      type="button"
+      onClick={onRemove}
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rentsphere-teal/10 text-rentsphere-teal text-xs font-semibold border border-rentsphere-teal/20 hover:bg-rentsphere-teal/20 transition-colors"
+    >
+      {label}
+      <span className="text-[10px]">✕</span>
+    </button>
+  );
+}
+
+
+
+
 function PropertyList() {
+  const { isAuthenticated } = useAuth();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searching, setSearching] = useState(false);
   const [error, setError] = useState("");
+  const [favoriteIds, setFavoriteIds] = useState(new Set());
 
-  // Search / filter state
+  
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [minRooms, setMinRooms] = useState("");
+  const [availableOnly, setAvailableOnly] = useState(false);
   const [sortBy, setSortBy] = useState("newest");
 
-  // RS-11: debounce the search term 300ms
-  const debouncedSearch = useDebounce(search, 300);
-
-  // Pagination
+  
   const [page, setPage] = useState(1);
 
-  // ---------------------------------------------------------------------------
-  // Fetch
-  // ---------------------------------------------------------------------------
-  const fetchProperties = useCallback(async (searchKeyword = "") => {
-    if (!searchKeyword) {
-      setLoading(true);
-    } else {
-      setSearching(true);
-    }
+  
+  
+  
+  const fetchProperties = useCallback(async () => {
+    setLoading(true);
     setError("");
     try {
-      let list;
-      if (searchKeyword) {
-        // RS-11: debounced search — GET /api/properties/search?prefix=...
-        const res = await propertyApi.search(searchKeyword);
-        list = Array.isArray(res.data) ? res.data : [];
-      } else {
-        // Initial load — GET /api/properties/all
-        const res = await propertyApi.getAll();
-        list = Array.isArray(res.data) ? res.data : [];
-      }
+      const res = await propertyApi.getAll();
+      const list = Array.isArray(res.data) ? res.data : [];
       setProperties(list.map(mapPropertyToFrontend));
     } catch (err) {
       setError(
@@ -100,64 +104,132 @@ function PropertyList() {
       );
     } finally {
       setLoading(false);
-      setSearching(false);
     }
   }, []);
 
-  // Initial load
+  const fetchFavorites = useCallback(async () => {
+    if (!isAuthenticated) {
+      setFavoriteIds(new Set());
+      return;
+    }
+
+    try {
+      const res = await propertyApi.getFavorites();
+      const list = Array.isArray(res.data) ? res.data : [];
+      const nextIds = new Set(
+        list
+          .map((item) => String(item?.propertyDetails?.property?.propertyId))
+          .filter(Boolean),
+      );
+      setFavoriteIds(nextIds);
+    } catch (err) {
+      setFavoriteIds(new Set());
+    }
+  }, [isAuthenticated]);
+
+  
   useEffect(() => {
     fetchProperties();
   }, [fetchProperties]);
 
-  // RS-11: re-fetch on debounced search changes
   useEffect(() => {
-    fetchProperties(debouncedSearch);
-  }, [debouncedSearch, fetchProperties]);
+    fetchFavorites();
+  }, [fetchFavorites]);
 
-  // Reset to page 1 whenever filters or debounced search changes
+  
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, typeFilter, maxPrice, sortBy]);
+  }, [search, typeFilter, cityFilter, maxPrice, minPrice, minRooms, availableOnly, sortBy]);
 
-  // ---------------------------------------------------------------------------
-  // Client-side filter + sort + paginate
-  // ---------------------------------------------------------------------------
-  // API mode: properties[] is already server-filtered for search.
-  // Apply client-side type/price/sort on top.
-  const filtered = properties
-    .filter((p) => {
-      const matchType = !typeFilter || p.propertyType === typeFilter;
-      const matchPrice = !maxPrice || Number(p.price) <= Number(maxPrice);
-      return matchType && matchPrice;
-    })
-    .sort((a, b) => {
-      if (sortBy === "price_asc") return a.price - b.price;
-      if (sortBy === "price_desc") return b.price - a.price;
-      return 0; // 'newest' — keep API order
-    });
+  
+  
+  
+  const cityOptions = useMemo(
+    () =>
+      Array.from(new Set(properties.map((p) => p.city).filter(Boolean))).sort((a, b) =>
+        a.localeCompare(b),
+      ),
+    [properties],
+  );
+
+  const filtered = useMemo(() => {
+    const normalizedQuery = search.trim().toLowerCase();
+    const queryTokens = normalizedQuery.split(/\s+/).filter(Boolean);
+
+    return properties
+      .filter((p) => {
+        const searchHaystack = [
+          p.title,
+          p.description,
+          p.propertyType,
+          p.city,
+          p.district,
+          p.address,
+          p.location,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        const matchSearch =
+          queryTokens.length === 0 ||
+          queryTokens.every((token) => searchHaystack.includes(token));
+        const matchType = !typeFilter || p.propertyType === typeFilter;
+        const matchCity = !cityFilter || p.city === cityFilter;
+        const matchMin = !minPrice || Number(p.price) >= Number(minPrice);
+        const matchMax = !maxPrice || Number(p.price) <= Number(maxPrice);
+        const matchRooms = !minRooms || Number(p.numRooms || 0) >= Number(minRooms);
+        const matchAvailable = !availableOnly || p.status === "available";
+
+        return (
+          matchSearch &&
+          matchType &&
+          matchCity &&
+          matchMin &&
+          matchMax &&
+          matchRooms &&
+          matchAvailable
+        );
+      })
+      .sort((a, b) => {
+        if (sortBy === "price_asc") return a.price - b.price;
+        if (sortBy === "price_desc") return b.price - a.price;
+        if (sortBy === "rooms_desc") return Number(b.numRooms || 0) - Number(a.numRooms || 0);
+        if (sortBy === "rooms_asc") return Number(a.numRooms || 0) - Number(b.numRooms || 0);
+        const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return bTime - aTime;
+      });
+  }, [properties, search, typeFilter, cityFilter, minPrice, maxPrice, minRooms, availableOnly, sortBy]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const hasFilters = search || typeFilter || maxPrice;
-  const activeSearch = debouncedSearch;
+  const hasFilters =
+    search || typeFilter || cityFilter || maxPrice || minPrice || minRooms || availableOnly;
+  const activeSearch = search.trim();
+  const typeLabel = PROPERTY_TYPES.find((t) => t.value === typeFilter)?.label;
 
   const clearFilters = () => {
     setSearch("");
     setTypeFilter("");
     setMaxPrice("");
+    setMinPrice("");
+    setCityFilter("");
+    setMinRooms("");
+    setAvailableOnly(false);
     setSortBy("newest");
   };
 
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
+  
+  
+  
   return (
     <AnimatedPage>
       <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          {/* ---------------------------------------------------------------- */}
-          {/* Header                                                            */}
-          {/* ---------------------------------------------------------------- */}
+          {}
+          {}
+          {}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -172,113 +244,189 @@ function PropertyList() {
             </p>
           </motion.div>
 
-          {/* ---------------------------------------------------------------- */}
-          {/* Filter bar                                                        */}
-          {/* ---------------------------------------------------------------- */}
+          {}
+          {}
+          {}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="glass-effect rounded-2xl p-4 mb-8 flex flex-col sm:flex-row gap-3 flex-wrap"
+            className="glass-effect rounded-2xl p-5 mb-8 border border-white/40 shadow-sm"
           >
-            {/* Search — RS-11 */}
-            <div className="flex-1 min-w-[180px] relative">
-              {/* Spinner while searching, magnifier otherwise */}
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                {searching ? (
-                  <span className="inline-block w-4 h-4 border-2 border-rentsphere-teal border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  "🔍"
-                )}
-              </span>
-              <input
-                type="text"
-                id="search-properties"
-                placeholder="Search by title or location…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="input-field pl-9 pr-8"
-                autoComplete="off"
-              />
-              {/* Inline clear button */}
-              <AnimatePresence>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-800">Search & Filters</h2>
+              {hasFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="text-sm font-semibold text-rentsphere-teal hover:text-rentsphere-orange transition-colors"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+              <div className="md:col-span-6 relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                  🔍
+                </span>
+                <input
+                  type="text"
+                  id="search-properties"
+                  placeholder="Search title, location, description..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="input-field pl-9 pr-8"
+                  autoComplete="off"
+                />
                 {search && (
-                  <motion.button
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
+                  <button
                     type="button"
                     onClick={() => setSearch("")}
                     aria-label="Clear search"
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm leading-none transition-colors"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
                   >
                     ✕
-                  </motion.button>
+                  </button>
                 )}
-              </AnimatePresence>
+              </div>
+
+              <div className="md:col-span-3">
+                <select
+                  id="filter-type"
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  className="input-field bg-white w-full"
+                >
+                  {PROPERTY_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="md:col-span-3">
+                <select
+                  id="filter-city"
+                  value={cityFilter}
+                  onChange={(e) => setCityFilter(e.target.value)}
+                  className="input-field bg-white w-full"
+                >
+                  <option value="">All Cities</option>
+                  {cityOptions.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="md:col-span-2 relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">
+                  $
+                </span>
+                <input
+                  type="number"
+                  id="filter-min-price"
+                  placeholder="Min"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  min={0}
+                  className="input-field pl-7"
+                />
+              </div>
+
+              <div className="md:col-span-2 relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">
+                  $
+                </span>
+                <input
+                  type="number"
+                  id="filter-max-price"
+                  placeholder="Max"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  min={0}
+                  className="input-field pl-7"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <input
+                  type="number"
+                  id="filter-min-rooms"
+                  placeholder="Min rooms"
+                  value={minRooms}
+                  onChange={(e) => setMinRooms(e.target.value)}
+                  min={0}
+                  className="input-field w-full"
+                />
+              </div>
+
+              <div className="md:col-span-3">
+                <select
+                  id="sort-properties"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="input-field bg-white w-full"
+                >
+                  <option value="newest">Newest first</option>
+                  <option value="price_asc">Price: Low → High</option>
+                  <option value="price_desc">Price: High → Low</option>
+                  <option value="rooms_desc">Rooms: High → Low</option>
+                  <option value="rooms_asc">Rooms: Low → High</option>
+                </select>
+              </div>
+
+              <div className="md:col-span-3 flex items-center">
+                <label className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm text-gray-700 w-full">
+                  <input
+                    type="checkbox"
+                    checked={availableOnly}
+                    onChange={(e) => setAvailableOnly(e.target.checked)}
+                    className="h-4 w-4"
+                  />
+                  Available only
+                </label>
+              </div>
             </div>
 
-            {/* Type */}
-            <select
-              id="filter-type"
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="input-field bg-white min-w-[140px] flex-shrink-0"
-            >
-              {PROPERTY_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-
-            {/* Max price */}
-            <div className="relative min-w-[140px] flex-shrink-0">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">
-                $
-              </span>
-              <input
-                type="number"
-                id="filter-max-price"
-                placeholder="Max price/mo"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                min={0}
-                className="input-field pl-7"
-              />
-            </div>
-
-            {/* Sort */}
-            <select
-              id="sort-properties"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="input-field bg-white min-w-[140px] flex-shrink-0"
-            >
-              <option value="newest">Newest first</option>
-              <option value="price_asc">Price: Low → High</option>
-              <option value="price_desc">Price: High → Low</option>
-            </select>
-
-            {/* Clear */}
             <AnimatePresence>
               {hasFilters && (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  onClick={clearFilters}
-                  className="btn-secondary !py-2 !px-4 text-sm flex-shrink-0"
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  className="mt-4 flex flex-wrap gap-2"
                 >
-                  ✕ Clear
-                </motion.button>
+                  {search && <FilterChip label={`Search: "${search}"`} onRemove={() => setSearch("")} />}
+                  {typeFilter && typeLabel && (
+                    <FilterChip label={typeLabel} onRemove={() => setTypeFilter("")} />
+                  )}
+                  {cityFilter && (
+                    <FilterChip label={`City: ${cityFilter}`} onRemove={() => setCityFilter("")} />
+                  )}
+                  {minPrice && (
+                    <FilterChip label={`Min $${minPrice}`} onRemove={() => setMinPrice("")} />
+                  )}
+                  {maxPrice && (
+                    <FilterChip label={`Max $${maxPrice}`} onRemove={() => setMaxPrice("")} />
+                  )}
+                  {minRooms && (
+                    <FilterChip label={`${minRooms}+ rooms`} onRemove={() => setMinRooms("")} />
+                  )}
+                  {availableOnly && (
+                    <FilterChip label="Available only" onRemove={() => setAvailableOnly(false)} />
+                  )}
+                </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
 
-          {/* ---------------------------------------------------------------- */}
-          {/* Error                                                             */}
-          {/* ---------------------------------------------------------------- */}
+          {}
+          {}
+          {}
           {error && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -299,9 +447,9 @@ function PropertyList() {
             </motion.div>
           )}
 
-          {/* ---------------------------------------------------------------- */}
-          {/* Loading skeletons                                                 */}
-          {/* ---------------------------------------------------------------- */}
+          {}
+          {}
+          {}
           {loading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: PAGE_SIZE }).map((_, i) => (
@@ -310,9 +458,9 @@ function PropertyList() {
             </div>
           )}
 
-          {/* ---------------------------------------------------------------- */}
-          {/* Empty state                                                       */}
-          {/* ---------------------------------------------------------------- */}
+          {}
+          {}
+          {}
           {!loading && !error && filtered.length === 0 && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -339,12 +487,12 @@ function PropertyList() {
             </motion.div>
           )}
 
-          {/* ---------------------------------------------------------------- */}
-          {/* Property grid                                                     */}
-          {/* ---------------------------------------------------------------- */}
+          {}
+          {}
+          {}
           {!loading && !error && paginated.length > 0 && (
             <>
-              {/* Result count — shows search keyword when active */}
+              {}
               <p className="text-sm text-gray-400 mb-4">
                 {activeSearch ? (
                   <>
@@ -367,11 +515,24 @@ function PropertyList() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {paginated.map((prop, i) => (
-                  <PropertyCard key={prop.id} property={prop} index={i} />
+                  <PropertyCard
+                    key={prop.id}
+                    property={prop}
+                    index={i}
+                    initialFavorited={favoriteIds.has(String(prop.id))}
+                    onFavoriteToggle={(next) => {
+                      setFavoriteIds((prev) => {
+                        const updated = new Set(prev);
+                        if (next) updated.add(String(prop.id));
+                        else updated.delete(String(prop.id));
+                        return updated;
+                      });
+                    }}
+                  />
                 ))}
               </div>
 
-              {/* Pagination */}
+              {}
               {totalPages > 1 && (
                 <motion.div
                   initial={{ opacity: 0 }}
