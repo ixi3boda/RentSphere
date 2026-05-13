@@ -17,7 +17,10 @@ jest.mock('../../utils/api', () => ({
     update: jest.fn(),
     delete: jest.fn(),
   },
-  authApi: { login: jest.fn(), register: jest.fn(), logout: jest.fn(), getMe: jest.fn(), updateProfile: jest.fn() },
+  authApi: {
+    login: jest.fn(), register: jest.fn(), logout: jest.fn(),
+    getMe: jest.fn(), updateProfile: jest.fn(),
+  },
   rentApi: {
     getAllContracts: jest.fn(),
     getAllRequests: jest.fn(),
@@ -26,10 +29,11 @@ jest.mock('../../utils/api', () => ({
   uploadApi: { uploadOne: jest.fn() },
 }));
 
-// Mock recently viewed utility
 jest.mock('../../utils/recentlyViewed', () => ({
   getRecentlyViewed: jest.fn(() => []),
   recordRecentlyViewed: jest.fn(),
+  clearRecentlyViewed: jest.fn(),
+  setRecentlyViewed: jest.fn(),
 }));
 
 const { propertyApi, rentApi } = require('../../utils/api');
@@ -50,7 +54,7 @@ describe('TenantDashboard', () => {
     });
   });
 
-  test('renders tenant welcome message with user name', async () => {
+  test('renders welcome message with user name', async () => {
     renderWithProviders(<TenantDashboard />, {
       authValue: { user: mockTenant, isAuthenticated: true, initializing: false },
     });
@@ -60,7 +64,7 @@ describe('TenantDashboard', () => {
     });
   });
 
-  test('shows empty favorites state when no favorites', async () => {
+  test('shows empty favorites message when no favorites', async () => {
     renderWithProviders(<TenantDashboard />, {
       authValue: { user: mockTenant, isAuthenticated: true, initializing: false },
     });
@@ -69,7 +73,7 @@ describe('TenantDashboard', () => {
     });
   });
 
-  test('shows Find New Home button', async () => {
+  test('renders Find New Home link', async () => {
     renderWithProviders(<TenantDashboard />, {
       authValue: { user: mockTenant, isAuthenticated: true, initializing: false },
     });
@@ -78,23 +82,33 @@ describe('TenantDashboard', () => {
     });
   });
 
-  test('renders stats section with Favorites, Viewed, Contracts labels', async () => {
+  test('renders stat labels: Favorites, Viewed, Contracts', async () => {
     renderWithProviders(<TenantDashboard />, {
       authValue: { user: mockTenant, isAuthenticated: true, initializing: false },
     });
     await waitFor(() => {
-      expect(screen.getByText('FAVORITES')).toBeInTheDocument();
-      expect(screen.getByText('VIEWED')).toBeInTheDocument();
-      expect(screen.getByText('CONTRACTS')).toBeInTheDocument();
+      // StatBlock renders raw text — CSS makes it uppercase visually but DOM text is lowercase
+      expect(screen.getByText('Favorites')).toBeInTheDocument();
+      expect(screen.getByText('Viewed')).toBeInTheDocument();
+      expect(screen.getByText('Contracts')).toBeInTheDocument();
     });
   });
 
-  test('does NOT show Pay button — TENANT dashboard has no pay action here', async () => {
+  test('TENANT dashboard does NOT have a Pay button', async () => {
     renderWithProviders(<TenantDashboard />, {
       authValue: { user: mockTenant, isAuthenticated: true, initializing: false },
     });
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: /pay/i })).not.toBeInTheDocument();
+    });
+  });
+
+  test('renders Your Favorites section heading', async () => {
+    renderWithProviders(<TenantDashboard />, {
+      authValue: { user: mockTenant, isAuthenticated: true, initializing: false },
+    });
+    await waitFor(() => {
+      expect(screen.getByText('Your Favorites')).toBeInTheDocument();
     });
   });
 });

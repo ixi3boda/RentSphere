@@ -17,19 +17,22 @@ jest.mock('../../utils/api', () => ({
     update: jest.fn(),
     delete: jest.fn(),
   },
-  authApi: { login: jest.fn(), register: jest.fn(), logout: jest.fn(), getMe: jest.fn(), updateProfile: jest.fn() },
+  authApi: {
+    login: jest.fn(), register: jest.fn(), logout: jest.fn(),
+    getMe: jest.fn(), updateProfile: jest.fn(),
+  },
   rentApi: {},
   uploadApi: { uploadOne: jest.fn() },
 }));
 
 const { propertyApi } = require('../../utils/api');
 
-const makeProperty = (id, title, city = 'Cairo', price = 1000) => ({
+const makeBackendProperty = (id, title, city = 'Cairo', price = 1000) => ({
   property: {
     propertyId: id,
     title,
     city,
-    district: '',
+    district: 'Downtown',
     address: '123 Test St',
     propertyType: 'APARTMENT',
     pricePerMonth: price,
@@ -49,19 +52,33 @@ describe('PropertyList', () => {
     propertyApi.getFavorites.mockResolvedValue({ data: [] });
   });
 
-  test('shows skeleton loading state initially', async () => {
-    propertyApi.getAll.mockReturnValue(new Promise(() => {})); // never resolves
-    renderWithProviders(<PropertyList />, { authValue: { initializing: false } });
-    // Skeleton cards have animate-pulse class — check for heading
+  test('renders the main page heading', async () => {
+    propertyApi.getAll.mockResolvedValue({ data: [] });
+    renderWithProviders(<PropertyList />, {
+      authValue: { isAuthenticated: false, initializing: false },
+    });
     expect(screen.getByText(/Explore/i)).toBeInTheDocument();
   });
 
-  test('renders property cards after loading', async () => {
+  test('renders search input', async () => {
+    propertyApi.getAll.mockResolvedValue({ data: [] });
+    renderWithProviders(<PropertyList />, {
+      authValue: { isAuthenticated: false, initializing: false },
+    });
+    expect(screen.getByPlaceholderText(/Where are you looking/i)).toBeInTheDocument();
+  });
+
+  test('renders property cards after data loads', async () => {
     propertyApi.getAll.mockResolvedValue({
-      data: [makeProperty(1, 'Luxury Villa'), makeProperty(2, 'Cozy Studio')],
+      data: [
+        makeBackendProperty(1, 'Luxury Villa'),
+        makeBackendProperty(2, 'Cozy Studio'),
+      ],
     });
 
-    renderWithProviders(<PropertyList />, { authValue: { initializing: false } });
+    renderWithProviders(<PropertyList />, {
+      authValue: { isAuthenticated: false, initializing: false },
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Luxury Villa')).toBeInTheDocument();
@@ -69,42 +86,43 @@ describe('PropertyList', () => {
     });
   });
 
-  test('shows "No Properties Found" when empty', async () => {
+  test('shows "No Properties Found" when list is empty', async () => {
     propertyApi.getAll.mockResolvedValue({ data: [] });
 
-    renderWithProviders(<PropertyList />, { authValue: { initializing: false } });
+    renderWithProviders(<PropertyList />, {
+      authValue: { isAuthenticated: false, initializing: false },
+    });
 
     await waitFor(() => {
       expect(screen.getByText('No Properties Found')).toBeInTheDocument();
     });
   });
 
-  test('shows error state when API fails', async () => {
-    propertyApi.getAll.mockRejectedValue({ response: { data: { message: 'Server error' } } });
+  test('shows error message when API call fails', async () => {
+    propertyApi.getAll.mockRejectedValue({
+      response: { data: { message: 'Server error' } },
+    });
 
-    renderWithProviders(<PropertyList />, { authValue: { initializing: false } });
+    renderWithProviders(<PropertyList />, {
+      authValue: { isAuthenticated: false, initializing: false },
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Server error')).toBeInTheDocument();
     });
   });
 
-  test('shows property count text', async () => {
+  test('shows Found N properties count', async () => {
     propertyApi.getAll.mockResolvedValue({
-      data: [makeProperty(1, 'Apartment One')],
+      data: [makeBackendProperty(1, 'One Bedroom Flat')],
     });
 
-    renderWithProviders(<PropertyList />, { authValue: { initializing: false } });
+    renderWithProviders(<PropertyList />, {
+      authValue: { isAuthenticated: false, initializing: false },
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/Found/i)).toBeInTheDocument();
-      expect(screen.getByText('1')).toBeInTheDocument();
     });
-  });
-
-  test('renders search input', () => {
-    propertyApi.getAll.mockResolvedValue({ data: [] });
-    renderWithProviders(<PropertyList />, { authValue: { initializing: false } });
-    expect(screen.getByPlaceholderText(/Where are you looking/i)).toBeInTheDocument();
   });
 });

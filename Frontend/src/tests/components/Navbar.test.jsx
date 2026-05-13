@@ -5,9 +5,13 @@ import Navbar from '../../components/Navbar';
 import { renderWithProviders, mockAdmin, mockTenant } from '../helpers/renderWithProviders';
 
 describe('Navbar', () => {
-  test('renders logo and Browse link for unauthenticated user', () => {
+  test('renders RentSphere brand text', () => {
     renderWithProviders(<Navbar />);
     expect(screen.getByText(/RentSphere/i)).toBeInTheDocument();
+  });
+
+  test('renders Browse link for all users', () => {
+    renderWithProviders(<Navbar />);
     expect(screen.getByText('Browse')).toBeInTheDocument();
   });
 
@@ -21,10 +25,11 @@ describe('Navbar', () => {
     renderWithProviders(<Navbar />, {
       authValue: { user: mockTenant, isAuthenticated: true },
     });
+    // There is exactly one Logout button in the nav (before modal opens)
     expect(screen.getByText('Logout')).toBeInTheDocument();
   });
 
-  test('shows admin Dashboard link for admin user', () => {
+  test('shows Dashboard link for admin user', () => {
     renderWithProviders(<Navbar />, {
       authValue: { user: mockAdmin, isAuthenticated: true },
     });
@@ -32,14 +37,14 @@ describe('Navbar', () => {
     expect(screen.getByText('Requests')).toBeInTheDocument();
   });
 
-  test('shows tenant Dashboard link for tenant user', () => {
+  test('shows Dashboard link for tenant user', () => {
     renderWithProviders(<Navbar />, {
       authValue: { user: mockTenant, isAuthenticated: true },
     });
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
   });
 
-  test('clicking Logout opens confirmation modal', () => {
+  test('clicking Logout button opens confirmation modal', () => {
     renderWithProviders(<Navbar />, {
       authValue: { user: mockTenant, isAuthenticated: true },
     });
@@ -48,22 +53,27 @@ describe('Navbar', () => {
     expect(screen.getByText(/Are you sure you want to log out/i)).toBeInTheDocument();
   });
 
-  test('logout modal Cancel button closes the dialog', () => {
+  test('clicking Cancel in logout modal hides the modal', () => {
     renderWithProviders(<Navbar />, {
       authValue: { user: mockTenant, isAuthenticated: true },
     });
     fireEvent.click(screen.getByText('Logout'));
+    // Cancel button is inside the modal
     fireEvent.click(screen.getByText('Cancel'));
     expect(screen.queryByText('Sign Out')).not.toBeInTheDocument();
   });
 
-  test('confirmed logout calls logout function', () => {
+  test('confirmed logout calls the logout function', () => {
     const mockLogout = jest.fn();
     renderWithProviders(<Navbar />, {
       authValue: { user: mockTenant, isAuthenticated: true, logout: mockLogout },
     });
+    // Open modal
     fireEvent.click(screen.getByText('Logout'));
-    fireEvent.click(screen.getByRole('button', { name: 'Logout' }));
+    // The modal renders a second "Logout" button — getAllByText returns both;
+    // the last one is the modal confirm button
+    const logoutBtns = screen.getAllByText('Logout');
+    fireEvent.click(logoutBtns[logoutBtns.length - 1]);
     expect(mockLogout).toHaveBeenCalledTimes(1);
   });
 });

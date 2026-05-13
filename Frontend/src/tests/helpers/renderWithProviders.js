@@ -25,7 +25,7 @@ export const mockAdmin = {
 export const defaultAuthValue = {
   user: null,
   isAuthenticated: false,
-  initializing: false,
+  initializing: false,   // ← false by default so components don't hang
   loading: false,
   login: jest.fn(),
   logout: jest.fn(),
