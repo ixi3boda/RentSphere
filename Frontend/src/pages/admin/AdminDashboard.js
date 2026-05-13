@@ -1,9 +1,3 @@
-
-
-
-
-
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,37 +7,30 @@ import { AnimatedPage, LoadingSpinner } from '../../components/AnimatedPage';
 import StatsCard from '../../components/StatsCard';
 import { rentApi } from '../../utils/api';
 
-
-
-
 const PROPERTY_TYPE_LABELS = {
-  apartment: '🏢 Apartment',
-  house:     '🏡 House',
-  studio:    '🏠 Studio',
-  villa:     '🏰 Villa',
-  office:    '🏬 Office',
-  other:     '📦 Other',
+  apartment: 'Apartment',
+  house:     'House',
+  studio:    'Studio',
+  villa:     'Villa',
+  office:    'Office',
+  other:     'Other',
 };
 
 const STATUS_COLORS = {
-  available:   'bg-green-100 text-green-700',
-  rented:      'bg-blue-100  text-blue-700',
-  maintenance: 'bg-yellow-100 text-yellow-700',
+  available:   'bg-emerald-50 text-emerald-600 border-emerald-100',
+  rented:      'bg-blue-50 text-blue-600 border-blue-100',
+  maintenance: 'bg-amber-50 text-amber-600 border-amber-100',
 };
-
-
-
-
 
 function QuickAction({ to, icon, label, variant = 'secondary' }) {
   return (
     <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
       <Link
         to={to}
-        className={`flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-300 shadow-sm
+        className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 shadow-sm border
           ${variant === 'primary'
-            ? 'bg-gradient-to-r from-rentsphere-teal to-rentsphere-orange text-white hover:shadow-md'
-            : 'glass-effect text-gray-700 hover:shadow-md hover:text-rentsphere-teal border border-white/30'
+            ? 'bg-zen-500 text-white border-zen-400 hover:shadow-lg shadow-zen-500/20'
+            : 'bg-white text-slate-600 border-slate-100 hover:bg-slate-50'
           }`}
       >
         <span className="text-base">{icon}</span>
@@ -53,88 +40,6 @@ function QuickAction({ to, icon, label, variant = 'secondary' }) {
   );
 }
 
-
-
-
-function DeleteModal({ property, onConfirm, onCancel, loading }) {
-  useEffect(() => {
-    const handler = (e) => e.key === 'Escape' && onCancel();
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onCancel]);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center px-4"
-    >
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onCancel}
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-      />
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.9, opacity: 0, y: 20 }}
-        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="relative glass-effect rounded-2xl p-6 max-w-md w-full shadow-2xl"
-      >
-        <div className="text-center">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
-            className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-red-400 to-red-600 flex items-center justify-center"
-          >
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </motion.div>
-          <h3 className="text-2xl font-bold text-gray-800 mb-2">Delete Property?</h3>
-          <p className="text-gray-600 mb-1">Are you sure you want to delete this property?</p>
-          {property && (
-            <p className="text-gray-800 font-semibold mb-4">"{property.title}"</p>
-          )}
-          <p className="text-sm text-red-500 mb-6">This action cannot be undone.</p>
-          <div className="flex gap-4">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={onCancel}
-              disabled={loading}
-              className="flex-1 btn-secondary py-2 px-4"
-            >
-              Cancel
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={onConfirm}
-              disabled={loading}
-              className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:shadow-lg disabled:opacity-60"
-            >
-              {loading ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                </div>
-              ) : 'Yes, Delete'}
-            </motion.button>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-}
-
-
-
-
 function AdminPropertyCard({ property, onDelete, index }) {
   const navigate = useNavigate();
 
@@ -142,142 +47,78 @@ function AdminPropertyCard({ property, onDelete, index }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.07 }}
-      className="glass-effect rounded-2xl overflow-hidden shadow-lg card-hover group"
+      transition={{ delay: index * 0.05 }}
+      className="bg-white rounded-[2rem] overflow-hidden border border-slate-100 soft-shadow group"
     >
-      {}
-      <div className="relative h-44 bg-gradient-to-br from-rentsphere-teal/20 to-rentsphere-orange/20 overflow-hidden">
+      <div className="relative h-48 overflow-hidden">
         {property.images?.[0] ? (
-          <img
-            src={property.images[0]}
-            alt={property.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
+          <img src={property.images[0]} alt={property.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-5xl opacity-40">🏠</span>
-          </div>
+          <div className="w-full h-full bg-slate-50 flex items-center justify-center text-4xl">🏠</div>
         )}
-        <span className={`absolute top-3 right-3 text-xs font-semibold px-3 py-1 rounded-full ${STATUS_COLORS[property.status] || 'bg-gray-100 text-gray-600'}`}>
-          {property.status?.charAt(0).toUpperCase() + property.status?.slice(1) || 'Unknown'}
+        <span className={`absolute top-4 right-4 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border backdrop-blur-md ${STATUS_COLORS[property.status] || 'bg-slate-50 text-slate-600 border-slate-100'}`}>
+          {property.status}
         </span>
       </div>
 
-      {}
-      <div className="p-5">
-        <h3 className="text-lg font-bold text-gray-800 truncate mb-1">{property.title}</h3>
-        <p className="text-sm text-gray-500 mb-1">📍 {property.location || 'No location set'}</p>
-        <p className="text-sm text-gray-500 mb-3">{PROPERTY_TYPE_LABELS[property.propertyType] || '📦 Other'}</p>
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-xl font-bold gradient-text">
-            ${Number(property.price || 0).toLocaleString()}
-            <span className="text-sm font-normal text-gray-500">/mo</span>
-          </span>
+      <div className="p-6">
+        <h3 className="text-xl font-bold text-slate-900 mb-1 truncate">{property.title}</h3>
+        <p className="text-slate-400 text-sm mb-4 font-medium flex items-center">
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
+          {property.location}
+        </p>
+        
+        <div className="flex items-center justify-between mb-6 pt-4 border-t border-slate-50">
+          <span className="text-2xl font-black text-slate-900">${Number(property.price || 0).toLocaleString()}<span className="text-sm font-medium text-slate-400">/mo</span></span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{PROPERTY_TYPE_LABELS[property.propertyType]}</span>
         </div>
+
         <div className="flex gap-2">
-          <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
-            onClick={() => navigate(`/admin/properties/edit/${property.id}`)}
-            id={`edit-property-${property.id}`}
-            className="flex-1 btn-secondary !py-2 !px-3 text-sm"
-          >
-            ✏️ Edit
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
-            onClick={() => onDelete(property)}
-            id={`delete-property-${property.id}`}
-            className="flex-1 bg-red-50 text-red-600 font-semibold py-2 px-3 text-sm rounded-lg transition-all duration-300 hover:bg-red-100 hover:shadow-md"
-          >
-            🗑️ Delete
-          </motion.button>
+          <button onClick={() => navigate(`/admin/properties/edit/${property.id}`)} className="flex-1 btn-secondary !py-2.5 !px-3 text-xs">Edit</button>
+          <button onClick={() => onDelete(property)} className="flex-1 bg-red-50 text-red-500 font-bold py-2.5 px-3 text-xs rounded-xl hover:bg-red-100 transition-colors">Delete</button>
         </div>
       </div>
     </motion.div>
   );
 }
 
-
-
-
 function AdminDashboard() {
   const { user } = useAuth();
   const { properties, loading: propsLoading, error: propsError, fetchOwnerProperties, deleteProperty } = useProperty();
   const navigate = useNavigate();
 
-  
-  const [stats, setStats]           = useState(null);
+  const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
   const [statsError, setStatsError] = useState('');
-
-  
-  const [deleteTarget, setDeleteTarget]   = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-
-  
   const [toast, setToast] = useState(null);
 
-  
-  
-  
-  useEffect(() => {
-    if (user && user.role !== 'admin') navigate('/');
-  }, [user, navigate]);
+  useEffect(() => { if (user && user.role !== 'admin') navigate('/'); }, [user, navigate]);
+  useEffect(() => { fetchOwnerProperties(); }, [fetchOwnerProperties]);
 
-  
-  
-  
-  useEffect(() => {
-    fetchOwnerProperties();
-  }, [fetchOwnerProperties]);
-
-  
-  
-  
   const fetchStats = useCallback(async () => {
     setStatsLoading(true);
     setStatsError('');
     try {
-      const [requestsRes, contractsRes] = await Promise.all([
-        rentApi.getAllRequests(),
-        rentApi.getAllContracts(),
-      ]);
+      const [requestsRes, contractsRes] = await Promise.all([rentApi.getAllRequests(), rentApi.getAllContracts()]);
       const requests  = Array.isArray(requestsRes.data)  ? requestsRes.data  : [];
       const contracts = Array.isArray(contractsRes.data) ? contractsRes.data : [];
-
       setStats({
         totalProperties: properties.length,
         pendingRequests: requests.filter((r) => r.reqStatus === 'PENDING').length,
         activeContracts: contracts.filter((c) => c.contractStatus === 'ACTIVE').length,
       });
-    } catch (err) {
-      setStatsError('Failed to load dashboard stats.');
-    } finally {
-      setStatsLoading(false);
-    }
+    } catch (err) { setStatsError('Failed to load dashboard stats.'); }
+    finally { setStatsLoading(false); }
   }, [properties]);
 
   useEffect(() => { fetchStats(); }, [fetchStats]);
 
-  
-  useEffect(() => {
-    if (!propsLoading && stats) {
-      setStats((prev) => ({ ...prev, totalProperties: properties.length }));
-    }
-  }, [propsLoading, properties.length]); 
-
-  
-  
-  
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3500);
   };
-
-  const handleDeleteClick  = (property) => setDeleteTarget(property);
-  const handleDeleteCancel = () => setDeleteTarget(null);
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
@@ -285,241 +126,98 @@ function AdminDashboard() {
     const result = await deleteProperty(deleteTarget.id);
     setDeleteLoading(false);
     setDeleteTarget(null);
-    if (result.success) {
-      showToast('Property deleted successfully.');
-    } else {
-      showToast(result.error || 'Failed to delete property.', 'error');
-    }
+    if (result.success) showToast('Property deleted successfully.');
+    else showToast(result.error || 'Failed to delete property.', 'error');
   };
 
-  
-  
-  
   const statCards = [
-    {
-      icon: '🏠',
-      label: 'Total Properties',
-      value: stats?.totalProperties ?? properties.length,
-      subLabel: `${properties.filter((p) => p.status === 'available').length} available`,
-      accent: 'teal',
-    },
-    {
-      icon: '📬',
-      label: 'Pending Requests',
-      value: stats?.pendingRequests ?? '—',
-      subLabel: 'Awaiting your response',
-      accent: 'orange',
-    },
-    {
-      icon: '📋',
-      label: 'Active Contracts',
-      value: stats?.activeContracts ?? '—',
-      subLabel: 'Currently rented',
-      accent: 'green',
-    },
-    {
-      icon: '🔧',
-      label: 'Under Maintenance',
-      value: properties.filter((p) => p.status === 'maintenance').length,
-      subLabel: 'Being serviced',
-      accent: 'yellow',
-    },
+    { icon: '🏠', label: 'Properties', value: properties.length, accent: 'teal' },
+    { icon: '📬', label: 'Pending', value: stats?.pendingRequests ?? '—', accent: 'orange' },
+    { icon: '📋', label: 'Active', value: stats?.activeContracts ?? '—', accent: 'green' },
+    { icon: '🔧', label: 'Maintenance', value: properties.filter((p) => p.status === 'maintenance').length, accent: 'yellow' },
   ];
 
-  
-  
-  
   return (
     <AnimatedPage>
-      <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-
-          {}
-          {}
-          {}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-              <div>
-                <h1 className="text-4xl font-bold gradient-text mb-1">Admin Dashboard</h1>
-                <p className="text-gray-500">
-                  Welcome back, <span className="font-semibold text-gray-700">{user?.name || 'Admin'}</span> — here's your overview
-                </p>
-              </div>
-
-              {/* Quick actions */}
-              <div className="flex flex-wrap gap-2">
-                <QuickAction
-                  to="/admin/properties/new"
-                  icon="+"
-                  label="Add Property"
-                  variant="primary"
-                />
-                <QuickAction
-                  to="/admin/requests"
-                  icon="📬"
-                  label="Requests"
-                />
-                <QuickAction
-                  to="/contracts"
-                  icon="📋"
-                  label="Contracts"
-                />
-                <QuickAction
-                  to="/properties"
-                  icon="🏘️"
-                  label="Browse All"
-                />
-              </div>
-            </div>
-          </motion.div>
-
-          {/* ---------------------------------------------------------------- */}
-          {/* Stats error                                                       */}
-          {/* ---------------------------------------------------------------- */}
-          {statsError && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg flex items-center gap-3"
-            >
-              <span>⚠️</span>
-              <span>{statsError}</span>
-              <button onClick={fetchStats} className="ml-auto btn-secondary !py-1 !px-3 text-xs">
-                Retry
-              </button>
-            </motion.div>
-          )}
-
-          {/* ---------------------------------------------------------------- */}
-          {/* Stats cards — RS-14                                               */}
-          {/* ---------------------------------------------------------------- */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.08 }}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10"
-          >
-            {statCards.map((s, i) => (
-              <StatsCard
-                key={s.label}
-                icon={s.icon}
-                label={s.label}
-                value={s.value}
-                subLabel={s.subLabel}
-                accent={s.accent}
-                loading={statsLoading && i > 0} // first card uses live property count
-                index={i}
-              />
-            ))}
-          </motion.div>
-
-          {/* ---------------------------------------------------------------- */}
-          {/* Section divider                                                   */}
-          {/* ---------------------------------------------------------------- */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="flex items-center justify-between mb-6"
-          >
+      <div className="bg-slate-50/50 min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-8">
             <div>
-              <h2 className="text-2xl font-bold text-gray-800">My Listings</h2>
-              <p className="text-sm text-gray-400">{properties.length} propert{properties.length === 1 ? 'y' : 'ies'} managed</p>
+              <h1 className="text-5xl font-black text-slate-900 mb-2 tracking-tight">Admin Console.</h1>
+              <p className="text-slate-500 font-medium">Managing RentSphere inventory and requests</p>
             </div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link
-                to="/admin/properties/new"
-                id="add-property-btn"
-                className="btn-primary inline-flex items-center gap-2 !py-2 !px-5 text-sm"
-              >
-                <span>+</span> Add Property
-              </Link>
-            </motion.div>
-          </motion.div>
+            <div className="flex flex-wrap gap-3">
+              <QuickAction to="/admin/properties/new" icon="+" label="Add New" variant="primary" />
+              <QuickAction to="/admin/requests" icon="📬" label="Requests" />
+              <QuickAction to="/contracts" icon="📋" label="Contracts" />
+            </div>
+          </div>
 
-          {/* ---------------------------------------------------------------- */}
-          {/* Property list error                                               */}
-          {/* ---------------------------------------------------------------- */}
-          {propsError && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg"
-            >
-              {propsError}
-            </motion.div>
-          )}
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+            {statCards.map((s, i) => (
+              <StatsCard key={s.label} icon={s.icon} label={s.label} value={s.value} accent={s.accent} loading={statsLoading && i > 0} index={i} />
+            ))}
+          </div>
 
-          {/* Loading */}
-          {propsLoading && properties.length === 0 && <LoadingSpinner />}
+          {/* Listings Header */}
+          <div className="flex items-center justify-between mb-8 px-2">
+            <div>
+              <h2 className="text-3xl font-black text-slate-900 mb-1">My Listings</h2>
+              <p className="text-slate-400 font-medium text-sm">{properties.length} properties managed by you</p>
+            </div>
+            <Link to="/admin/properties/new" className="text-zen-600 font-bold hover:underline">Add Property →</Link>
+          </div>
 
-          {/* Empty state */}
-          {!propsLoading && properties.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="glass-effect rounded-2xl p-16 text-center"
-            >
-              <div className="text-6xl mb-4">🏘️</div>
-              <h2 className="text-2xl font-bold text-gray-700 mb-2">No Properties Yet</h2>
-              <p className="text-gray-500 mb-6">Start by adding your first property listing.</p>
-              <Link to="/admin/properties/new" className="btn-primary inline-block !py-2.5 !px-8">
-                + Add Your First Property
-              </Link>
-            </motion.div>
-          )}
-
-          {/* Property grid */}
-          {properties.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Main Content */}
+          {propsLoading && properties.length === 0 ? (
+            <LoadingSpinner />
+          ) : properties.length === 0 ? (
+            <div className="bg-white rounded-[3rem] p-20 text-center border border-slate-100 soft-shadow">
+              <div className="text-6xl mb-6">🏘️</div>
+              <h3 className="text-2xl font-black text-slate-900 mb-2">No Properties Yet</h3>
+              <p className="text-slate-500 mb-8 max-w-xs mx-auto font-medium">Start building your portfolio by adding your first property.</p>
+              <Link to="/admin/properties/new" className="btn-primary !px-8">+ Add First Property</Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {properties.map((prop, i) => (
-                <AdminPropertyCard
-                  key={prop.id}
-                  property={prop}
-                  onDelete={handleDeleteClick}
-                  index={i}
-                />
+                <AdminPropertyCard key={prop.id} property={prop} onDelete={setDeleteTarget} index={i} />
               ))}
             </div>
           )}
-
         </div>
       </div>
 
-      {/* -------------------------------------------------------------------- */}
-      {/* Delete Modal                                                          */}
-      {/* -------------------------------------------------------------------- */}
+      {/* Delete Modal */}
       <AnimatePresence>
         {deleteTarget && (
-          <DeleteModal
-            property={deleteTarget}
-            onConfirm={handleDeleteConfirm}
-            onCancel={handleDeleteCancel}
-            loading={deleteLoading}
-          />
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDeleteTarget(null)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative bg-white rounded-[2.5rem] p-10 max-w-sm w-full shadow-2xl">
+              <div className="text-center">
+                <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-3xl">🗑️</div>
+                <h3 className="text-2xl font-black text-slate-900 mb-2">Delete Property?</h3>
+                <p className="text-slate-500 mb-8 font-medium">Are you sure you want to remove <span className="text-slate-900 font-bold">"{deleteTarget.title}"</span>? This cannot be undone.</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <button onClick={() => setDeleteTarget(null)} className="btn-secondary">Cancel</button>
+                  <button onClick={handleDeleteConfirm} className="bg-red-500 text-white font-bold rounded-2xl py-3 hover:bg-red-600 shadow-lg shadow-red-200">
+                    {deleteLoading ? '...' : 'Confirm'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
-      {/* -------------------------------------------------------------------- */}
-      {/* Toast notification                                                    */}
-      {/* -------------------------------------------------------------------- */}
+      {/* Toast */}
       <AnimatePresence>
         {toast && (
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 40 }}
-            className={`fixed bottom-6 right-6 z-50 px-6 py-3 rounded-xl shadow-2xl text-white font-semibold
-              ${toast.type === 'error'
-                ? 'bg-gradient-to-r from-red-500 to-red-600'
-                : 'bg-gradient-to-r from-rentsphere-teal to-rentsphere-orange'
-              }`}
-          >
-            {toast.type === 'error' ? '❌ ' : '✅ '}{toast.message}
+          <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }} className={`fixed bottom-8 right-8 z-[110] px-8 py-4 rounded-2xl shadow-2xl text-white font-bold flex items-center space-x-3 ${toast.type === 'error' ? 'bg-red-500' : 'bg-slate-900'}`}>
+            <span>{toast.type === 'error' ? '❌' : '✅'}</span>
+            <span>{toast.message}</span>
           </motion.div>
         )}
       </AnimatePresence>

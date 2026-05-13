@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,20 +6,16 @@ import { AnimatedPage, LoadingSpinner } from '../../components/AnimatedPage';
 import { rentApi } from '../../utils/api';
 
 
-
-
 const CONTRACT_STATUS_STYLES = {
-  ACTIVE:          'bg-green-100  text-green-700  border border-green-200',
-  EXPIRED:         'bg-gray-100   text-gray-600   border border-gray-200',
-  TERMINATED:      'bg-red-100    text-red-600    border border-red-200',
-  PENDING_PAYMENT: 'bg-yellow-100 text-yellow-700 border border-yellow-200',
+  ACTIVE: 'bg-green-100  text-green-700  border border-green-200',
+  EXPIRED: 'bg-gray-100   text-gray-600   border border-gray-200',
+  TERMINATED: 'bg-red-100    text-red-600    border border-red-200',
 };
 
 const CONTRACT_STATUS_ICONS = {
-  ACTIVE:          '✅',
-  EXPIRED:         '⏰',
-  TERMINATED:      '🚫',
-  PENDING_PAYMENT: '💳',
+  ACTIVE: '✅',
+  EXPIRED: '⏰',
+  TERMINATED: '🚫',
 };
 
 function formatDate(val) {
@@ -43,7 +30,7 @@ function formatDate(val) {
 
 function PayPalModal({ contract, onClose }) {
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const h = (e) => e.key === 'Escape' && onClose();
@@ -56,11 +43,11 @@ function PayPalModal({ contract, onClose }) {
     setError('');
     try {
       const successUrl = `${window.location.origin}/paypal/callback`;
-      const cancelUrl  = `${window.location.origin}/contracts`;
+      const cancelUrl = `${window.location.origin}/contracts`;
 
       const res = await rentApi.createPayPalPayment(contract.contractId, {
-        amount:      Number(contract.rentAmount),
-        currency:    'USD',
+        amount: Number(contract.rentAmount),
+        currency: 'USD',
         description: `RentSphere Contract #${contract.contractId} — Property #${contract.propertyId}`,
         successUrl,
         cancelUrl,
@@ -69,11 +56,11 @@ function PayPalModal({ contract, onClose }) {
       const { approvalUrl, paymentId } = res.data || {};
       if (!approvalUrl) throw new Error('No PayPal approval URL received.');
 
-      
-      sessionStorage.setItem('paypal_contract_id', String(contract.contractId));
-      sessionStorage.setItem('paypal_payment_id',  paymentId || '');
 
-      
+      sessionStorage.setItem('paypal_contract_id', String(contract.contractId));
+      sessionStorage.setItem('paypal_payment_id', paymentId || '');
+
+
       window.location.href = approvalUrl;
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to start PayPal payment.');
@@ -93,8 +80,8 @@ function PayPalModal({ contract, onClose }) {
       />
       <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 24 }}
-        animate={{ scale: 1,   opacity: 1, y: 0  }}
-        exit={{   scale: 0.9, opacity: 0, y: 24 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.9, opacity: 0, y: 24 }}
         transition={{ type: 'spring', damping: 26, stiffness: 300 }}
         className="relative glass-effect rounded-2xl p-7 max-w-md w-full shadow-2xl z-10"
       >
@@ -103,7 +90,7 @@ function PayPalModal({ contract, onClose }) {
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors text-xl leading-none"
         >✕</button>
 
-        {}
+        { }
         <div className="text-center mb-6">
           <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-700 flex items-center justify-center">
             <span className="text-3xl">💳</span>
@@ -112,7 +99,7 @@ function PayPalModal({ contract, onClose }) {
           <p className="text-gray-500 text-sm mt-1">Contract #{contract.contractId}</p>
         </div>
 
-        {}
+        { }
         <div className="bg-gray-50 rounded-xl p-4 mb-5 space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-gray-500">Property</span>
@@ -175,20 +162,40 @@ function PayPalModal({ contract, onClose }) {
 
 
 function ContractCard({ contract, onPay, index, role }) {
+  const [payments, setPayments] = useState([]);
+  const [showPayments, setShowPayments] = useState(false);
+  const [loadingPayments, setLoadingPayments] = useState(false);
+
   const statusStyle = CONTRACT_STATUS_STYLES[contract.contractStatus] || 'bg-gray-100 text-gray-600';
-  const statusIcon  = CONTRACT_STATUS_ICONS[contract.contractStatus] || '📋';
-  
-  
+  const statusIcon = CONTRACT_STATUS_ICONS[contract.contractStatus] || '📋';
+
   const canPay = role === 'tenant' && ['ACTIVE', 'PENDING_PAYMENT'].includes(contract.contractStatus);
+
+  const togglePayments = async () => {
+    if (!showPayments && payments.length === 0) {
+      setLoadingPayments(true);
+      try {
+        const res = await rentApi.getContractPayments(contract.contractId);
+        setPayments(res.data || []);
+      } catch (err) {
+        console.error("Failed to load payments", err);
+      } finally {
+        setLoadingPayments(false);
+      }
+    }
+    setShowPayments(!showPayments);
+  };
+
+  const pendingCount = payments.filter(p => p.paymentStatus === 'PENDING' || p.paymentStatus === 'OVERDUE').length;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0  }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       className="glass-effect rounded-2xl p-5 shadow-md flex flex-col gap-4"
     >
-      {}
+      { }
       <div className="flex items-center justify-between flex-wrap gap-2">
         <span className="text-xs text-gray-400 font-mono">CONTRACT #{contract.contractId}</span>
         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusStyle}`}>
@@ -196,7 +203,7 @@ function ContractCard({ contract, onPay, index, role }) {
         </span>
       </div>
 
-      {}
+      { }
       <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
         <div>
           <p className="text-xs text-gray-400 uppercase tracking-wide">Property</p>
@@ -226,14 +233,14 @@ function ContractCard({ contract, onPay, index, role }) {
         </div>
       </div>
 
-      {}
+      { }
       {contract.notes && (
         <div className="bg-gray-50 rounded-xl p-3 text-sm text-gray-600 italic border border-gray-100">
           "{contract.notes}"
         </div>
       )}
 
-      {}
+      { }
       {contract.pdfUrl && (
         <a
           href={contract.pdfUrl}
@@ -245,24 +252,64 @@ function ContractCard({ contract, onPay, index, role }) {
         </a>
       )}
 
-      {}
-      {role === 'admin' && (
-        <div className="mt-2 text-xs text-gray-500 border-t border-gray-100 pt-3">
-          <p>Tenant Payment History: <span className="font-semibold">{contract.contractStatus === 'PENDING_PAYMENT' ? 'Payment Due' : 'Up to Date'}</span></p>
-        </div>
-      )}
-
-      {}
-      {canPay && (
-        <motion.button
-          whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-          onClick={() => onPay(contract)}
-          id={`pay-contract-${contract.contractId}`}
-          className="w-full bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition-all hover:shadow-lg"
+      {/* Actions */}
+      <div className="flex gap-2 mt-2">
+        <button
+          onClick={togglePayments}
+          className="flex-1 btn-secondary !py-2 text-xs font-bold"
         >
-          💳 Pay via PayPal
-        </motion.button>
-      )}
+          {showPayments ? 'Hide Payments' : `View Payments ${pendingCount > 0 ? `(${pendingCount} Pending)` : ''}`}
+        </button>
+        {canPay && (
+          <motion.button
+            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+            onClick={() => onPay(contract)}
+            id={`pay-contract-${contract.contractId}`}
+            className="flex-[1.5] bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold py-2 px-4 rounded-xl text-xs transition-all hover:shadow-lg"
+          >
+            💳 Pay Next
+          </motion.button>
+        )}
+      </div>
+
+      <AnimatePresence>
+        {showPayments && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden border-t border-slate-100 pt-4"
+          >
+            {loadingPayments ? (
+              <div className="text-center py-4 text-xs text-slate-400">Loading payment history...</div>
+            ) : payments.length === 0 ? (
+              <div className="text-center py-4 text-xs text-slate-400">No payments scheduled yet.</div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Payment Schedule</p>
+                {payments.map((p) => (
+                  <div key={p.paymentId} className={`flex items-center justify-between p-3 rounded-xl text-xs border ${p.paymentStatus === 'PAID' ? 'bg-emerald-50/50 border-emerald-100' :
+                      p.paymentStatus === 'OVERDUE' ? 'bg-rose-50 border-rose-100' : 'bg-slate-50 border-slate-100'
+                    }`}>
+                    <div className="flex items-center gap-3">
+                      <span className="font-bold text-slate-400">#{p.installmentNo}</span>
+                      <div>
+                        <p className="font-bold text-slate-700">${Number(p.amountDue).toLocaleString()}</p>
+                        <p className="text-[10px] text-slate-400">{formatDate(p.dueDate)}</p>
+                      </div>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded-full font-black text-[9px] uppercase tracking-tighter ${p.paymentStatus === 'PAID' ? 'bg-emerald-100 text-emerald-700' :
+                        p.paymentStatus === 'OVERDUE' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
+                      }`}>
+                      {p.paymentStatus}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
@@ -272,15 +319,15 @@ function ContractCard({ contract, onPay, index, role }) {
 
 function ContractsPage() {
   const { user } = useAuth();
-  const navigate  = useNavigate();
+  const navigate = useNavigate();
 
-  const [contracts, setContracts]     = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [error, setError]             = useState('');
-  const [payTarget, setPayTarget]     = useState(null);
+  const [contracts, setContracts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [payTarget, setPayTarget] = useState(null);
   const [filterStatus, setFilterStatus] = useState('ALL');
 
-  
+
   useEffect(() => {
     if (!user) {
       navigate('/login');
@@ -293,7 +340,7 @@ function ContractsPage() {
     setLoading(true);
     setError('');
     try {
-      const res  = await rentApi.getAllContracts();
+      const res = await rentApi.getAllContracts();
       const list = Array.isArray(res.data) ? res.data : [];
       setContracts(list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (err) {
@@ -310,22 +357,21 @@ function ContractsPage() {
     : contracts.filter((c) => c.contractStatus === filterStatus);
 
   const counts = {
-    ALL:            contracts.length,
-    ACTIVE:         contracts.filter((c) => c.contractStatus === 'ACTIVE').length,
-    PENDING_PAYMENT:contracts.filter((c) => c.contractStatus === 'PENDING_PAYMENT').length,
-    EXPIRED:        contracts.filter((c) => c.contractStatus === 'EXPIRED').length,
-    TERMINATED:     contracts.filter((c) => c.contractStatus === 'TERMINATED').length,
+    ALL: contracts.length,
+    ACTIVE: contracts.filter((c) => c.contractStatus === 'ACTIVE').length,
+    EXPIRED: contracts.filter((c) => c.contractStatus === 'EXPIRED').length,
+    TERMINATED: contracts.filter((c) => c.contractStatus === 'TERMINATED').length,
   };
 
-  
-  
-  
+
+
+
   return (
     <AnimatedPage>
       <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
 
-          {}
+          { }
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -360,7 +406,7 @@ function ContractsPage() {
             </div>
           </motion.div>
 
-          {}
+          { }
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -368,11 +414,10 @@ function ContractsPage() {
             className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8"
           >
             {[
-              { key: 'ALL',             label: 'All',             icon: '📋', color: 'from-gray-500 to-gray-600'    },
-              { key: 'ACTIVE',          label: 'Active',          icon: '✅', color: 'from-green-500 to-emerald-500' },
-              { key: 'PENDING_PAYMENT', label: 'Pending Payment', icon: '💳', color: 'from-yellow-400 to-amber-500' },
-              { key: 'EXPIRED',         label: 'Expired',         icon: '⏰', color: 'from-gray-400 to-gray-500'    },
-              { key: 'TERMINATED',      label: 'Terminated',      icon: '🚫', color: 'from-red-400 to-rose-500'     },
+              { key: 'ALL', label: 'All', icon: '📋', color: 'from-gray-500 to-gray-600' },
+              { key: 'ACTIVE', label: 'Active', icon: '✅', color: 'from-green-500 to-emerald-500' },
+              { key: 'EXPIRED', label: 'Expired', icon: '⏰', color: 'from-gray-400 to-gray-500' },
+              { key: 'TERMINATED', label: 'Terminated', icon: '🚫', color: 'from-red-400 to-rose-500' },
             ].map((s) => (
               <motion.div
                 key={s.key}
@@ -390,7 +435,7 @@ function ContractsPage() {
             ))}
           </motion.div>
 
-          {}
+          { }
           {error && (
             <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg flex items-center gap-3">
               <span>⚠️</span><span>{error}</span>
@@ -438,7 +483,7 @@ function ContractsPage() {
         </div>
       </div>
 
-      {}
+      { }
       <AnimatePresence>
         {payTarget && (
           <PayPalModal

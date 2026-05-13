@@ -1,29 +1,29 @@
-
 import React, { useState, useEffect } from 'react';
-
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-
 
 function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-useEffect(() => {
-  const handleEsc = (e) => {
-    if (e.key === 'Escape' && showLogoutConfirm) {
-      handleCancelLogout();
-    }
-  };
-  window.addEventListener('keydown', handleEsc);
-  return () => window.removeEventListener('keydown', handleEsc);
-}, [showLogoutConfirm]);
-  const handleLogoutClick = () => {
-    setShowLogoutConfirm(true);
-  };
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape' && showLogoutConfirm) setShowLogoutConfirm(false);
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [showLogoutConfirm]);
 
   const handleConfirmLogout = () => {
     logout();
@@ -31,203 +31,90 @@ useEffect(() => {
     navigate('/login');
   };
 
-  const handleCancelLogout = () => {
-    setShowLogoutConfirm(false);
-  };
+  const isActive = (path) => location.pathname === path;
 
   return (
     <>
-      <motion.nav 
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="glass-effect sticky top-0 z-50 shadow-lg"
-      >
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'py-4' : 'py-6'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-16">
-            {}
-            <div className="flex items-center">
-              <Link to="/" className="flex items-center space-x-3 group">
-              <motion.img 
-                src="/rentSphereLogo.png" 
-                alt="RentSphere Logo" 
-                className="h-10 w-auto object-contain cursor-pointer"
-                whileHover={{ 
-                  rotate: 360,
-                  scale: 1.1,
-                  transition: { 
-                    duration: 0.6,
-                    ease: "easeInOut",
-                    type: "spring",
-                    stiffness: 260,
-                    damping: 20
-                  }
-                }}
-                whileTap={{ scale: 0.95 }}
-              />
-              <span className="text-xl font-bold gradient-text hidden sm:inline group-hover:opacity-80 transition-opacity">
-                RentSphere
+          <motion.div 
+            layout
+            className={`glass-effect rounded-2xl px-4 sm:px-6 flex items-center justify-between h-16 transition-all duration-500 ${scrolled ? 'shadow-xl' : 'shadow-sm'}`}
+          >
+            {/* Logo */}
+            <Link to="/" className="flex items-center space-x-3 group">
+              <motion.div
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.8, ease: "anticipate" }}
+                className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center p-1"
+              >
+                <img src="/rentSphereLogo.png" alt="Logo" className="w-full h-full object-contain" />
+              </motion.div>
+              <span className="text-xl font-bold tracking-tight text-slate-800 hidden sm:inline">
+                Rent<span className="text-zen-500">Sphere</span>
               </span>
             </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-1">
+              <NavLink to="/properties" active={isActive('/properties')}>Browse</NavLink>
+              
+              {isAuthenticated ? (
+                <>
+                  {user?.role === 'admin' ? (
+                    <>
+                      <NavLink to="/admin/dashboard" active={isActive('/admin/dashboard')}>Dashboard</NavLink>
+                      <NavLink to="/admin/requests" active={isActive('/admin/requests')}>Requests</NavLink>
+                    </>
+                  ) : (
+                    <NavLink to="/tenant/dashboard" active={isActive('/tenant/dashboard')}>Dashboard</NavLink>
+                  )}
+                  
+                  {(user?.role === 'admin' || user?.role === 'tenant') && (
+                    <NavLink to="/contracts" active={isActive('/contracts')}>Contracts</NavLink>
+                  )}
+                </>
+              ) : null}
             </div>
 
-            {}
-            <div className="hidden md:flex md:flex-1 md:justify-center">
-              {isAuthenticated && (
-                <div className="flex items-center gap-3">
-                  <Link to="/profile">
-                    <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="w-8 h-8 rounded-full bg-gradient-to-r from-rentsphere-teal to-rentsphere-orange overflow-hidden cursor-pointer"
-                    >
-                      {user?.avatar ? (
-                        <img
-                          src={user.avatar}
-                          alt="Profile"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white text-sm font-bold">
-                          {user?.name ? user.name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                    </motion.div>
+            {/* Auth Actions */}
+            <div className="hidden md:flex items-center space-x-4">
+              {isAuthenticated ? (
+                <div className="flex items-center space-x-4">
+                  <Link to="/profile" className="flex items-center space-x-3 group bg-slate-50 rounded-full pr-4 pl-1 py-1 transition-all hover:bg-slate-100">
+                    <div className="w-8 h-8 rounded-full bg-zen-500 flex items-center justify-center text-white font-bold text-sm overflow-hidden shadow-sm">
+                      {user?.avatar ? <img src={user.avatar} alt="P" className="w-full h-full object-cover" /> : user?.name?.[0] || user?.email?.[0]}
+                    </div>
+                    <span className="text-sm font-medium text-slate-600 truncate max-w-[100px]">
+                      {user?.name || user?.email?.split('@')[0]}
+                    </span>
                   </Link>
-
-                  <motion.div
+                  <motion.button
                     whileHover={{ scale: 1.05 }}
-                    className="text-gray-700 font-medium"
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowLogoutConfirm(true)}
+                    className="btn-secondary !py-2 !px-4 text-sm"
                   >
-                    👋 Welcome, {user?.name || user?.email?.split('@')[0]}
-                  </motion.div>
+                    Logout
+                  </motion.button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Link to="/login">
+                    <button className="btn-ghost text-sm">Login</button>
+                  </Link>
+                  <Link to="/signup">
+                    <button className="btn-primary text-sm shadow-zen-500/20">Get Started</button>
+                  </Link>
                 </div>
               )}
             </div>
 
-            {}
-            <div className="hidden md:flex items-center space-x-6 md:ml-auto">
-              {isAuthenticated ? (
-                <>
-                  
-                  
-                  {}
-                  <Link to="/properties">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="text-gray-700 hover:text-rentsphere-teal transition-colors"
-                    >
-                      🏘️ Browse
-                    </motion.button>
-                  </Link>
-
-                  {user?.role === 'admin' && (
-                    <>
-                      <Link to="/admin/dashboard">
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="text-gray-700 hover:text-rentsphere-teal transition-colors"
-                        >
-                          📊 Dashboard
-                        </motion.button>
-                      </Link>
-                      <Link to="/admin/requests">
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="text-gray-700 hover:text-rentsphere-teal transition-colors"
-                        >
-                          📬 Requests
-                        </motion.button>
-                      </Link>
-                    </>
-                  )}
-                  
-                  {user?.role !== 'admin' && (
-                    <Link to="/tenant/dashboard">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="text-gray-700 hover:text-rentsphere-teal transition-colors"
-                      >
-                        📊 Dashboard
-                      </motion.button>
-                    </Link>
-                  )}
-                  
-                  {(user?.role === 'admin' || user?.role === 'tenant') && (
-                    <Link to="/contracts">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="text-gray-700 hover:text-rentsphere-teal transition-colors"
-                      >
-                        📋 Contracts
-                      </motion.button>
-                    </Link>
-                  )}
-                  
-                  {}
-                  <Link to="/profile">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="text-gray-700 hover:text-rentsphere-teal transition-colors"
-                    >
-                      👤 Profile
-                    </motion.button>
-                  </Link>
-                  
-                  {}
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleLogoutClick}
-                    className="btn-primary !py-1 !px-4"
-                  >
-                    Logout
-                  </motion.button>
-                </>
-              ) : (
-                <>
-                  <Link to="/properties">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="text-gray-700 hover:text-rentsphere-teal transition-colors"
-                    >
-                      🏘️ Browse
-                    </motion.button>
-                  </Link>
-                  <Link to="/login">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="text-gray-700 hover:text-rentsphere-teal transition-colors"
-                    >
-                      Login
-                    </motion.button>
-                  </Link>
-                  <Link to="/signup">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="btn-primary !py-1 !px-4"
-                    >
-                      Sign Up
-                    </motion.button>
-                  </Link>
-                </>
-              )}
-            </div>
-
-            {}
+            {/* Mobile Toggle */}
             <div className="md:hidden">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="text-gray-700 focus:outline-none"
+                className="p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
               >
                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   {isMobileMenuOpen ? (
@@ -238,160 +125,90 @@ useEffect(() => {
                 </svg>
               </button>
             </div>
-          </div>
+          </motion.div>
 
-          {}
-          {isMobileMenuOpen && (
-            <motion.div 
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="md:hidden py-4 border-t border-gray-200"
-            >
-              {isAuthenticated ? (
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3 mb-4">
-                    {}
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-rentsphere-teal to-rentsphere-orange overflow-hidden">
-                      {user?.avatar ? (
-                        <img 
-                          src={user.avatar} 
-                          alt="Profile" 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white text-base font-bold">
-                          {user?.name ? user.name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-gray-700 font-medium">
-                      Welcome, {user?.name || user?.email}
-                    </div>
-                  </div>
-                  {user?.role === 'admin' ? (
-                    <Link to="/admin/dashboard">
-                      <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Dashboard</button>
-                    </Link>
-                  ) : (
-                    <Link to="/tenant/dashboard">
-                      <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Dashboard</button>
-                    </Link>
-                  )}
-                  {user?.role === 'admin' && (
+          {/* Mobile Menu */}
+          <AnimatePresence>
+            {isMobileMenuOpen && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="md:hidden mt-2 glass-effect rounded-2xl p-4 shadow-xl border border-white/50"
+              >
+                <div className="flex flex-col space-y-2">
+                  <MobileNavLink to="/properties" onClick={() => setIsMobileMenuOpen(false)}>Browse Properties</MobileNavLink>
+                  {isAuthenticated ? (
                     <>
-                      <Link to="/admin/requests">
-                        <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">📬 Rental Requests</button>
-                      </Link>
+                      <MobileNavLink to="/profile" onClick={() => setIsMobileMenuOpen(false)}>My Profile</MobileNavLink>
+                      <MobileNavLink to={user?.role === 'admin' ? "/admin/dashboard" : "/tenant/dashboard"} onClick={() => setIsMobileMenuOpen(false)}>Dashboard</MobileNavLink>
+                      <button onClick={() => { setIsMobileMenuOpen(false); setShowLogoutConfirm(true); }} className="w-full text-left px-4 py-3 text-red-500 font-medium hover:bg-red-50 rounded-xl transition-colors">Logout</button>
+                    </>
+                  ) : (
+                    <>
+                      <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 font-medium text-slate-600 hover:bg-slate-50 rounded-xl">Login</Link>
+                      <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 font-semibold text-zen-600 bg-zen-50 rounded-xl">Sign Up</Link>
                     </>
                   )}
-                  {(user?.role === 'admin' || user?.role === 'tenant') && (
-                    <Link to="/contracts">
-                      <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">📋 Contracts</button>
-                    </Link>
-                  )}
-                  <Link to="/properties">
-                    <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">🏘️ Browse</button>
-                  </Link>
-                  <Link to="/profile">
-                    <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Profile</button>
-                  </Link>
-                  <button 
-                    onClick={handleLogoutClick} 
-                    className="w-full text-left text-gray-700 hover:text-rentsphere-teal"
-                  >
-                    Logout
-                  </button>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  <Link to="/properties">
-                    <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">🏘️ Browse</button>
-                  </Link>
-                  <Link to="/login">
-                    <button className="w-full text-left text-gray-700 hover:text-rentsphere-teal">Login</button>
-                  </Link>
-                  <Link to="/signup">
-                    <button className="w-full text-left text-rentsphere-teal font-semibold">Sign Up</button>
-                  </Link>
-                </div>
-              )}
-            </motion.div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </motion.nav>
+      </nav>
 
-      {}
+      {/* Logout Modal */}
       <AnimatePresence>
         {showLogoutConfirm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center px-4"
-          >
-            {}
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={handleCancelLogout}
-              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setShowLogoutConfirm(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
             />
-            
-            {}
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative glass-effect rounded-2xl p-6 max-w-md w-full shadow-2xl"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl overflow-hidden"
             >
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-400 to-red-500" />
               <div className="text-center">
-                {}
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-                  className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-rentsphere-teal to-rentsphere-orange flex items-center justify-center"
-                >
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
-                </motion.div>
-                
-                {}
-                <h3 className="text-2xl font-bold text-gray-800 mb-2">Ready to Leave?</h3>
-                
-                {}
-                <p className="text-gray-600 mb-6">
-                  Are you sure you want to logout? You'll need to sign in again to access your account.
-                </p>
-                
-                {}
-                <div className="flex gap-4">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleCancelLogout}
-                    className="flex-1 btn-secondary py-2 px-4"
-                  >
-                    Cancel
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleConfirmLogout}
-                    className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:shadow-lg"
-                  >
-                    Yes, Logout
-                  </motion.button>
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Sign Out</h3>
+                <p className="text-slate-500 mb-8">Are you sure you want to log out of your account?</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button onClick={() => setShowLogoutConfirm(false)} className="btn-secondary py-3">Cancel</button>
+                  <button onClick={handleConfirmLogout} className="bg-red-500 text-white font-bold rounded-xl py-3 hover:bg-red-600 transition-colors shadow-lg shadow-red-200">Logout</button>
                 </div>
               </div>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+function NavLink({ to, children, active }) {
+  return (
+    <Link to={to} className={`nav-link ${active ? 'text-zen-600 after:content-[""] after:absolute after:bottom-0 after:left-4 after:right-4 after:h-0.5 after:bg-zen-500 after:rounded-full' : ''}`}>
+      {children}
+    </Link>
+  );
+}
+
+function MobileNavLink({ to, children, onClick }) {
+  return (
+    <Link to={to} onClick={onClick} className="block px-4 py-3 font-medium text-slate-600 hover:bg-slate-50 hover:text-zen-600 rounded-xl transition-all">
+      {children}
+    </Link>
   );
 }
 

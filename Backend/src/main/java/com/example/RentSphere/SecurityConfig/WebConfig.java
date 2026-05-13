@@ -9,7 +9,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String uploadPath = "file:D:/SocialMediaAppBackend/uploads/";
+        String uploadPath = "file:uploads/";
 
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations(uploadPath)

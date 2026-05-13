@@ -48,7 +48,7 @@ public class PayPalService {
         
         Amount amount = new Amount();
         amount.setCurrency(paymentRequest.getCurrency());
-        amount.setTotal(String.format(Locale.forLanguageTag(paymentRequest.getCurrency()), "%.2f", paymentRequest.getAmount()));
+        amount.setTotal(String.format(java.util.Locale.US, "%.2f", paymentRequest.getAmount()));
 
         Transaction transaction = new Transaction();
         transaction.setDescription(paymentRequest.getDescription());

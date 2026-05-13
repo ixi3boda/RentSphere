@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,10 +7,6 @@ import { AnimatedPage, AnimatedButton } from '../../components/AnimatedPage';
 import ImageUpload from '../../components/ImageUpload';
 import { mapFormToBackend } from '../../utils/mappers';
 import { propertyApi } from '../../utils/api';
-
-
-
-
 
 const PROPERTY_TYPES = [
   { value: '',          label: 'Select a type…' },
@@ -38,9 +33,6 @@ const EMPTY_FORM = {
   areaSqm:             '',
 };
 
-
-
-
 function FieldError({ message }) {
   if (!message) return null;
   return (
@@ -53,10 +45,6 @@ function FieldError({ message }) {
     </motion.p>
   );
 }
-
-
-
-
 
 function PropertyForm() {
   const { id } = useParams();
@@ -72,12 +60,10 @@ function PropertyForm() {
   const [submitError, setSubmitError] = useState('');
   const [fetchLoading, setFetchLoading] = useState(isEditMode);
 
-  
   useEffect(() => {
     if (user && user.role !== 'admin') navigate('/');
   }, [user, navigate]);
 
-  
   useEffect(() => {
     if (!isEditMode) return;
 
@@ -114,9 +100,6 @@ function PropertyForm() {
     }
   };
 
-  
-  
-  
   const validate = () => {
     const errs = {};
     if (!formData.title.trim())               errs.title = 'Title is required.';
@@ -145,9 +128,6 @@ function PropertyForm() {
     return errs;
   };
 
-  
-  
-  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError('');
@@ -159,7 +139,6 @@ function PropertyForm() {
     }
 
     if (isEditMode) {
-      
       const payload = {
         ...mapFormToBackend(formData),
         coverPic: images[0] || null,
@@ -171,32 +150,23 @@ function PropertyForm() {
         setSubmitError(result.error || 'An error occurred. Please try again.');
       }
     } else {
-      
-      
-      
       const result = await createProperty({ ...formData, images });
       if (!result.success) {
         setSubmitError(result.error || 'An error occurred. Please try again.');
         return;
       }
 
-      
-      
-      
       const newId = result.data?.property?.propertyId ?? result.data?.id;
       if (newId && images.length > 1) {
-        for (let i = 1; i < images.length; i++) {
-          await propertyApi.addImage(newId, images[i], false);
-        }
+        await Promise.all(
+          images.slice(1).map((img) => propertyApi.addImage(newId, img, false))
+        );
       }
 
       navigate('/admin/dashboard');
     }
   };
 
-  
-  
-  
   if (fetchLoading) {
     return (
       <AnimatedPage>
@@ -212,7 +182,6 @@ function PropertyForm() {
       <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
 
-          {}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -234,15 +203,12 @@ function PropertyForm() {
             </p>
           </motion.div>
 
-          {}
           <motion.div
             initial={{ scale: 0.97, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.1 }}
             className="glass-effect rounded-2xl p-8 shadow-2xl"
           >
-
-            {}
             <AnimatePresence>
               {submitError && (
                 <motion.div
@@ -258,7 +224,6 @@ function PropertyForm() {
 
             <form onSubmit={handleSubmit} className="space-y-6" noValidate>
 
-              {}
               <div>
                 <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
                   Property Title <span className="text-red-500">*</span>
@@ -277,7 +242,6 @@ function PropertyForm() {
                 <FieldError message={fieldErrors.title} />
               </div>
 
-              {}
               <div>
                 <label htmlFor="propertyDescription" className="block text-sm font-medium text-gray-700 mb-2">
                   Description <span className="text-red-500">*</span>
@@ -294,7 +258,6 @@ function PropertyForm() {
                 <FieldError message={fieldErrors.propertyDescription} />
               </div>
 
-              {}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="pricePerMonth" className="block text-sm font-medium text-gray-700 mb-2">
@@ -338,7 +301,6 @@ function PropertyForm() {
                 </div>
               </div>
 
-              {}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="numRooms" className="block text-sm font-medium text-gray-700 mb-2">
@@ -378,7 +340,6 @@ function PropertyForm() {
                 </div>
               </div>
 
-              {}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
@@ -414,7 +375,6 @@ function PropertyForm() {
                 </div>
               </div>
 
-              {}
               <div>
                 <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
                   Street Address <span className="text-red-500">*</span>
@@ -432,7 +392,6 @@ function PropertyForm() {
                 <FieldError message={fieldErrors.address} />
               </div>
 
-              {}
               <ImageUpload
                 value={images}
                 onChange={setImages}
@@ -440,7 +399,6 @@ function PropertyForm() {
                 disabled={loading}
               />
 
-              {}
               <div className="flex gap-4 pt-2">
                 <motion.button
                   type="button"

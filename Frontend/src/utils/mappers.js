@@ -14,11 +14,20 @@ export function mapPropertyToFrontend(pd) {
 
   const status = p.isAvailable === false ? 'rented' : 'available';
 
+  const formatImageUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('http') || url.startsWith('blob:') || url.startsWith('data:') || url.startsWith('/')) {
+      return url;
+    }
+    return `/uploads/${url}`;
+  };
+
   const images = [];
-  if (pd.coverPic) images.push(pd.coverPic);
+  if (pd.coverPic) images.push(formatImageUrl(pd.coverPic));
   if (Array.isArray(pd.propertyImages)) {
     pd.propertyImages.forEach((img) => {
-      if (img && img !== pd.coverPic) images.push(img);
+      const formatted = formatImageUrl(img);
+      if (formatted && !images.includes(formatted)) images.push(formatted);
     });
   }
 
@@ -39,7 +48,7 @@ export function mapPropertyToFrontend(pd) {
     longitude:    p.longitude != null ? Number(p.longitude) : null,
     ownerId:      p.ownerId ?? null,
     images,
-    coverPic:     pd.coverPic || (images[0] || null),
+    coverPic:     formatImageUrl(pd.coverPic) || (images[0] || null),
     createdAt:    p.createdAt || null,
     updatedAt:    p.updatedAt || null,
   };

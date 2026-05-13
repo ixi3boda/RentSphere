@@ -1,7 +1,4 @@
--- ─────────────────────────────────────────────────────────────────
--- H2-compatible schema for tests (mirrors MySQL production schema)
--- RentSphere test database DDL
--- ─────────────────────────────────────────────────────────────────
+
 DROP ALL OBJECTS;
 
 CREATE TABLE IF NOT EXISTS roles (
@@ -114,10 +111,12 @@ CREATE TABLE IF NOT EXISTS payments (
 );
 
 CREATE TABLE IF NOT EXISTS notifications (
-    notification_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id         INT NOT NULL,
-    message         TEXT NOT NULL,
-    is_read         BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    noti_id           INT AUTO_INCREMENT PRIMARY KEY,
+    recipient_id      INT NOT NULL,
+    notification_type VARCHAR(50),
+    title             VARCHAR(255),
+    body              TEXT,
+    is_read           BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (recipient_id) REFERENCES users(user_id)
 );

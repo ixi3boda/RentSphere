@@ -101,6 +101,7 @@ export const rentApi = {
 
   
   getAllContracts: () => apiClient.get("/api/rent/contracts/all"),
+  getContractPayments: (contractId) => apiClient.get(`/api/rent/contracts/${contractId}/payments`),
 
   
   acceptRequest: (id) => apiClient.put(`/api/rent/requests/${id}/accept`),

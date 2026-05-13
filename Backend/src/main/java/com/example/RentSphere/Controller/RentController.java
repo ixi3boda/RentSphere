@@ -89,12 +89,31 @@ public class RentController {
     }
 
     @GetMapping("/contracts/all")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getAllContracts() {
+    public ResponseEntity<?> getAllContracts(Principal principal) {
         try {
-            return ResponseEntity.ok(contractService.getAllContracts());
+            String email = getPrincipalEmail(principal);
+            com.example.RentSphere.Dto.User user = userService.getCurrentUser(email);
+            
+            if ("ADMIN".equalsIgnoreCase(user.getRole_name())) {
+                
+                return ResponseEntity.ok(contractService.getContractsForOwner((long) user.getUser_id()));
+            } else if ("TENANT".equalsIgnoreCase(user.getRole_name())) {
+                return ResponseEntity.ok(contractService.getContractsForTenant((long) user.getUser_id()));
+            } else {
+                return ResponseEntity.ok(List.of());
+            }
         } catch (Exception e) {
             return buildErrorResponse("Failed to fetch contracts: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/contracts/{contractId}/payments")
+    public ResponseEntity<?> getContractPayments(@PathVariable Long contractId, Principal principal) {
+        try {
+            
+            return ResponseEntity.ok(contractService.getPaymentsByContractId(contractId));
+        } catch (Exception e) {
+            return buildErrorResponse("Failed to fetch payments: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
