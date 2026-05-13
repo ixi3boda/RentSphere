@@ -82,6 +82,9 @@ function ImageCarousel({ images = [], autoPlay = false }) {
           transition={{ duration: 0.45, ease: 'easeInOut' }}
           className="absolute inset-0 w-full h-full object-cover"
           draggable={false}
+          onError={(e) => {
+            e.currentTarget.style.opacity = '0';
+          }}
         />
       </AnimatePresence>
 

@@ -1,9 +1,19 @@
 
-
-
-
-
-
+// Normalize any image URL to a displayable src.
+// Supports: data: URIs (base64), full http URLs, /uploads/ paths, bare filenames.
+function formatImageUrl(url) {
+  if (!url) return null;
+  if (
+    url.startsWith('data:') ||
+    url.startsWith('http') ||
+    url.startsWith('blob:') ||
+    url.startsWith('/')
+  ) {
+    return url;
+  }
+  // Bare filename — prefix with /uploads/
+  return `/uploads/${url}`;
+}
 
 export function mapPropertyToFrontend(pd) {
   if (!pd) return null;
@@ -14,16 +24,11 @@ export function mapPropertyToFrontend(pd) {
 
   const status = p.isAvailable === false ? 'rented' : 'available';
 
-  const formatImageUrl = (url) => {
-    if (!url) return null;
-    if (url.startsWith('http') || url.startsWith('blob:') || url.startsWith('data:') || url.startsWith('/')) {
-      return url;
-    }
-    return `/uploads/${url}`;
-  };
-
   const images = [];
-  if (pd.coverPic) images.push(formatImageUrl(pd.coverPic));
+  if (pd.coverPic) {
+    const c = formatImageUrl(pd.coverPic);
+    if (c) images.push(c);
+  }
   if (Array.isArray(pd.propertyImages)) {
     pd.propertyImages.forEach((img) => {
       const formatted = formatImageUrl(img);
@@ -48,7 +53,7 @@ export function mapPropertyToFrontend(pd) {
     longitude:    p.longitude != null ? Number(p.longitude) : null,
     ownerId:      p.ownerId ?? null,
     images,
-    coverPic:     formatImageUrl(pd.coverPic) || (images[0] || null),
+    coverPic:     formatImageUrl(pd.coverPic) || images[0] || null,
     createdAt:    p.createdAt || null,
     updatedAt:    p.updatedAt || null,
   };
@@ -57,13 +62,13 @@ export function mapPropertyToFrontend(pd) {
 
 export function mapFormToBackend(formData) {
   return {
-    propertyType:        (formData.propertyType || '').toUpperCase(), 
+    propertyType:        (formData.propertyType || '').toUpperCase(),
     title:               formData.title || '',
-    propertyDescription: formData.propertyDescription || '',          
-    pricePerMonth:       formData.pricePerMonth ? Number(formData.pricePerMonth) : null, 
+    propertyDescription: formData.propertyDescription || '',
+    pricePerMonth:       formData.pricePerMonth ? Number(formData.pricePerMonth) : null,
     city:                formData.city || '',
     district:            formData.district || '',
-    address:             formData.address || '',                       
+    address:             formData.address || '',
     latitude:            formData.latitude  ? Number(formData.latitude)  : null,
     longitude:           formData.longitude ? Number(formData.longitude) : null,
     numRooms:            formData.numRooms  ? Number(formData.numRooms)  : null,

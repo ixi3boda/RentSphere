@@ -6,7 +6,6 @@ import { useProperty } from '../../context/PropertyContext';
 import { AnimatedPage, AnimatedButton } from '../../components/AnimatedPage';
 import ImageUpload from '../../components/ImageUpload';
 import { mapFormToBackend } from '../../utils/mappers';
-import { propertyApi } from '../../utils/api';
 
 const PROPERTY_TYPES = [
   { value: '',          label: 'Select a type…' },
@@ -150,17 +149,11 @@ function PropertyForm() {
         setSubmitError(result.error || 'An error occurred. Please try again.');
       }
     } else {
+      // PropertyContext.createProperty handles all images (cover + additional)
       const result = await createProperty({ ...formData, images });
       if (!result.success) {
         setSubmitError(result.error || 'An error occurred. Please try again.');
         return;
-      }
-
-      const newId = result.data?.property?.propertyId ?? result.data?.id;
-      if (newId && images.length > 1) {
-        await Promise.all(
-          images.slice(1).map((img) => propertyApi.addImage(newId, img, false))
-        );
       }
 
       navigate('/admin/dashboard');

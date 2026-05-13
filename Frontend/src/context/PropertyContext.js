@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useCallback } from 'react';
 import { propertyApi } from '../utils/api';
 import { mapPropertyToFrontend, mapFormToBackend } from '../utils/mappers';
@@ -14,9 +13,6 @@ export function PropertyProvider({ children }) {
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState(null);
 
-  
-  
-  
   const fetchOwnerProperties = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -34,39 +30,47 @@ export function PropertyProvider({ children }) {
     }
   }, []);
 
-  
-  
-  
-  const getPropertyById = useCallback(
-    async (id) => {
-      
-      const local = properties.find((p) => p.id === String(id));
-      if (local) return { success: true, data: local };
+  // Always fetch fresh from API — avoids returning stale blob-URL cache
+  const getPropertyById = useCallback(async (id) => {
+    try {
+      const res = await propertyApi.getById(id);
+      return { success: true, data: mapPropertyToFrontend(res.data) };
+    } catch (err) {
+      return { success: false, error: err.response?.data?.message || err.message };
+    }
+  }, []);
 
-      try {
-        const res = await propertyApi.getById(id);
-        return { success: true, data: mapPropertyToFrontend(res.data) };
-      } catch (err) {
-        return { success: false, error: err.response?.data?.message || err.message };
-      }
-    },
-    [properties]
-  );
-
-  
-  
-  
+  // Send coverPic (first image) in main payload.
+  // Additional images sent via addImage with JSON body (not query params).
   const createProperty = async (formData) => {
     setLoading(true);
     setError(null);
     try {
+      const imageList = Array.isArray(formData.images) ? formData.images : [];
+      const coverPic  = imageList[0] || null;
+
       const backendPayload = {
         ...mapFormToBackend(formData),
-        coverPic: formData.images?.[0] || formData.coverPic || null,
+        coverPic,
       };
+
       const res = await propertyApi.create(backendPayload);
 
-      
+      const newId =
+        res.data?.property?.propertyId ??
+        res.data?.propertyId ??
+        res.data?.id ??
+        null;
+
+      // Upload additional images (index 1+)
+      if (newId && imageList.length > 1) {
+        await Promise.all(
+          imageList.slice(1).map((imgBase64) =>
+            propertyApi.addImage(newId, imgBase64, false)
+          )
+        );
+      }
+
       await fetchOwnerProperties();
       return { success: true, data: res.data };
     } catch (err) {
@@ -78,38 +82,37 @@ export function PropertyProvider({ children }) {
     }
   };
 
-  
-  
-  
-  
   const updateProperty = async (id, formData) => {
     setLoading(true);
     setError(null);
     try {
       const body = {
-        propertyType:        formData.propertyType       || undefined,
-        title:               formData.title              || undefined,
+        propertyType:        formData.propertyType        || undefined,
+        title:               formData.title               || undefined,
         propertyDescription: formData.propertyDescription || formData.description || undefined,
-        pricePerMonth:       formData.pricePerMonth != null ? Number(formData.pricePerMonth) : formData.price != null ? Number(formData.price) : undefined,
-        city:                formData.city               || undefined,
-        district:            formData.district           || undefined,
-        address:             formData.address || formData.location || undefined,
-        latitude:            formData.latitude  != null ? Number(formData.latitude)  : undefined,
-        longitude:           formData.longitude != null ? Number(formData.longitude) : undefined,
-        numRooms:            formData.numRooms  != null ? Number(formData.numRooms)  : undefined,
-        areaSqm:             formData.areaSqm   != null ? Number(formData.areaSqm)   : undefined,
-        isAvailable:         formData.isAvailable !== undefined ? formData.isAvailable : undefined,
+        pricePerMonth:
+          formData.pricePerMonth != null ? Number(formData.pricePerMonth)
+          : formData.price       != null ? Number(formData.price)
+          : undefined,
+        city:        formData.city                     || undefined,
+        district:    formData.district                 || undefined,
+        address:     formData.address || formData.location || undefined,
+        latitude:    formData.latitude  != null ? Number(formData.latitude)  : undefined,
+        longitude:   formData.longitude != null ? Number(formData.longitude) : undefined,
+        numRooms:    formData.numRooms  != null ? Number(formData.numRooms)  : undefined,
+        areaSqm:     formData.areaSqm   != null ? Number(formData.areaSqm)   : undefined,
+        isAvailable: formData.isAvailable !== undefined ? formData.isAvailable : undefined,
       };
 
-      
       Object.keys(body).forEach((k) => body[k] === undefined && delete body[k]);
 
       await propertyApi.update(id, body);
 
-      
       setProperties((prev) =>
         prev.map((p) =>
-          p.id === String(id) ? { ...p, ...mapFormToBackend(formData), id: String(id) } : p
+          p.id === String(id)
+            ? { ...p, ...mapFormToBackend(formData), id: String(id) }
+            : p
         )
       );
       return { success: true };
@@ -122,9 +125,6 @@ export function PropertyProvider({ children }) {
     }
   };
 
-  
-  
-  
   const deleteProperty = async (id) => {
     setLoading(true);
     setError(null);
