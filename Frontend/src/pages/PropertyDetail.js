@@ -63,7 +63,22 @@ function PropertyDetail() {
     return () => { cancelled = true; };
   }, [id]);
 
-  useEffect(() => { if (property) recordRecentlyViewed(property); }, [property]);
+  useEffect(() => {
+    if (property) {
+      // One-time cleanup: clear any old bloated recently-viewed data that
+      // stored full base64 images (the new recordRecentlyViewed strips images)
+      try {
+        const raw = localStorage.getItem('rentsphere_recently_viewed');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const hasBlob = parsed.some(p => p.images?.some(img => img?.startsWith('data:')));
+          if (hasBlob) localStorage.removeItem('rentsphere_recently_viewed');
+        }
+      } catch { /* ignore */ }
+
+      recordRecentlyViewed(property);
+    }
+  }, [property]);
 
   useEffect(() => {
     let cancelled = false;

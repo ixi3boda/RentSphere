@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, useCallback } from 'react';
 import { propertyApi } from '../utils/api';
 import { mapPropertyToFrontend, mapFormToBackend } from '../utils/mappers';
 
-const PropertyContext = createContext();
+export const PropertyContext = createContext();
 
 export function useProperty() {
   return useContext(PropertyContext);

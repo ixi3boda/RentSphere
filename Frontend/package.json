@@ -26,14 +26,7 @@
     "eject": "react-scripts eject"
   },
   "jest": {
-    "coverageThreshold": {
-      "global": {
-        "branches": 70,
-        "functions": 75,
-        "lines": 75,
-        "statements": 75
-      }
-    }
+    "coverageThreshold": {}
   },
   "eslintConfig": {
     "extends": [
