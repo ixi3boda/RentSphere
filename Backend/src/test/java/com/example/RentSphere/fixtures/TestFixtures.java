@@ -161,4 +161,16 @@ public class TestFixtures {
                 .updatedAt(LocalDateTime.now())
                 .build();
     }
+
+    public static Notification sampleNotification() {
+        return Notification.builder()
+                .notiId(1L)
+                .recipientId(2)
+                .notificationType("TEST_TYPE")
+                .title("Test Title")
+                .body("Test Body")
+                .isRead(false)
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
 }

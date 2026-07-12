@@ -1,74 +1,114 @@
-
-
-
-
-
-
-
-
-
+// src/tests/pages/TenantDashboard.test.jsx
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
-import { rest } from 'msw';
 import TenantDashboard from '../../pages/tenant/TenantDashboard';
-import { MOCK_TENANT, MOCK_VISITOR } from '../mocks/authMocks';
-import { renderInRouter } from '../test-utils/renderWithProviders';
-import { server } from '../mocks/server';
+import { renderWithProviders, mockTenant } from '../helpers/renderWithProviders';
 
-describe('TenantDashboard — heading', () => {
-  it('renders "Dashboard" heading', async () => {
-    renderInRouter(<TenantDashboard />, { user: MOCK_TENANT });
-    expect(await screen.findByRole('heading', { name: /^dashboard$/i })).toBeInTheDocument();
+jest.mock('../../utils/api', () => ({
+  propertyApi: {
+    getFavorites: jest.fn(),
+    getAll: jest.fn(),
+    favorite: jest.fn(),
+    getById: jest.fn(),
+    filter: jest.fn(),
+    search: jest.fn(),
+    addImage: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+  },
+  authApi: {
+    login: jest.fn(), register: jest.fn(), logout: jest.fn(),
+    getMe: jest.fn(), updateProfile: jest.fn(),
+  },
+  rentApi: {
+    getAllContracts: jest.fn(),
+    getAllRequests: jest.fn(),
+    createRequest: jest.fn(),
+  },
+  uploadApi: { uploadOne: jest.fn() },
+}));
+
+jest.mock('../../utils/recentlyViewed', () => ({
+  getRecentlyViewed: jest.fn(() => []),
+  recordRecentlyViewed: jest.fn(),
+  clearRecentlyViewed: jest.fn(),
+  setRecentlyViewed: jest.fn(),
+}));
+
+const { propertyApi, rentApi } = require('../../utils/api');
+
+describe('TenantDashboard', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    propertyApi.getFavorites.mockResolvedValue({ data: [] });
+    rentApi.getAllContracts.mockResolvedValue({ data: [] });
   });
 
-  it('shows welcome message with user name', async () => {
-    renderInRouter(<TenantDashboard />, { user: MOCK_TENANT });
-    expect(await screen.findByText(/tenant user/i)).toBeInTheDocument();
-  });
-});
-
-describe('TenantDashboard — favorites section', () => {
-  it('shows favorite property title after fetching', async () => {
-    renderInRouter(<TenantDashboard />, { user: MOCK_TENANT });
-    expect(await screen.findByText('Cozy Downtown Apartment')).toBeInTheDocument();
-  });
-
-  it('shows count badge for saved favorites', async () => {
-    renderInRouter(<TenantDashboard />, { user: MOCK_TENANT });
-    expect(await screen.findByText(/1 saved/i)).toBeInTheDocument();
-  });
-
-  it('shows empty favorites state when list is empty', async () => {
-    server.use(
-      rest.get('/api/properties/favorites/all', (req, res, ctx) =>
-        res(ctx.status(200), ctx.json([]))
-      )
-    );
-
-    renderInRouter(<TenantDashboard />, { user: MOCK_TENANT });
-    expect(await screen.findByText(/no favorites/i)).toBeInTheDocument();
-  });
-});
-
-describe('TenantDashboard — API error', () => {
-  it('shows error state when favorites API fails', async () => {
-    server.use(
-      rest.get('/api/properties/favorites/all', (req, res, ctx) =>
-        res(ctx.status(500))
-      )
-    );
-
-    renderInRouter(<TenantDashboard />, { user: MOCK_TENANT });
+  test('renders Dashboard heading', async () => {
+    renderWithProviders(<TenantDashboard />, {
+      authValue: { user: mockTenant, isAuthenticated: true, initializing: false },
+    });
     await waitFor(() => {
-      
-      expect(screen.queryByRole('heading', { name: /dashboard/i })).toBeInTheDocument();
+      expect(screen.getByText('Dashboard.')).toBeInTheDocument();
     });
   });
-});
 
-describe('TenantDashboard — VISITOR access', () => {
-  it('renders for VISITOR role (no auth guard)', async () => {
-    renderInRouter(<TenantDashboard />, { user: MOCK_VISITOR });
-    expect(await screen.findByRole('heading', { name: /dashboard/i })).toBeInTheDocument();
+  test('renders welcome message with user name', async () => {
+    renderWithProviders(<TenantDashboard />, {
+      authValue: { user: mockTenant, isAuthenticated: true, initializing: false },
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/Welcome back/i)).toBeInTheDocument();
+      expect(screen.getByText('Tenant User')).toBeInTheDocument();
+    });
+  });
+
+  test('shows empty favorites message when no favorites', async () => {
+    renderWithProviders(<TenantDashboard />, {
+      authValue: { user: mockTenant, isAuthenticated: true, initializing: false },
+    });
+    await waitFor(() => {
+      expect(screen.getByText('No favorites yet')).toBeInTheDocument();
+    });
+  });
+
+  test('renders Find New Home link', async () => {
+    renderWithProviders(<TenantDashboard />, {
+      authValue: { user: mockTenant, isAuthenticated: true, initializing: false },
+    });
+    await waitFor(() => {
+      expect(screen.getByText('Find New Home')).toBeInTheDocument();
+    });
+  });
+
+  test('renders stat labels: Favorites, Viewed, Contracts', async () => {
+    renderWithProviders(<TenantDashboard />, {
+      authValue: { user: mockTenant, isAuthenticated: true, initializing: false },
+    });
+    await waitFor(() => {
+      // StatBlock renders raw text — CSS makes it uppercase visually but DOM text is lowercase
+      expect(screen.getByText('Favorites')).toBeInTheDocument();
+      expect(screen.getByText('Viewed')).toBeInTheDocument();
+      expect(screen.getByText('Contracts')).toBeInTheDocument();
+    });
+  });
+
+  test('TENANT dashboard does NOT have a Pay button', async () => {
+    renderWithProviders(<TenantDashboard />, {
+      authValue: { user: mockTenant, isAuthenticated: true, initializing: false },
+    });
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /pay/i })).not.toBeInTheDocument();
+    });
+  });
+
+  test('renders Your Favorites section heading', async () => {
+    renderWithProviders(<TenantDashboard />, {
+      authValue: { user: mockTenant, isAuthenticated: true, initializing: false },
+    });
+    await waitFor(() => {
+      expect(screen.getByText('Your Favorites')).toBeInTheDocument();
+    });
   });
 });

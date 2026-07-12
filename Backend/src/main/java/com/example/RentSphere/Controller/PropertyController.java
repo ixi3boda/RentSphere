@@ -63,13 +63,16 @@ public class PropertyController {
         }
     }
 
+    record AddImageRequest(String image_url, Boolean is_cover) {}
+
     @PostMapping("/{id}/images/add")
     public ResponseEntity<?> addPropertyImage(
             @PathVariable Long id,
-            @RequestParam String image_url,
-            @RequestParam(defaultValue = "false") boolean is_cover,
+            @RequestBody AddImageRequest body,
             Principal principal
     ) {
+        String image_url = body.image_url();
+        boolean is_cover = body.is_cover() != null && body.is_cover();
         try {
             String email = getPrincipalEmail(principal);
             int currentUserId = userService.getCurrentUser(email).getUser_id();

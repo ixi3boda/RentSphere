@@ -100,4 +100,16 @@ public class ContractService {
     public java.util.List<Contract> getAllContracts() {
         return contractRepository.findAll();
     }
+
+    public java.util.List<Contract> getContractsForTenant(Long tenantId) {
+        return contractRepository.findByTenantId(tenantId);
+    }
+
+    public java.util.List<Contract> getContractsForOwner(Long ownerId) {
+        return contractRepository.findByOwnerId(ownerId);
+    }
+
+    public java.util.List<PaymentDto> getPaymentsByContractId(Long contractId) {
+        return contractRepository.findPaymentsByContractId(contractId);
+    }
 }

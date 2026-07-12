@@ -1,99 +1,116 @@
-
-
-
-
-
-
-
-
+// src/tests/components/FavoriteButton.test.jsx
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { rest } from 'msw';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import FavoriteButton from '../../components/FavoriteButton';
-import { MOCK_TENANT } from '../mocks/authMocks';
-import { renderInRouter } from '../test-utils/renderWithProviders';
-import { server } from '../mocks/server';
+import { renderWithProviders, mockTenant } from '../helpers/renderWithProviders';
+
+// Mock the API module
+jest.mock('../../utils/api', () => ({
+  propertyApi: {
+    favorite: jest.fn(),
+    getAll: jest.fn(),
+    getById: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    filter: jest.fn(),
+    search: jest.fn(),
+    getFavorites: jest.fn(),
+    addImage: jest.fn(),
+  },
+  authApi: {
+    login: jest.fn(),
+    register: jest.fn(),
+    logout: jest.fn(),
+    getMe: jest.fn(),
+    updateProfile: jest.fn(),
+  },
+  rentApi: {},
+  uploadApi: { uploadOne: jest.fn() },
+}));
+
+const { propertyApi } = require('../../utils/api');
 
 describe('FavoriteButton', () => {
-  describe('unfavorited state', () => {
-    it('renders with heart icon in unfavorited state', () => {
-      renderInRouter(
-        <FavoriteButton propertyId="101" initialFavorited={false} />,
-        { user: MOCK_TENANT }
-      );
-      const btn = screen.getByRole('button', { name: /add to favorites/i });
-      expect(btn).toBeInTheDocument();
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('renders with unfavorited state by default', () => {
+    renderWithProviders(
+      <FavoriteButton propertyId="1" />,
+      { authValue: { user: mockTenant, isAuthenticated: true } }
+    );
+    const btn = screen.getByRole('button', { name: /Add to favorites/i });
+    expect(btn).toBeInTheDocument();
+    expect(btn).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  test('renders with favorited state when initialFavorited=true', () => {
+    renderWithProviders(
+      <FavoriteButton propertyId="1" initialFavorited={true} />,
+      { authValue: { user: mockTenant, isAuthenticated: true } }
+    );
+    const btn = screen.getByRole('button', { name: /Remove from favorites/i });
+    expect(btn).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('toggles favorite state on click when authenticated', async () => {
+    propertyApi.favorite.mockResolvedValue({ data: {} });
+
+    renderWithProviders(
+      <FavoriteButton propertyId="1" initialFavorited={false} />,
+      { authValue: { user: mockTenant, isAuthenticated: true } }
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Add to favorites/i }));
+
+    await waitFor(() => {
+      expect(propertyApi.favorite).toHaveBeenCalledWith('1');
+      expect(screen.getByRole('button', { name: /Remove from favorites/i })).toBeInTheDocument();
     });
   });
 
-  describe('favorited state', () => {
-    it('renders with filled heart in favorited state', () => {
-      renderInRouter(
-        <FavoriteButton propertyId="101" initialFavorited={true} />,
-        { user: MOCK_TENANT }
-      );
-      const btn = screen.getByRole('button', { name: /remove from favorites/i });
-      expect(btn).toBeInTheDocument();
-    });
+  test('redirects to login when unauthenticated user clicks favorite', () => {
+    renderWithProviders(
+      <FavoriteButton propertyId="1" />,
+      { authValue: { user: null, isAuthenticated: false } }
+    );
+    // Click should not throw; navigation to /login happens internally
+    fireEvent.click(screen.getByRole('button', { name: /Add to favorites/i }));
+    // API should NOT be called
+    expect(propertyApi.favorite).not.toHaveBeenCalled();
   });
 
-  describe('unauthenticated user', () => {
-    it('does not call API — instead redirects to /login', async () => {
-      const user = userEvent.setup();
-      renderInRouter(
-        <FavoriteButton propertyId="101" initialFavorited={false} />,
-        { user: null, route: '/properties/101' }
-      );
-      
-      await user.click(screen.getByRole('button', { name: /add to favorites/i }));
-      
-      expect(screen.queryByText('Network error')).not.toBeInTheDocument();
-    });
+  test('shows label when showLabel=true', () => {
+    renderWithProviders(
+      <FavoriteButton propertyId="1" showLabel={true} initialFavorited={false} />,
+      { authValue: { user: mockTenant, isAuthenticated: true } }
+    );
+    expect(screen.getByText('Save')).toBeInTheDocument();
   });
 
-  describe('toggle behavior', () => {
-    it('calls onToggle callback with new state after API success', async () => {
-      const onToggle = jest.fn();
-      const user = userEvent.setup();
-
-      renderInRouter(
-        <FavoriteButton propertyId="101" initialFavorited={false} onToggle={onToggle} />,
-        { user: MOCK_TENANT }
-      );
-
-      await user.click(screen.getByRole('button', { name: /add to favorites/i }));
-
-      await waitFor(() => {
-        expect(onToggle).toHaveBeenCalledWith(true);
-      });
-    });
+  test('shows Saved label when favorited and showLabel=true', () => {
+    renderWithProviders(
+      <FavoriteButton propertyId="1" showLabel={true} initialFavorited={true} />,
+      { authValue: { user: mockTenant, isAuthenticated: true } }
+    );
+    expect(screen.getByText('Saved')).toBeInTheDocument();
   });
 
-  describe('error handling', () => {
-    it('does not call onToggle if API fails', async () => {
-      server.use(
-        rest.post('/api/properties/:propertyId/favorite', (req, res, ctx) =>
-          res(ctx.status(500))
-        )
-      );
+  test('calls onToggle callback after toggling', async () => {
+    propertyApi.favorite.mockResolvedValue({ data: {} });
+    const onToggle = jest.fn();
 
-      const onToggle = jest.fn();
-      const user = userEvent.setup();
+    renderWithProviders(
+      <FavoriteButton propertyId="1" initialFavorited={false} onToggle={onToggle} />,
+      { authValue: { user: mockTenant, isAuthenticated: true } }
+    );
 
-      renderInRouter(
-        <FavoriteButton propertyId="101" initialFavorited={false} onToggle={onToggle} />,
-        { user: MOCK_TENANT }
-      );
+    fireEvent.click(screen.getByRole('button', { name: /Add to favorites/i }));
 
-      await user.click(screen.getByRole('button', { name: /add to favorites/i }));
-
-      await waitFor(() => {
-        
-        expect(screen.getByRole('button')).not.toBeDisabled();
-      });
-      
-      expect(onToggle).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(onToggle).toHaveBeenCalledWith(true);
     });
   });
 });

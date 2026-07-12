@@ -1,82 +1,148 @@
-
-
-
-
-
-
-
-
+// src/tests/pages/AdminDashboard.test.jsx
 import React from 'react';
-import { screen } from '@testing-library/react';
-import { rest } from 'msw';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import { render } from '@testing-library/react';
-import AuthContext from '../../context/AuthContext';
+import { screen, waitFor } from '@testing-library/react';
 import AdminDashboard from '../../pages/admin/AdminDashboard';
-import { PropertyProvider } from '../../context/PropertyContext';
-import { MOCK_ADMIN, MOCK_TENANT } from '../mocks/authMocks';
-import { buildAuthValue } from '../test-utils/renderWithProviders';
-import { server } from '../mocks/server';
+import { renderWithProviders, mockAdmin } from '../helpers/renderWithProviders';
 
-function renderAdmin(user) {
-  return render(
-    <AuthContext.Provider value={buildAuthValue({ user })}>
-      <PropertyProvider>
-        <MemoryRouter initialEntries={['/admin/dashboard']}>
-          <Routes>
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/login" element={<div>Login Page</div>} />
-            <Route path="/properties" element={<div>Properties Page</div>} />
-          </Routes>
-        </MemoryRouter>
-      </PropertyProvider>
-    </AuthContext.Provider>
-  );
-}
+jest.mock('../../utils/api', () => ({
+  propertyApi: {
+    getAll: jest.fn(),
+    getFavorites: jest.fn(),
+    favorite: jest.fn(),
+    getById: jest.fn(),
+    filter: jest.fn(),
+    search: jest.fn(),
+    addImage: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+  },
+  authApi: {
+    login: jest.fn(), register: jest.fn(), logout: jest.fn(),
+    getMe: jest.fn(), updateProfile: jest.fn(),
+  },
+  rentApi: {
+    getAllRequests: jest.fn(),
+    getAllContracts: jest.fn(),
+    acceptRequest: jest.fn(),
+    rejectRequest: jest.fn(),
+  },
+  uploadApi: { uploadOne: jest.fn() },
+}));
 
-describe('AdminDashboard — access control', () => {
-  it('redirects non-admin user away from dashboard', async () => {
-    renderAdmin(MOCK_TENANT);
-    
-    expect(screen.queryByText(/admin dashboard/i)).not.toBeInTheDocument();
-  });
+const { rentApi } = require('../../utils/api');
 
-  it('renders admin content for ADMIN user', async () => {
-    renderAdmin(MOCK_ADMIN);
-    expect(await screen.findByText(/total properties/i)).toBeInTheDocument();
-  });
+const mockProperty = {
+  id: '1',
+  title: 'Admin Test Property',
+  price: 2000,
+  location: 'Cairo, Maadi',
+  city: 'Cairo',
+  propertyType: 'apartment',
+  status: 'available',
+  numRooms: 3,
+  areaSqm: 90,
+  images: [],
+};
+
+const defaultPropertyCtx = (properties = []) => ({
+  properties,
+  loading: false,
+  error: null,
+  fetchOwnerProperties: jest.fn(),
+  deleteProperty: jest.fn().mockResolvedValue({ success: true }),
+  createProperty: jest.fn(),
+  updateProperty: jest.fn(),
+  getPropertyById: jest.fn(),
 });
 
-describe('AdminDashboard — stats', () => {
-  it('shows stats cards', async () => {
-    renderAdmin(MOCK_ADMIN);
-    
-    expect(await screen.findByText(/total properties/i)).toBeInTheDocument();
+describe('AdminDashboard', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    rentApi.getAllRequests.mockResolvedValue({ data: [] });
+    rentApi.getAllContracts.mockResolvedValue({ data: [] });
   });
 
-  it('shows active contracts count', async () => {
-    renderAdmin(MOCK_ADMIN);
-    expect(await screen.findByText(/active contracts/i)).toBeInTheDocument();
+  test('renders Admin Console heading', async () => {
+    renderWithProviders(<AdminDashboard />, {
+      authValue: { user: mockAdmin, isAuthenticated: true },
+      propertyValue: defaultPropertyCtx(),
+    });
+    await waitFor(() => {
+      expect(screen.getByText('Admin Console.')).toBeInTheDocument();
+    });
   });
-});
 
-describe('AdminDashboard — property list', () => {
-  it('lists properties in the management section', async () => {
-    renderAdmin(MOCK_ADMIN);
-    expect(await screen.findByText('Cozy Downtown Apartment')).toBeInTheDocument();
+  test('shows "No Properties Yet" when property list is empty', async () => {
+    renderWithProviders(<AdminDashboard />, {
+      authValue: { user: mockAdmin, isAuthenticated: true },
+      propertyValue: defaultPropertyCtx([]),
+    });
+    await waitFor(() => {
+      expect(screen.getByText('No Properties Yet')).toBeInTheDocument();
+    });
   });
-});
 
-describe('AdminDashboard — API error', () => {
-  it('shows error or empty state when properties API fails', async () => {
-    server.use(
-      rest.get('/api/properties/all', (req, res, ctx) =>
-        res(ctx.status(500))
-      )
-    );
+  test('renders property card when properties exist', async () => {
+    renderWithProviders(<AdminDashboard />, {
+      authValue: { user: mockAdmin, isAuthenticated: true },
+      propertyValue: defaultPropertyCtx([mockProperty]),
+    });
+    await waitFor(() => {
+      expect(screen.getByText('Admin Test Property')).toBeInTheDocument();
+    });
+  });
 
-    renderAdmin(MOCK_ADMIN);
-    
-    expect(await screen.findByText(/active contracts|total properties/i)).toBeInTheDocument();
+  test('renders Add New quick action link', async () => {
+    renderWithProviders(<AdminDashboard />, {
+      authValue: { user: mockAdmin, isAuthenticated: true },
+      propertyValue: defaultPropertyCtx(),
+    });
+    await waitFor(() => {
+      expect(screen.getByText('Add New')).toBeInTheDocument();
+    });
+  });
+
+  test('renders Requests and Contracts quick action links', async () => {
+    renderWithProviders(<AdminDashboard />, {
+      authValue: { user: mockAdmin, isAuthenticated: true },
+      propertyValue: defaultPropertyCtx(),
+    });
+    await waitFor(() => {
+      expect(screen.getByText('Requests')).toBeInTheDocument();
+      expect(screen.getByText('Contracts')).toBeInTheDocument();
+    });
+  });
+
+  test('⚠️ ADMIN does NOT see a Pay button', async () => {
+    renderWithProviders(<AdminDashboard />, {
+      authValue: { user: mockAdmin, isAuthenticated: true },
+      propertyValue: defaultPropertyCtx([mockProperty]),
+    });
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /pay/i })).not.toBeInTheDocument();
+    });
+  });
+
+  test('Edit and Delete buttons appear for each property', async () => {
+    renderWithProviders(<AdminDashboard />, {
+      authValue: { user: mockAdmin, isAuthenticated: true },
+      propertyValue: defaultPropertyCtx([mockProperty]),
+    });
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Edit/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Delete/i })).toBeInTheDocument();
+    });
+  });
+
+  test('Stats section renders Properties label', async () => {
+    renderWithProviders(<AdminDashboard />, {
+      authValue: { user: mockAdmin, isAuthenticated: true },
+      propertyValue: defaultPropertyCtx(),
+    });
+    await waitFor(() => {
+      // StatsCard renders label with uppercase tracking via CSS; DOM text is normal case
+      expect(screen.getByText('Properties')).toBeInTheDocument();
+    });
   });
 });

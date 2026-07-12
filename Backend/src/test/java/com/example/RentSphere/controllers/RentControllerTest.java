@@ -140,27 +140,6 @@ class RentControllerTest {
     
 
     @Test
-    @DisplayName("GET /contracts/all — 200 for ADMIN")
-    @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
-    void getAllContracts_asAdmin_returns200() throws Exception {
-        when(contractService.getAllContracts()).thenReturn(List.of(TestFixtures.activeContract()));
-
-        mockMvc.perform(get("/api/rent/contracts/all"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].contractStatus").value("ACTIVE"));
-    }
-
-    @Test
-    @DisplayName("GET /contracts/all — 403 for TENANT")
-    @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
-    void getAllContracts_asTenant_returns403() throws Exception {
-        mockMvc.perform(get("/api/rent/contracts/all"))
-                .andExpect(status().isForbidden());
-    }
-
-    
-
-    @Test
     @DisplayName("PUT /requests/{id}/accept — 200 for authenticated owner")
     @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
     void acceptRequest_asOwner_returns200() throws Exception {

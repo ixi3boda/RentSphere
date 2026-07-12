@@ -1,118 +1,72 @@
-
-
-
-
-
-
-
-
-
-
+// src/tests/pages/Login.test.jsx
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { rest } from 'msw';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import Login from '../../pages/Login';
-import { MOCK_TOKEN, RAW_ADMIN_USER, RAW_TENANT_USER } from '../mocks/authMocks';
-import { renderInRouter } from '../test-utils/renderWithProviders';
-import { server } from '../mocks/server';
+import { renderWithProviders } from '../helpers/renderWithProviders';
 
-
-const mockMeAs = (rawUser) =>
-  rest.get('/api/user/me', (req, res, ctx) =>
-    res(ctx.status(200), ctx.json(rawUser))
-  );
-
-describe('Login page — rendering', () => {
-  beforeEach(() => renderInRouter(<Login />, { user: null }));
-
-  it('renders email and password inputs', () => {
-    expect(screen.getByPlaceholderText(/you@example\.com/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/•{4,}/)).toBeInTheDocument();
+describe('Login page', () => {
+  test('renders email and password fields', () => {
+    renderWithProviders(<Login />);
+    expect(screen.getByPlaceholderText(/you@example.com/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument();
   });
 
-  it('renders Sign In submit button', () => {
+  test('renders Sign In button', () => {
+    renderWithProviders(<Login />);
     expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
   });
 
-  it('renders link to signup page', () => {
-    expect(screen.getByRole('link', { name: /sign up/i })).toBeInTheDocument();
+  test('shows Create Account link', () => {
+    renderWithProviders(<Login />);
+    expect(screen.getByText(/Create Account/i)).toBeInTheDocument();
   });
 
-  it('renders Stay signed in checkbox', () => {
-    expect(screen.getByRole('checkbox', { name: /stay signed in/i })).toBeInTheDocument();
-  });
-});
-
-describe('Login page — invalid credentials', () => {
-  it('shows error message for wrong credentials', async () => {
-    const mockLogin = jest.fn().mockResolvedValue({ 
-      success: false, 
-      error: 'Invalid credentials' 
+  test('shows error message on failed login', async () => {
+    const mockLogin = jest.fn().mockResolvedValue({
+      success: false,
+      error: 'Invalid credentials',
+    });
+    renderWithProviders(<Login />, {
+      authValue: { login: mockLogin, loading: false },
     });
 
-    const user = userEvent.setup();
-    renderInRouter(<Login />, { 
-      user: null,
-      authOverrides: { login: mockLogin }
+    fireEvent.change(screen.getByPlaceholderText(/you@example.com/i), {
+      target: { value: 'bad@test.com' },
     });
-
-    await user.type(screen.getByPlaceholderText(/you@example\.com/i), 'wrong@test.com');
-    await user.type(screen.getByPlaceholderText(/•{4,}/), 'badpass');
-    await user.click(screen.getByRole('button', { name: /sign in/i }));
-
-    expect(await screen.findByText(/invalid credentials/i)).toBeInTheDocument();
-    expect(mockLogin).toHaveBeenCalledWith('wrong@test.com', 'badpass', false);
-  });
-});
-
-describe('Login page — successful login', () => {
-  it('stores token in sessionStorage on successful login', async () => {
-    server.use(
-      rest.post('/api/user/login', (req, res, ctx) =>
-        res(ctx.status(200), ctx.json({ token: MOCK_TOKEN }))
-      ),
-      mockMeAs(RAW_TENANT_USER)
-    );
-
-    const mockLogin = jest.fn().mockImplementation(async () => {
-      sessionStorage.setItem('token', MOCK_TOKEN);
-      return { success: true };
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), {
+      target: { value: 'wrongpass' },
     });
-
-    const user = userEvent.setup();
-    renderInRouter(<Login />, {
-      user: null,
-      authOverrides: { login: mockLogin },
-    });
-
-    await user.type(screen.getByPlaceholderText(/you@example\.com/i), 'tenant@test.com');
-    await user.type(screen.getByPlaceholderText(/•{4,}/), 'password');
-    await user.click(screen.getByRole('button', { name: /sign in/i }));
+    fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
     await waitFor(() => {
-      expect(mockLogin).toHaveBeenCalledWith('tenant@test.com', 'password', false);
+      expect(screen.getByText('Invalid credentials')).toBeInTheDocument();
     });
   });
-});
 
-describe('Login page — stay signed in', () => {
-  it('passes staySignedIn=true when checkbox is checked', async () => {
+  test('calls login with entered credentials on submit', async () => {
     const mockLogin = jest.fn().mockResolvedValue({ success: true });
-    const user = userEvent.setup();
-
-    renderInRouter(<Login />, {
-      user: null,
-      authOverrides: { login: mockLogin },
+    renderWithProviders(<Login />, {
+      authValue: { login: mockLogin, loading: false },
     });
 
-    await user.click(screen.getByRole('checkbox', { name: /stay signed in/i }));
-    await user.type(screen.getByPlaceholderText(/you@example\.com/i), 'admin@test.com');
-    await user.type(screen.getByPlaceholderText(/•{4,}/), 'pass');
-    await user.click(screen.getByRole('button', { name: /sign in/i }));
+    fireEvent.change(screen.getByPlaceholderText(/you@example.com/i), {
+      target: { value: 'test@test.com' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), {
+      target: { value: 'password123' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
     await waitFor(() => {
-      expect(mockLogin).toHaveBeenCalledWith('admin@test.com', 'pass', true);
+      expect(mockLogin).toHaveBeenCalledWith('test@test.com', 'password123', false);
     });
+  });
+
+  test('stay signed-in checkbox toggles', () => {
+    renderWithProviders(<Login />);
+    const checkbox = screen.getByRole('checkbox', { name: /Stay signed in/i });
+    expect(checkbox).not.toBeChecked();
+    fireEvent.click(checkbox);
+    expect(checkbox).toBeChecked();
   });
 });

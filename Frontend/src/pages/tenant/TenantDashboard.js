@@ -1,240 +1,199 @@
-
-
 import React, { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { AnimatedPage, LoadingSpinner } from '../../components/AnimatedPage';
 import PropertyCard from '../../components/PropertyCard';
-import { propertyApi } from '../../utils/api';
+import { propertyApi, rentApi } from '../../utils/api';
 import { mapPropertyToFrontend } from '../../utils/mappers';
 import { getRecentlyViewed } from '../../utils/recentlyViewed';
 
 function TenantDashboard() {
-  const { user } = useAuth();
-
+  const { user, initializing } = useAuth();
   const [favorites, setFavorites] = useState([]);
+  const [contracts, setContracts] = useState([]);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const fetchFavorites = useCallback(async () => {
+  const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      
-      if (!user) {
-        setFavorites([]);
-        return;
+      if (!user) { 
+        setFavorites([]); 
+        setContracts([]);
+        return; 
       }
-      const res = await propertyApi.getFavorites();
-      const list = Array.isArray(res.data) ? res.data : [];
-      setFavorites(
-        list
-          .map((item) => mapPropertyToFrontend(item.propertyDetails))
-          .filter(Boolean),
-      );
-    } catch (err) {
+      const [favRes, conRes] = await Promise.all([
+        propertyApi.getFavorites(),
+        rentApi.getAllContracts()
+      ]);
       
+      const favList = Array.isArray(favRes.data) ? favRes.data : [];
+      setFavorites(favList.map((item) => mapPropertyToFrontend(item.propertyDetails)).filter(Boolean));
+      
+      const conList = Array.isArray(conRes.data) ? conRes.data : [];
+      setContracts(conList);
+    } catch (err) {
       if (err.response?.status === 401) {
         setFavorites([]);
+        setContracts([]);
       } else {
-        setError(err.response?.data?.message || 'Failed to load your favorites.');
+        setError(err.response?.data?.message || 'Failed to load your dashboard data.');
       }
     } finally {
       setLoading(false);
     }
   }, [user]);
 
-  useEffect(() => {
-    fetchFavorites();
-  }, [fetchFavorites]);
+  useEffect(() => { 
+    if (!initializing) {
+      fetchDashboardData(); 
+    }
+  }, [fetchDashboardData, initializing]);
 
-  useEffect(() => {
-    setRecentlyViewed(getRecentlyViewed());
-  }, []);
+  useEffect(() => { setRecentlyViewed(getRecentlyViewed()); }, []);
 
   const favoriteIds = new Set(favorites.map((favorite) => String(favorite.id)));
 
   return (
     <AnimatedPage>
-      <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
+      <div className="bg-slate-50/50 min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4"
-          >
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
             <div>
-              <h1 className="text-4xl font-bold gradient-text mb-1">Dashboard</h1>
-              <p className="text-gray-500">
-                Welcome back, <span className="font-semibold text-gray-700">{user?.name || 'Tenant'}</span>
+              <h1 className="text-5xl font-black text-slate-900 mb-2 tracking-tight">Dashboard.</h1>
+              <p className="text-slate-500 font-medium">
+                Welcome back, <span className="text-zen-600">{user?.name || user?.email?.split('@')[0]}</span>
               </p>
             </div>
+            <div className="flex gap-3">
+              <Link to="/profile" className="btn-secondary !py-3">Edit Profile</Link>
+              <Link to="/properties" className="btn-primary !py-3 shadow-zen-500/20">Find New Home</Link>
+            </div>
+          </div>
 
-            <Link to="/properties" className="btn-primary inline-flex self-start !py-2 !px-5">
-              Browse properties
-            </Link>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.08 }}
-            className="mb-10"
-          >
-            <motion.div
-              animate={{ y: [0, -4, 0], scale: [1, 1.01, 1] }}
-              transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut' }}
-              className="relative overflow-hidden rounded-3xl p-7 sm:p-8 text-white shadow-2xl"
-              style={{
-                background:
-                  'linear-gradient(120deg, rgba(13,148,136,1) 0%, rgba(59,130,246,1) 45%, rgba(251,146,60,1) 100%)',
-              }}
-            >
-              <motion.div
-                animate={{ x: ['-120%', '120%'] }}
-                transition={{ duration: 2.8, repeat: Infinity, repeatDelay: 1.2, ease: 'easeInOut' }}
-                className="absolute inset-y-0 w-1/3 bg-white/15 blur-2xl"
-              />
-
-              <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
-                <div>
-                  <p className="text-white/80 text-sm font-semibold tracking-wide uppercase mb-1">
-                    Your Properties Catalog
-                  </p>
-                  <h2 className="text-3xl sm:text-4xl font-extrabold leading-tight">
-                    Discover your next home
-                  </h2>
-                  <p className="text-white/85 mt-2 max-w-2xl">
-                    Browse the full live catalog, then save the listings you love.
-                  </p>
+          {/* Stats / Banner */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-16">
+             <div className="relative overflow-hidden rounded-[3rem] p-10 lg:p-14 bg-slate-900 text-white shadow-2xl">
+                <div className="absolute top-[-20%] right-[-10%] w-[400px] h-[400px] bg-zen-500 rounded-full blur-[120px] opacity-20" />
+                <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
+                  <div>
+                    <span className="inline-block px-4 py-1 rounded-full bg-zen-500/20 text-zen-400 text-[10px] font-bold uppercase tracking-widest mb-6 border border-zen-500/30">Tenant Perks</span>
+                    <h2 className="text-4xl lg:text-5xl font-black mb-6 leading-tight">Manage your <span className="text-zen-400">RentSphere</span> experience in one place.</h2>
+                    <p className="text-slate-400 text-lg mb-8">Keep track of your saved listings, view recent activity, and manage your rental contracts with ease.</p>
+                    <div className="flex items-center space-x-12">
+                      <StatBlock label="Favorites" value={favorites.length} />
+                      <StatBlock label="Viewed" value={recentlyViewed.length} />
+                      <StatBlock label="Contracts" value={contracts.length} />
+                    </div>
+                  </div>
+                  <div className="hidden md:flex justify-center">
+                     <div className="w-64 h-64 bg-zen-500/10 rounded-full border border-white/5 flex items-center justify-center text-[100px] animate-float">🏠</div>
+                  </div>
                 </div>
-
-                <motion.div
-                  animate={{ rotate: [0, -6, 6, 0] }}
-                  transition={{ duration: 3.6, repeat: Infinity, ease: 'easeInOut' }}
-                  className="text-6xl sm:text-7xl self-end sm:self-auto"
-                >
-                  🏘️
-                </motion.div>
-              </div>
-            </motion.div>
+             </div>
           </motion.div>
 
+          {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg">
-              {error}
+            <div className="mb-8 p-6 bg-red-50 border border-red-100 text-red-600 rounded-[2rem] font-medium flex items-center space-x-3">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <span>{error}</span>
             </div>
           )}
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.12 }}
-            className="flex items-center justify-between mb-6"
-          >
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800">Your Favorites: {favorites.length} saved</h2>
-              <p className="text-sm text-gray-400">Saved properties pulled directly from the database</p>
+          {/* Favorites Section */}
+          <section className="mb-20">
+            <div className="flex items-center justify-between mb-8 px-2">
+              <div>
+                <h2 className="text-3xl font-black text-slate-900 mb-1">Your Favorites</h2>
+                <p className="text-slate-400 font-medium text-sm">Saved for quick access later</p>
+              </div>
+              {favorites.length > 0 && <Link to="/favorites" className="text-zen-600 font-bold hover:underline">View All →</Link>}
             </div>
-            <Link to="/favorites" className="btn-secondary inline-flex !py-2 !px-5 text-sm">
-              View all favorites
-            </Link>
-          </motion.div>
 
-          {loading ? (
-            <LoadingSpinner />
-          ) : favorites.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="glass-effect rounded-2xl p-16 text-center"
-            >
-              <div className="text-6xl mb-4">🤍</div>
-              <h2 className="text-2xl font-bold text-gray-700 mb-2">No favorites yet</h2>
-              <p className="text-gray-500 mb-6">
-                Tap the heart on any property to save it, and it will appear here.
-              </p>
-              <Link to="/properties" className="btn-primary inline-block !py-2.5 !px-8">
-                Browse Properties
-              </Link>
-            </motion.div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {favorites.map((property, index) => (
-                <PropertyCard
-                  key={property.id}
-                  property={property}
-                  index={index}
-                  initialFavorited={favoriteIds.has(String(property.id))}
-                  onFavoriteToggle={(next) => {
-                    setFavorites((prev) => {
-                      if (next) return prev;
-                      return prev.filter((item) => String(item.id) !== String(property.id));
-                    });
-                  }}
-                />
-              ))}
-            </div>
-          )}
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"><LoadingSpinner /></div>
+            ) : favorites.length === 0 ? (
+              <EmptyState icon="🤍" title="No favorites yet" desc="Heart some properties and they'll show up here." action="/properties" actionText="Browse Properties" />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {favorites.map((prop, i) => (
+                  <PropertyCard
+                    key={prop.id}
+                    property={prop}
+                    index={i}
+                    initialFavorited={favoriteIds.has(String(prop.id))}
+                    onFavoriteToggle={(next) => {
+                      if (!next) setFavorites(prev => prev.filter(item => String(item.id) !== String(prop.id)));
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18 }}
-            className="flex items-center justify-between mt-14 mb-6"
-          >
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800">Recently Viewed: {recentlyViewed.length} properties</h2>
-              <p className="text-sm text-gray-400">Your latest property visits, stored in this browser</p>
+          {/* Recently Viewed */}
+          <section>
+            <div className="flex items-center justify-between mb-8 px-2">
+              <div>
+                <h2 className="text-3xl font-black text-slate-900 mb-1">Recently Viewed</h2>
+                <p className="text-slate-400 font-medium text-sm">Stored locally in your browser</p>
+              </div>
+              {recentlyViewed.length > 0 && (
+                <button onClick={() => { setRecentlyViewed([]); localStorage.removeItem('rentsphere_recently_viewed'); }} className="text-red-400 font-bold hover:text-red-500 transition-colors">
+                  Clear History
+                </button>
+              )}
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                setRecentlyViewed([]);
-                localStorage.removeItem('rentsphere_recently_viewed');
-              }}
-              className="btn-secondary inline-flex !py-2 !px-5 text-sm"
-            >
-              Clear history
-            </button>
-          </motion.div>
 
-          {recentlyViewed.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="glass-effect rounded-2xl p-12 text-center"
-            >
-              <div className="text-5xl mb-3">🕘</div>
-              <h3 className="text-xl font-bold text-gray-700 mb-2">No recent views yet</h3>
-              <p className="text-gray-500">Open a property detail page and it will show up here.</p>
-            </motion.div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recentlyViewed.map((property, index) => (
-                <PropertyCard
-                  key={property.id}
-                  property={property}
-                  index={index}
-                  initialFavorited={favorites.some((item) => String(item.id) === String(property.id))}
-                  onFavoriteToggle={(next) => {
-                    setFavorites((prev) => {
-                      if (next) {
-                        const exists = prev.some((item) => String(item.id) === String(property.id));
-                        return exists ? prev : [property, ...prev];
-                      }
-                      return prev.filter((item) => String(item.id) !== String(property.id));
-                    });
-                  }}
-                />
-              ))}
-            </div>
-          )}
+            {recentlyViewed.length === 0 ? (
+              <EmptyState icon="🕒" title="History is empty" desc="Your recently visited listings will appear here." />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {recentlyViewed.map((prop, i) => (
+                  <PropertyCard
+                    key={prop.id}
+                    property={prop}
+                    index={i}
+                    initialFavorited={favoriteIds.has(String(prop.id))}
+                    onFavoriteToggle={(next) => {
+                      setFavorites(prev => {
+                        if (next) return [...prev, prop];
+                        return prev.filter(item => String(item.id) !== String(prop.id));
+                      });
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
         </div>
       </div>
     </AnimatedPage>
+  );
+}
+
+function StatBlock({ label, value }) {
+  return (
+    <div className="group">
+      <p className="text-3xl lg:text-4xl font-black text-white group-hover:text-zen-400 transition-colors">{value}</p>
+      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">{label}</p>
+    </div>
+  );
+}
+
+function EmptyState({ icon, title, desc, action, actionText }) {
+  return (
+    <div className="bg-white rounded-[3rem] p-16 text-center border border-slate-100 soft-shadow">
+      <div className="text-6xl mb-6">{icon}</div>
+      <h3 className="text-2xl font-black text-slate-900 mb-2">{title}</h3>
+      <p className="text-slate-500 mb-8 max-w-xs mx-auto font-medium">{desc}</p>
+      {action && <Link to={action} className="btn-primary !px-8">{actionText}</Link>}
+    </div>
   );
 }
 

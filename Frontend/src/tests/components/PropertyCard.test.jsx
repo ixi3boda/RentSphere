@@ -1,62 +1,92 @@
-
-
-
-
+// src/tests/components/PropertyCard.test.jsx
 import React from 'react';
 import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import PropertyCard from '../../components/PropertyCard';
-import { createMockProperty } from '../test-utils/factory';
-import { MOCK_TENANT } from '../mocks/authMocks';
-import { renderInRouter } from '../test-utils/renderWithProviders';
+import { renderWithProviders } from '../helpers/renderWithProviders';
+
+// Mock API so FavoriteButton (rendered inside PropertyCard) doesn't break
+jest.mock('../../utils/api', () => ({
+  propertyApi: {
+    favorite: jest.fn(),
+    getAll: jest.fn(),
+    getById: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    filter: jest.fn(),
+    search: jest.fn(),
+    getFavorites: jest.fn(),
+    addImage: jest.fn(),
+  },
+  authApi: {
+    login: jest.fn(), register: jest.fn(), logout: jest.fn(),
+    getMe: jest.fn(), updateProfile: jest.fn(),
+  },
+  rentApi: {},
+  uploadApi: { uploadOne: jest.fn() },
+}));
+
+const mockProperty = {
+  id: '1',
+  title: 'Modern Downtown Apartment',
+  price: 1200,
+  location: 'New York, Manhattan',
+  city: 'New York',
+  propertyType: 'apartment',
+  status: 'available',
+  numRooms: 3,
+  areaSqm: 85,
+  images: [],
+};
+
+const mockPropertyWithImage = {
+  ...mockProperty,
+  id: '2',
+  images: ['data:image/png;base64,fakebase64=='],
+};
 
 describe('PropertyCard', () => {
-  const property = createMockProperty({
-    title: 'Sunset Villa',
-    price: 2500,
-    location: 'Jeddah, Al Hamra',
-    propertyType: 'villa',
-    status: 'available',
+  test('renders property title', () => {
+    renderWithProviders(<PropertyCard property={mockProperty} />);
+    expect(screen.getByText('Modern Downtown Apartment')).toBeInTheDocument();
   });
 
-  it('renders property title', () => {
-    renderInRouter(<PropertyCard property={property} />, { user: MOCK_TENANT });
-    expect(screen.getByText('Sunset Villa')).toBeInTheDocument();
+  test('renders price with /mo suffix', () => {
+    renderWithProviders(<PropertyCard property={mockProperty} />);
+    expect(screen.getByText('$1,200')).toBeInTheDocument();
+    expect(screen.getByText(/\/mo/i)).toBeInTheDocument();
   });
 
-  it('renders property price formatted with $', () => {
-    renderInRouter(<PropertyCard property={property} />, { user: MOCK_TENANT });
-    expect(screen.getByText(/2,500/)).toBeInTheDocument();
+  test('renders location text', () => {
+    renderWithProviders(<PropertyCard property={mockProperty} />);
+    expect(screen.getByText(/New York/i)).toBeInTheDocument();
   });
 
-  it('renders availability status badge', () => {
-    renderInRouter(<PropertyCard property={property} />, { user: MOCK_TENANT });
-    expect(screen.getByText(/available/i)).toBeInTheDocument();
+  test('renders status badge with capitalized status', () => {
+    renderWithProviders(<PropertyCard property={mockProperty} />);
+    expect(screen.getByText('Available')).toBeInTheDocument();
   });
 
-  it('renders "rented" badge for unavailable property', () => {
-    const rented = createMockProperty({ status: 'rented', title: 'Property for Rent' });
-    renderInRouter(<PropertyCard property={rented} />, { user: MOCK_TENANT });
-    
-    const badge = screen.getByText(/^rented$/i, { selector: 'span' });
-    expect(badge).toBeInTheDocument();
+  test('renders property type label', () => {
+    renderWithProviders(<PropertyCard property={mockProperty} />);
+    expect(screen.getByText('Apartment')).toBeInTheDocument();
   });
 
-  it('renders FavoriteButton', () => {
-    renderInRouter(<PropertyCard property={property} />, { user: MOCK_TENANT });
-    expect(screen.getByRole('button', { name: /favorites/i })).toBeInTheDocument();
+  test('does NOT render img element when images array is empty', () => {
+    renderWithProviders(<PropertyCard property={mockProperty} />);
+    const cardImg = screen.queryByAltText('Modern Downtown Apartment');
+    expect(cardImg).not.toBeInTheDocument();
   });
 
-  it('renders placeholder when no image', () => {
-    const noImg = createMockProperty({ images: [], coverPic: null });
-    renderInRouter(<PropertyCard property={noImg} />, { user: MOCK_TENANT });
-    
-    expect(screen.getByRole('button', { name: /favorites/i })).toBeInTheDocument();
+  test('renders img element when images array has a URL', () => {
+    renderWithProviders(<PropertyCard property={mockPropertyWithImage} />);
+    const img = screen.getByAltText('Modern Downtown Apartment');
+    expect(img).toBeInTheDocument();
+    expect(img.src).toContain('data:image');
   });
 
-  it('has correct aria attributes on card container', () => {
-    renderInRouter(<PropertyCard property={property} />, { user: MOCK_TENANT });
-    const card = document.getElementById(`property-card-${property.id}`);
-    expect(card).toBeInTheDocument();
+  test('renders room count in overlay area', () => {
+    renderWithProviders(<PropertyCard property={mockProperty} />);
+    expect(screen.getByText(/3 Rooms/i)).toBeInTheDocument();
   });
 });

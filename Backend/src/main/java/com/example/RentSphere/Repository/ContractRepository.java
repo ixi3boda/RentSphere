@@ -73,6 +73,21 @@ public class ContractRepository {
         return jdbcTemplate.query(sql, contractMapper);
     }
 
+    public List<Contract> findByTenantId(Long tenantId) {
+        String sql = "SELECT * FROM contracts WHERE tenant_id = ? ORDER BY created_at DESC";
+        return jdbcTemplate.query(sql, new Object[]{tenantId}, contractMapper);
+    }
+
+    public List<Contract> findByOwnerId(Long ownerId) {
+        String sql = "SELECT * FROM contracts WHERE owner_id = ? ORDER BY created_at DESC";
+        return jdbcTemplate.query(sql, new Object[]{ownerId}, contractMapper);
+    }
+
+    public List<PaymentDto> findPaymentsByContractId(Long contractId) {
+        String sql = "SELECT * FROM payments WHERE contract_id = ? ORDER BY installment_no ASC";
+        return jdbcTemplate.query(sql, new Object[]{contractId}, paymentMapper);
+    }
+
     public List<PaymentDueInfo> findPaymentsDueOn(LocalDate dueDate) {
         String sql = "SELECT p.payment_id, p.contract_id, c.tenant_id, p.installment_no, p.due_date, p.amount_due " +
                 "FROM payments p JOIN contracts c ON p.contract_id = c.contract_id " +
@@ -153,7 +168,7 @@ public class ContractRepository {
                     "PENDING",
                     installment,
                     Date.valueOf(dueDate),
-                    Timestamp.valueOf(now),
+                    now, 
                     amount,
                     BigDecimal.ZERO,
                     null,

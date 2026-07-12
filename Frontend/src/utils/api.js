@@ -80,10 +80,9 @@ export const propertyApi = {
   getFavorites: () => apiClient.get("/api/properties/favorites/all"),
 
   
+  // Sends image as JSON body — base64 strings are too large for URL query params
   addImage: (id, image_url, is_cover = false) =>
-    apiClient.post(`/api/properties/${id}/images/add`, null, {
-      params: { image_url, is_cover },
-    }),
+    apiClient.post(`/api/properties/${id}/images/add`, { image_url, is_cover }),
 };
 
 
@@ -101,6 +100,7 @@ export const rentApi = {
 
   
   getAllContracts: () => apiClient.get("/api/rent/contracts/all"),
+  getContractPayments: (contractId) => apiClient.get(`/api/rent/contracts/${contractId}/payments`),
 
   
   acceptRequest: (id) => apiClient.put(`/api/rent/requests/${id}/accept`),
@@ -123,10 +123,8 @@ export const rentApi = {
 
 
 export const uploadApi = {
-  uploadOne: (file, onProgress) => {
-    
-    return Promise.resolve({ data: { url: URL.createObjectURL(file) } });
-  },
+  // No-op: images are converted to base64 client-side and sent via JSON
+  uploadOne: () => Promise.resolve({ data: { url: null } }),
 };
 
 export default apiClient;
