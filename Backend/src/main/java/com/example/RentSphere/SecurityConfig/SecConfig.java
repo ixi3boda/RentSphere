@@ -37,6 +37,7 @@ public class SecConfig {
                         .requestMatchers(HttpMethod.GET, "/api/properties/filter").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/properties/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/properties/*").permitAll()
+                        .requestMatchers("/actuator/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

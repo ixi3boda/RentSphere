@@ -4,6 +4,7 @@ import com.example.RentSphere.Dto.*;
 import com.example.RentSphere.Repository.ContractRepository;
 import com.example.RentSphere.Repository.UserRepository;
 import com.example.RentSphere.Service.ContractService;
+import com.example.RentSphere.Service.NotificationService;
 import com.example.RentSphere.Service.PayPalService;
 import com.example.RentSphere.fixtures.TestFixtures;
 import com.paypal.api.payments.Payment;
@@ -30,6 +31,8 @@ class ContractServiceTest {
     private UserRepository userRepository;
     @Mock
     private PayPalService payPalService;
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private ContractService contractService;
@@ -118,7 +121,7 @@ class ContractServiceTest {
     void executePayPalPayment_paymentFails_throws() throws Exception {
         when(payPalService.executePayment(anyString(), anyString())).thenReturn(null);
 
-        assertThatThrownBy(() -> contractService.executePayPalPaymentForContract(1L, "payId", "payerId"))
+        assertThatThrownBy(() -> contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("execution failed");
     }
@@ -136,11 +139,39 @@ class ContractServiceTest {
         pendingPayment.setInstallmentNo(1);
         when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.of(pendingPayment));
         when(contractRepository.countPendingPayments(1L)).thenReturn(0);
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
 
-        PayPalPaymentResponse response = contractService.executePayPalPaymentForContract(1L, "payId", "payerId");
+        PayPalPaymentResponse response = contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null);
 
         assertThat(response.getStatus()).isEqualTo("approved");
         verify(contractRepository).markPaymentPaid(eq(1L), eq(1), eq(new BigDecimal("1500.00")), eq("PAY-123"));
         verify(contractRepository).completeContract(1L);
+    }
+
+    @Test
+    @DisplayName("processCreditCardPaymentForContract — succeeds and updates payment status")
+    void processCreditCardPayment_succeeds() {
+        Contract contract = TestFixtures.activeContract();
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(contract));
+
+        PaymentDto pendingPayment = new PaymentDto();
+        pendingPayment.setAmountDue(new BigDecimal("1500.00"));
+        pendingPayment.setInstallmentNo(1);
+        when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.of(pendingPayment));
+
+        CreditCardPaymentRequest cardReq = CreditCardPaymentRequest.builder()
+                .cardNumber("4111111111111111")
+                .cardHolderName("John Doe")
+                .expiryMonth("12")
+                .expiryYear("28")
+                .cvv("123")
+                .build();
+
+        CreditCardPaymentResponse response = contractService.processCreditCardPaymentForContract(1L, cardReq);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo("PAID");
+        assertThat(response.getAmountPaid()).isEqualTo(new BigDecimal("1500.00"));
+        verify(contractRepository).markPaymentPaid(eq(1L), eq(1), eq(new BigDecimal("1500.00")), anyString());
     }
 }

@@ -251,6 +251,12 @@ function PropertyList() {
             </div>
           </div>
 
+          {error && (
+            <div className="mb-8 p-4 bg-red-50 text-red-600 rounded-2xl border border-red-100 font-semibold">
+              {error}
+            </div>
+          )}
+
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {Array.from({ length: PAGE_SIZE }).map((_, i) => <SkeletonCard key={i} />)}

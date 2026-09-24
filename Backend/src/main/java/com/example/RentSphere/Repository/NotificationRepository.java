@@ -42,6 +42,22 @@ public class NotificationRepository {
         return count != null && count > 0;
     }
 
+    public java.util.List<Notification> findByRecipientId(int recipientId) {
+        String sql = "SELECT * FROM notifications WHERE recipient_id = ? ORDER BY created_at DESC";
+        return jdbcTemplate.query(sql, new Object[]{recipientId}, notificationMapper);
+    }
+
+    public int markAsRead(Long notiId, int recipientId) {
+        String sql = "UPDATE notifications SET is_read = TRUE WHERE noti_id = ? AND recipient_id = ?";
+        return jdbcTemplate.update(sql, notiId, recipientId);
+    }
+
+    public int countUnreadByRecipientId(int recipientId) {
+        String sql = "SELECT COUNT(*) FROM notifications WHERE recipient_id = ? AND is_read = FALSE";
+        Integer count = jdbcTemplate.queryForObject(sql, new Object[]{recipientId}, Integer.class);
+        return count != null ? count : 0;
+    }
+
     public Optional<Notification> findById(Long id) {
         String sql = "SELECT * FROM notifications WHERE noti_id = ?";
         try {

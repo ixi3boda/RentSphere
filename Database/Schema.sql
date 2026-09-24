@@ -56,7 +56,8 @@ CREATE TABLE properties (
     INDEX idx_properties_city           (city),
     INDEX idx_properties_price          (price_per_month),
     INDEX idx_properties_available      (is_available),
-    INDEX idx_properties_location       (city, district)
+    INDEX idx_properties_location       (city, district),
+    INDEX idx_properties_avail_city_price (is_available, city, price_per_month)
 );
 
 -- property_images  (one property → many images)
@@ -136,7 +137,7 @@ CREATE TABLE payments (
     payment_status    VARCHAR(20)    NOT NULL,
     installment_no    INT        UNSIGNED NOT NULL,   -- 1 … duration_months
     due_date          DATE                    NOT NULL,
-    paid_date         DATETIME                NOT NULL,
+    paid_date         DATETIME                NULL,
     amount_due        DECIMAL(12, 2)          NOT NULL,
     amount_paid       DECIMAL(12, 2)          NOT NULL DEFAULT 0.00,
     transaction_ref   VARCHAR(100)            NULL,

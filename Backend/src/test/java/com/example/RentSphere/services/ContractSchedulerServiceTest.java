@@ -43,6 +43,7 @@ class ContractSchedulerServiceTest {
                                 .contractId(101L)
                                 .tenantId(2)
                                 .installmentNo(1)
+                                .amountDue(new java.math.BigDecimal("500.00"))
                                 .dueDate(tomorrow)
                                 .build();
 
@@ -54,7 +55,13 @@ class ContractSchedulerServiceTest {
                 finishedContract.setContractId(303L);
                 finishedContract.setTenantId(2L);
 
-                when(contractRepository.findPaymentsDueOn(tomorrow)).thenReturn(List.of(duePayment));
+                when(contractRepository.findPaymentsDueOn(any(LocalDate.class))).thenAnswer(invocation -> {
+                        LocalDate date = invocation.getArgument(0);
+                        if (date.equals(tomorrow)) {
+                                return List.of(duePayment);
+                        }
+                        return List.of();
+                });
                 when(contractRepository.findActiveContractsWithPastDuePendingPayments(today))
                                 .thenReturn(List.of(overdueContract));
                 when(contractRepository.findActiveContractsToComplete(today)).thenReturn(List.of(finishedContract));
@@ -62,15 +69,15 @@ class ContractSchedulerServiceTest {
                 schedulerService.processContractEvents();
 
                 verify(notificationService).createNotification(
-                                eq(2), eq("PAYMENT_REMINDER"), anyString(), contains("installment 1"));
+                                eq(2), eq("PAYMENT_REMINDER"), anyString(), contains("installment #1"));
 
                 verify(contractRepository).markPaymentsOverdueByContract(202L);
                 verify(contractRepository).cancelContract(202L);
                 verify(notificationService).createNotification(
-                                eq(2), eq("REQUEST_CANCELLED"), anyString(), contains("Contract 202"));
+                                eq(2), eq("REQUEST_CANCELLED"), anyString(), contains("Contract #202"));
 
                 verify(contractRepository).completeContract(303L);
                 verify(notificationService).createNotification(
-                                eq(2), eq("CONTRACT_COMPLETED"), anyString(), contains("Contract 303"));
+                                eq(2), eq("CONTRACT_COMPLETED"), anyString(), contains("Contract #303"));
         }
 }

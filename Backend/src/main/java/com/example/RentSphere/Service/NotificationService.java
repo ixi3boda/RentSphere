@@ -23,4 +23,16 @@ public class NotificationService {
             notificationRepository.save(notification);
         }
     }
+
+    public java.util.List<Notification> getNotificationsForUser(int recipientId) {
+        return notificationRepository.findByRecipientId(recipientId);
+    }
+
+    public void markNotificationAsRead(Long notiId, int recipientId) {
+        notificationRepository.markAsRead(notiId, recipientId);
+    }
+
+    public int getUnreadCount(int recipientId) {
+        return notificationRepository.countUnreadByRecipientId(recipientId);
+    }
 }

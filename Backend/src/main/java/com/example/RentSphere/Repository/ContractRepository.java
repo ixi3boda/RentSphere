@@ -168,7 +168,7 @@ public class ContractRepository {
                     "PENDING",
                     installment,
                     Date.valueOf(dueDate),
-                    now, 
+                    null, 
                     amount,
                     BigDecimal.ZERO,
                     null,
@@ -180,6 +180,15 @@ public class ContractRepository {
         String sql = "SELECT * FROM payments WHERE contract_id = ? AND payment_status = 'PENDING' ORDER BY installment_no LIMIT 1";
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new Object[]{contractId}, paymentMapper));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<PaymentDto> findPendingPaymentByInstallmentNo(Long contractId, int installmentNo) {
+        String sql = "SELECT * FROM payments WHERE contract_id = ? AND installment_no = ? AND payment_status = 'PENDING'";
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new Object[]{contractId, installmentNo}, paymentMapper));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }

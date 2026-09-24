@@ -7,7 +7,7 @@ import { renderWithProviders, mockAdmin, mockTenant } from '../helpers/renderWit
 describe('Navbar', () => {
   test('renders RentSphere brand text', () => {
     renderWithProviders(<Navbar />);
-    expect(screen.getByText(/RentSphere/i)).toBeInTheDocument();
+    expect(screen.getByText('Sphere')).toBeInTheDocument();
   });
 
   test('renders Browse link for all users', () => {

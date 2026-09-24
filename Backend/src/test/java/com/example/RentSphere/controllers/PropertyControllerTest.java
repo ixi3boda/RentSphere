@@ -242,4 +242,54 @@ class PropertyControllerTest {
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$").isArray());
         }
+
+        @Test
+        @DisplayName("POST /{id}/images/add — 200 for authenticated owner")
+        @WithMockUser(username = "admin@test.com", roles = { "ADMIN" })
+        void addPropertyImage_asOwner_returns200() throws Exception {
+                when(userService.getCurrentUser("admin@test.com")).thenReturn(TestFixtures.adminUser());
+                doNothing().when(propertyService).addImageByOwner(eq(1L), anyString(), anyBoolean(), eq(1));
+
+                String body = "{\"image_url\":\"http://img.png\",\"is_cover\":true}";
+
+                mockMvc.perform(post("/api/properties/1/images/add")
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("POST /{id}/images/add — 403 when not owner")
+        @WithMockUser(username = "admin@test.com", roles = { "ADMIN" })
+        void addPropertyImage_notOwner_returns403() throws Exception {
+                when(userService.getCurrentUser("admin@test.com")).thenReturn(TestFixtures.adminUser());
+                doThrow(new IllegalArgumentException("Not owner"))
+                                .when(propertyService).addImageByOwner(anyLong(), anyString(), anyBoolean(), anyInt());
+
+                String body = "{\"image_url\":\"http://img.png\",\"is_cover\":true}";
+
+                mockMvc.perform(post("/api/properties/1/images/add")
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("POST /{id}/images/add — 404 when property not found")
+        @WithMockUser(username = "admin@test.com", roles = { "ADMIN" })
+        void addPropertyImage_notFound_returns404() throws Exception {
+                when(userService.getCurrentUser("admin@test.com")).thenReturn(TestFixtures.adminUser());
+                doThrow(new RuntimeException("Property not found"))
+                                .when(propertyService).addImageByOwner(anyLong(), anyString(), anyBoolean(), anyInt());
+
+                String body = "{\"image_url\":\"http://img.png\",\"is_cover\":true}";
+
+                mockMvc.perform(post("/api/properties/1/images/add")
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isNotFound());
+        }
 }

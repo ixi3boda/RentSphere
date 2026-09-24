@@ -55,7 +55,10 @@ function TenantDashboard() {
 
   useEffect(() => { setRecentlyViewed(getRecentlyViewed()); }, []);
 
-  const favoriteIds = new Set(favorites.map((favorite) => String(favorite.id)));
+  const favoriteIds = new Set((favorites || []).map((favorite) => String(favorite?.id)).filter(Boolean));
+
+  const favList = favorites || [];
+  const recentList = recentlyViewed || [];
 
   return (
     <AnimatedPage>
@@ -85,9 +88,9 @@ function TenantDashboard() {
                     <h2 className="text-4xl lg:text-5xl font-black mb-6 leading-tight">Manage your <span className="text-zen-400">RentSphere</span> experience in one place.</h2>
                     <p className="text-slate-400 text-lg mb-8">Keep track of your saved listings, view recent activity, and manage your rental contracts with ease.</p>
                     <div className="flex items-center space-x-12">
-                      <StatBlock label="Favorites" value={favorites.length} />
-                      <StatBlock label="Viewed" value={recentlyViewed.length} />
-                      <StatBlock label="Contracts" value={contracts.length} />
+                      <StatBlock label="Favorites" value={favList.length} />
+                      <StatBlock label="Viewed" value={recentList.length} />
+                      <StatBlock label="Contracts" value={contracts?.length || 0} />
                     </div>
                   </div>
                   <div className="hidden md:flex justify-center">
@@ -112,23 +115,23 @@ function TenantDashboard() {
                 <h2 className="text-3xl font-black text-slate-900 mb-1">Your Favorites</h2>
                 <p className="text-slate-400 font-medium text-sm">Saved for quick access later</p>
               </div>
-              {favorites.length > 0 && <Link to="/favorites" className="text-zen-600 font-bold hover:underline">View All →</Link>}
+              {favList.length > 0 && <Link to="/favorites" className="text-zen-600 font-bold hover:underline">View All →</Link>}
             </div>
 
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"><LoadingSpinner /></div>
-            ) : favorites.length === 0 ? (
+            ) : favList.length === 0 ? (
               <EmptyState icon="🤍" title="No favorites yet" desc="Heart some properties and they'll show up here." action="/properties" actionText="Browse Properties" />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {favorites.map((prop, i) => (
+                {favList.map((prop, i) => (
                   <PropertyCard
                     key={prop.id}
                     property={prop}
                     index={i}
                     initialFavorited={favoriteIds.has(String(prop.id))}
                     onFavoriteToggle={(next) => {
-                      if (!next) setFavorites(prev => prev.filter(item => String(item.id) !== String(prop.id)));
+                      if (!next) setFavorites(prev => (prev || []).filter(item => String(item.id) !== String(prop.id)));
                     }}
                   />
                 ))}
@@ -143,18 +146,18 @@ function TenantDashboard() {
                 <h2 className="text-3xl font-black text-slate-900 mb-1">Recently Viewed</h2>
                 <p className="text-slate-400 font-medium text-sm">Stored locally in your browser</p>
               </div>
-              {recentlyViewed.length > 0 && (
+              {recentList.length > 0 && (
                 <button onClick={() => { setRecentlyViewed([]); localStorage.removeItem('rentsphere_recently_viewed'); }} className="text-red-400 font-bold hover:text-red-500 transition-colors">
                   Clear History
                 </button>
               )}
             </div>
 
-            {recentlyViewed.length === 0 ? (
+            {recentList.length === 0 ? (
               <EmptyState icon="🕒" title="History is empty" desc="Your recently visited listings will appear here." />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {recentlyViewed.map((prop, i) => (
+                {recentList.map((prop, i) => (
                   <PropertyCard
                     key={prop.id}
                     property={prop}
@@ -162,8 +165,8 @@ function TenantDashboard() {
                     initialFavorited={favoriteIds.has(String(prop.id))}
                     onFavoriteToggle={(next) => {
                       setFavorites(prev => {
-                        if (next) return [...prev, prop];
-                        return prev.filter(item => String(item.id) !== String(prop.id));
+                        if (next) return [...(prev || []), prop];
+                        return (prev || []).filter(item => String(item.id) !== String(prop.id));
                       });
                     }}
                   />

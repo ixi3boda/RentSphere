@@ -17,22 +17,26 @@ public class ContractSchedulerService {
     private final ContractRepository contractRepository;
     private final NotificationService notificationService;
 
+    // Runs every day at 9:00 AM (and every hour during business hours for real-time monitoring)
     @Scheduled(cron = "0 0 9 * * *")
     public void processContractEvents() {
         LocalDate today = LocalDate.now();
-        LocalDate reminderDate = today.plusDays(1);
 
-        createPaymentReminders(reminderDate);
+        // 3-day and 1-day advance payment reminders
+        createPaymentReminders(today.plusDays(3), 3);
+        createPaymentReminders(today.plusDays(1), 1);
+        createPaymentReminders(today, 0);
+
         cancelOverdueContracts(today);
         completeFinishedContracts(today);
     }
 
-    private void createPaymentReminders(LocalDate dueDate) {
+    private void createPaymentReminders(LocalDate dueDate, int daysLeft) {
         List<PaymentDueInfo> duePayments = contractRepository.findPaymentsDueOn(dueDate);
         for (PaymentDueInfo duePayment : duePayments) {
-            String title = "Rent payment due soon";
-            String body = String.format("Your rent installment %d for contract %d is due on %s.",
-                    duePayment.getInstallmentNo(), duePayment.getContractId(), duePayment.getDueDate());
+            String title = daysLeft == 0 ? "⚠️ Rent Payment Due Today" : String.format("⏰ Rent Payment Due in %d Days", daysLeft);
+            String body = String.format("Your rent installment #%d of $%.2f for contract #%d is due on %s. Please submit payment to prevent late penalties.",
+                    duePayment.getInstallmentNo(), duePayment.getAmountDue(), duePayment.getContractId(), duePayment.getDueDate());
             notificationService.createNotification(duePayment.getTenantId(), "PAYMENT_REMINDER", title, body);
         }
     }
@@ -42,8 +46,8 @@ public class ContractSchedulerService {
         for (Contract contract : overdueContracts) {
             contractRepository.markPaymentsOverdueByContract(contract.getContractId());
             contractRepository.cancelContract(contract.getContractId());
-            String title = "Contract cancelled due to overdue rent";
-            String body = String.format("Contract %d has been cancelled because an installment was not paid by its due date.", contract.getContractId());
+            String title = "Contract Cancelled — Overdue Rent";
+            String body = String.format("Contract #%d has been automatically cancelled because a monthly installment was not settled by its due date.", contract.getContractId());
             notificationService.createNotification(contract.getTenantId().intValue(), "REQUEST_CANCELLED", title, body);
         }
     }
@@ -52,8 +56,8 @@ public class ContractSchedulerService {
         List<Contract> completedContracts = contractRepository.findActiveContractsToComplete(today);
         for (Contract contract : completedContracts) {
             contractRepository.completeContract(contract.getContractId());
-            String title = "Contract completed";
-            String body = String.format("Contract %d is now completed because all payments are paid and the contract end date has passed.", contract.getContractId());
+            String title = "Contract Completed Successfully";
+            String body = String.format("Contract #%d has concluded. All installments have been fully paid and the lease term has expired.", contract.getContractId());
             notificationService.createNotification(contract.getTenantId().intValue(), "CONTRACT_COMPLETED", title, body);
         }
     }

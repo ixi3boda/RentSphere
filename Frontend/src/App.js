@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { PropertyProvider } from "./context/PropertyContext";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import PrivateRoute from "./components/PrivateRoute";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -101,6 +102,7 @@ function App() {
             {}
             <Route path="/paypal/callback" element={<PayPalCallbackPage />} />
           </Routes>
+          <Footer />
         </PropertyProvider>
       </AuthProvider>
     </Router>

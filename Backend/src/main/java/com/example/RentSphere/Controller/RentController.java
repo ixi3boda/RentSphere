@@ -20,6 +20,9 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.RentSphere.Dto.CreditCardPaymentRequest;
+import com.example.RentSphere.Dto.CreditCardPaymentResponse;
+
 @RestController
 @RequestMapping("/api/rent")
 @RequiredArgsConstructor
@@ -95,7 +98,6 @@ public class RentController {
             com.example.RentSphere.Dto.User user = userService.getCurrentUser(email);
             
             if ("ADMIN".equalsIgnoreCase(user.getRole_name())) {
-                
                 return ResponseEntity.ok(contractService.getContractsForOwner((long) user.getUser_id()));
             } else if ("TENANT".equalsIgnoreCase(user.getRole_name())) {
                 return ResponseEntity.ok(contractService.getContractsForTenant((long) user.getUser_id()));
@@ -110,7 +112,6 @@ public class RentController {
     @GetMapping("/contracts/{contractId}/payments")
     public ResponseEntity<?> getContractPayments(@PathVariable Long contractId, Principal principal) {
         try {
-            
             return ResponseEntity.ok(contractService.getPaymentsByContractId(contractId));
         } catch (Exception e) {
             return buildErrorResponse("Failed to fetch payments: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -158,18 +159,38 @@ public class RentController {
             @PathVariable Long contractId,
             @RequestParam String paymentId,
             @RequestParam String payerId,
+            @RequestParam(required = false) Integer installmentNo,
             Principal principal
     ) {
         try {
             String email = getPrincipalEmail(principal);
             int currentUserId = userService.getCurrentUser(email).getUser_id();
             
-            PayPalPaymentResponse response = contractService.executePayPalPaymentForContract(contractId, paymentId, payerId);
+            PayPalPaymentResponse response = contractService.executePayPalPaymentForContract(contractId, paymentId, payerId, installmentNo);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return buildErrorResponse("Failed to execute PayPal payment: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/contracts/{contractId}/card-payment")
+    public ResponseEntity<?> processContractCardPayment(
+            @PathVariable Long contractId,
+            @RequestBody CreditCardPaymentRequest paymentRequest,
+            Principal principal
+    ) {
+        try {
+            String email = getPrincipalEmail(principal);
+            int currentUserId = userService.getCurrentUser(email).getUser_id();
+            
+            CreditCardPaymentResponse response = contractService.processCreditCardPaymentForContract(contractId, paymentRequest);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return buildErrorResponse("Credit card payment failed: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 

@@ -1,15 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { notificationApi } from '../utils/api';
 
 function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  // Notifications State
+  const [notifications, setNotifications] = useState([]);
+  const [showNotiDropdown, setShowNotiDropdown] = useState(false);
+
+  const fetchNotifications = useCallback(async () => {
+    if (!isAuthenticated) {
+      setNotifications([]);
+      return;
+    }
+    try {
+      const res = await notificationApi.getMyNotifications();
+      const list = Array.isArray(res.data) ? res.data : [];
+      setNotifications(list);
+    } catch {
+      setNotifications([]);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    fetchNotifications();
+    // Poll for new notifications every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
+
+  const handleMarkAsRead = async (id) => {
+    try {
+      await notificationApi.markAsRead(id);
+      setNotifications(prev => prev.map(n => String(n.notiId) === String(id) ? { ...n, isRead: true } : n));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -19,11 +55,14 @@ function Navbar() {
 
   useEffect(() => {
     const handleEsc = (e) => {
-      if (e.key === 'Escape' && showLogoutConfirm) setShowLogoutConfirm(false);
+      if (e.key === 'Escape') {
+        setShowLogoutConfirm(false);
+        setShowNotiDropdown(false);
+      }
     };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
-  }, [showLogoutConfirm]);
+  }, []);
 
   const handleConfirmLogout = () => {
     logout();
@@ -32,6 +71,7 @@ function Navbar() {
   };
 
   const isActive = (path) => location.pathname === path;
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
     <>
@@ -51,7 +91,7 @@ function Navbar() {
                 <img src="/rentSphereLogo.png" alt="Logo" className="w-full h-full object-contain" />
               </motion.div>
               <span className="text-xl font-bold tracking-tight text-slate-800 hidden sm:inline">
-                Rent<span className="text-zen-500">Sphere</span>
+                Rent<span className="text-sky-500">Sphere</span>
               </span>
             </Link>
 
@@ -77,18 +117,78 @@ function Navbar() {
               ) : null}
             </div>
 
-            {/* Auth Actions */}
+            {/* Auth & Notification Actions */}
             <div className="hidden md:flex items-center space-x-4">
               {isAuthenticated ? (
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4 relative">
+                  
+                  {/* Notification Bell Dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowNotiDropdown(!showNotiDropdown)}
+                      className="p-2.5 rounded-xl bg-slate-100/80 hover:bg-slate-200 text-slate-700 relative transition-all"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-6 0v-1m6 0H9" />
+                      </svg>
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white animate-pulse">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </button>
+
+                    {/* Popover Menu */}
+                    <AnimatePresence>
+                      {showNotiDropdown && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                          className="absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-[100]"
+                        >
+                          <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
+                            <span className="font-bold text-sm">Notifications</span>
+                            <span className="text-xs bg-sky-500/20 text-sky-400 px-2.5 py-0.5 rounded-full font-semibold">{unreadCount} Unread</span>
+                          </div>
+
+                          <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
+                            {notifications.length === 0 ? (
+                              <div className="p-8 text-center text-slate-400 text-sm">
+                                🔔 No notifications right now
+                              </div>
+                            ) : (
+                              notifications.map((n) => (
+                                <div
+                                  key={n.notiId}
+                                  onClick={() => handleMarkAsRead(n.notiId)}
+                                  className={`p-4 transition-colors cursor-pointer hover:bg-slate-50 ${!n.isRead ? 'bg-sky-50/40' : ''}`}
+                                >
+                                  <div className="flex items-start justify-between mb-1">
+                                    <h5 className={`text-xs font-bold ${!n.isRead ? 'text-sky-700' : 'text-slate-800'}`}>{n.title}</h5>
+                                    {!n.isRead && <span className="w-2 h-2 rounded-full bg-sky-500"></span>}
+                                  </div>
+                                  <p className="text-xs text-slate-500 font-medium leading-relaxed mb-2">{n.body}</p>
+                                  <span className="text-[10px] text-slate-400 font-semibold">{n.createdAt ? new Date(n.createdAt).toLocaleDateString() : 'Just now'}</span>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Profile Avatar */}
                   <Link to="/profile" className="flex items-center space-x-3 group bg-slate-50 rounded-full pr-4 pl-1 py-1 transition-all hover:bg-slate-100">
-                    <div className="w-8 h-8 rounded-full bg-zen-500 flex items-center justify-center text-white font-bold text-sm overflow-hidden shadow-sm">
+                    <div className="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center text-white font-bold text-sm overflow-hidden shadow-sm">
                       {user?.avatar ? <img src={user.avatar} alt="P" className="w-full h-full object-cover" /> : user?.name?.[0] || user?.email?.[0]}
                     </div>
                     <span className="text-sm font-medium text-slate-600 truncate max-w-[100px]">
                       {user?.name || user?.email?.split('@')[0]}
                     </span>
                   </Link>
+
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -104,7 +204,7 @@ function Navbar() {
                     <button className="btn-ghost text-sm">Login</button>
                   </Link>
                   <Link to="/signup">
-                    <button className="btn-primary text-sm shadow-zen-500/20">Get Started</button>
+                    <button className="btn-primary text-sm shadow-sky-500/20">Get Started</button>
                   </Link>
                 </div>
               )}
@@ -147,7 +247,7 @@ function Navbar() {
                   ) : (
                     <>
                       <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 font-medium text-slate-600 hover:bg-slate-50 rounded-xl">Login</Link>
-                      <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 font-semibold text-zen-600 bg-zen-50 rounded-xl">Sign Up</Link>
+                      <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 font-semibold text-sky-600 bg-sky-50 rounded-xl">Sign Up</Link>
                     </>
                   )}
                 </div>
@@ -198,7 +298,7 @@ function Navbar() {
 
 function NavLink({ to, children, active }) {
   return (
-    <Link to={to} className={`nav-link ${active ? 'text-zen-600 after:content-[""] after:absolute after:bottom-0 after:left-4 after:right-4 after:h-0.5 after:bg-zen-500 after:rounded-full' : ''}`}>
+    <Link to={to} className={`nav-link ${active ? 'text-sky-600 after:content-[""] after:absolute after:bottom-0 after:left-4 after:right-4 after:h-0.5 after:bg-sky-500 after:rounded-full' : ''}`}>
       {children}
     </Link>
   );
@@ -206,7 +306,7 @@ function NavLink({ to, children, active }) {
 
 function MobileNavLink({ to, children, onClick }) {
   return (
-    <Link to={to} onClick={onClick} className="block px-4 py-3 font-medium text-slate-600 hover:bg-slate-50 hover:text-zen-600 rounded-xl transition-all">
+    <Link to={to} onClick={onClick} className="block px-4 py-3 font-medium text-slate-600 hover:bg-slate-50 hover:text-sky-600 rounded-xl transition-all">
       {children}
     </Link>
   );

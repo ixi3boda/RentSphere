@@ -166,4 +166,82 @@ class RentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reqStatus").value("REJECTED"));
     }
+
+    @Test
+    @DisplayName("GET /contracts/all — 200 for ADMIN role returning owner contracts")
+    @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
+    void getAllContracts_asAdmin_returns200() throws Exception {
+        User admin = TestFixtures.adminUser();
+        admin.setRole_name("ADMIN");
+        when(userService.getCurrentUser("admin@test.com")).thenReturn(admin);
+        when(contractService.getContractsForOwner(1L)).thenReturn(List.of(TestFixtures.activeContract()));
+
+        mockMvc.perform(get("/api/rent/contracts/all"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].contractStatus").value("ACTIVE"));
+    }
+
+    @Test
+    @DisplayName("GET /contracts/all — 200 for TENANT role returning tenant contracts")
+    @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
+    void getAllContracts_asTenant_returns200() throws Exception {
+        User tenant = TestFixtures.tenantUser();
+        tenant.setRole_name("TENANT");
+        when(userService.getCurrentUser("tenant@test.com")).thenReturn(tenant);
+        when(contractService.getContractsForTenant(2L)).thenReturn(List.of(TestFixtures.activeContract()));
+
+        mockMvc.perform(get("/api/rent/contracts/all"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    @DisplayName("GET /contracts/{contractId}/payments — 200 returning payments list")
+    @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
+    void getContractPayments_returns200() throws Exception {
+        when(contractService.getPaymentsByContractId(1L)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/rent/contracts/1/payments"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    @DisplayName("POST /contracts/{contractId}/paypal — 200 for valid payment creation")
+    @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
+    void createContractPayPalPayment_returns200() throws Exception {
+        when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());
+        PayPalPaymentResponse resp = new PayPalPaymentResponse();
+        resp.setApprovalUrl("https://paypal.com/approve");
+        when(contractService.createPayPalPaymentForContract(eq(1L), any())).thenReturn(resp);
+
+        PayPalPaymentRequest req = new PayPalPaymentRequest();
+        req.setCancelUrl("http://cancel");
+        req.setSuccessUrl("http://success");
+
+        mockMvc.perform(post("/api/rent/contracts/1/paypal")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.approvalUrl").value("https://paypal.com/approve"));
+    }
+
+    @Test
+    @DisplayName("POST /contracts/{contractId}/paypal/execute — 200 for valid payment execution")
+    @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
+    void executeContractPayPalPayment_returns200() throws Exception {
+        when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());
+        PayPalPaymentResponse resp = new PayPalPaymentResponse();
+        resp.setStatus("APPROVED");
+        when(contractService.executePayPalPaymentForContract(eq(1L), eq("pay123"), eq("payer123"), isNull())).thenReturn(resp);
+
+        mockMvc.perform(post("/api/rent/contracts/1/paypal/execute")
+                        .with(csrf())
+                        .param("paymentId", "pay123")
+                        .param("payerId", "payer123"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("APPROVED"));
+    }
 }

@@ -167,4 +167,64 @@ class UserControllerTest {
                 .andExpect(status().isOk());
         verify(userService).logout("tenant@test.com");
     }
+
+    @Test
+    @DisplayName("POST /register — 500 when unexpected error occurs")
+    void register_unexpectedError_returns500() throws Exception {
+        RegisterRequest req = TestFixtures.validRegisterRequest();
+        when(userService.register(any())).thenThrow(new RuntimeException("DB crash"));
+
+        mockMvc.perform(post("/api/user/register")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @DisplayName("POST /login — 500 when unexpected error occurs")
+    void login_unexpectedError_returns500() throws Exception {
+        LoginRequest req = TestFixtures.validTenantLoginRequest();
+        when(userService.login(any())).thenThrow(new RuntimeException("System error"));
+
+        mockMvc.perform(post("/api/user/login")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @DisplayName("GET /me — 500 when unexpected error occurs")
+    @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
+    void getMe_unexpectedError_returns500() throws Exception {
+        when(userService.getCurrentUser("tenant@test.com")).thenThrow(new RuntimeException("DB fail"));
+
+        mockMvc.perform(get("/api/user/me"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @DisplayName("PUT /me — 500 when unexpected error occurs")
+    @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
+    void updateMe_unexpectedError_returns500() throws Exception {
+        UpdateProfileRequest req = UpdateProfileRequest.builder().full_name("Test").build();
+        when(userService.updateCurrentUser(anyString(), any())).thenThrow(new RuntimeException("Fatal error"));
+
+        mockMvc.perform(put("/api/user/me")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @DisplayName("POST /logout — 500 when unexpected error occurs")
+    @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
+    void logout_unexpectedError_returns500() throws Exception {
+        doThrow(new RuntimeException("Logout error")).when(userService).logout(anyString());
+
+        mockMvc.perform(post("/api/user/logout").with(csrf()))
+                .andExpect(status().isInternalServerError());
+    }
 }

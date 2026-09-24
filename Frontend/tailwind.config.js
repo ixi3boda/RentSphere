@@ -13,6 +13,7 @@ module.exports = {
         'float': 'float 6s ease-in-out infinite',
         'liquid': 'liquid 10s ease-in-out infinite',
         'spin-slow': 'spin 8s linear infinite',
+        'glow': 'glow 2s ease-in-out infinite alternate',
       },
       keyframes: {
         fadeIn: {
@@ -31,9 +32,9 @@ module.exports = {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-15px)' },
         },
-        liquid: {
-          '0%, 100%': { borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%' },
-          '50%': { borderRadius: '30% 60% 70% 40% / 50% 60% 30% 60%' },
+        glow: {
+          '0%': { boxShadow: '0 0 15px rgba(14, 165, 233, 0.2)' },
+          '100%': { boxShadow: '0 0 30px rgba(14, 165, 233, 0.5)' },
         }
       },
       colors: {
@@ -61,20 +62,25 @@ module.exports = {
           800: '#1e293b',
           900: '#0f172a',
         },
-        accent: {
-          soft: '#fdf4ff',
-          warm: '#fffbeb',
+        agency: {
+          navy: '#0b1329',
+          card: '#131e3a',
+          accent: '#38bdf8',
           gold: '#f59e0b',
-        },
-        rentsphere: {
-          navy: '#0f172a',
-          teal: '#0ea5e9',
-          orange: '#f59e0b',
-          cream: '#f8fafc',
+          emerald: '#10b981',
+          rose: '#f43f5e',
         }
       },
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
+        outfit: ['Outfit', 'sans-serif'],
+        jakarta: ['Plus Jakarta Sans', 'sans-serif'],
+      },
+      boxShadow: {
+        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+        'glow-sky': '0 0 25px -5px rgba(14, 165, 233, 0.4)',
+        'glow-emerald': '0 0 25px -5px rgba(16, 185, 129, 0.4)',
+        'luxury': '0 20px 50px -12px rgba(15, 23, 42, 0.15)',
       }
     },
   },

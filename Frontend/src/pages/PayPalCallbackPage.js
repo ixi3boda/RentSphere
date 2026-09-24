@@ -21,16 +21,16 @@ function PayPalCallbackPage() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const params      = new URLSearchParams(window.location.search);
-    const paymentId   = params.get('paymentId');
-    const payerId     = params.get('PayerID'); 
-    const contractId  = sessionStorage.getItem('paypal_contract_id');
+    const params          = new URLSearchParams(window.location.search);
+    const paymentId       = params.get('paymentId');
+    const payerId         = params.get('PayerID');
+    const contractId      = sessionStorage.getItem('paypal_contract_id');
+    const installmentNo   = sessionStorage.getItem('paypal_installment_no');
 
-    
     sessionStorage.removeItem('paypal_contract_id');
     sessionStorage.removeItem('paypal_payment_id');
+    sessionStorage.removeItem('paypal_installment_no');
 
-    
     if (!payerId) {
       setStatus('cancelled');
       setMessage('You cancelled the PayPal payment. No charge was made.');
@@ -43,13 +43,16 @@ function PayPalCallbackPage() {
       return;
     }
 
-    
     (async () => {
       try {
-        await rentApi.executePayPalPayment(Number(contractId), paymentId, payerId);
+        await rentApi.executePayPalPayment(
+          Number(contractId),
+          paymentId,
+          payerId,
+          installmentNo ? Number(installmentNo) : undefined
+        );
         setStatus('success');
         setMessage(`Payment for Contract #${contractId} was completed successfully!`);
-        
         setTimeout(() => navigate('/contracts'), 4000);
       } catch (err) {
         setStatus('error');
@@ -60,7 +63,7 @@ function PayPalCallbackPage() {
         );
       }
     })();
-  }, []); 
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   
   

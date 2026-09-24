@@ -112,19 +112,21 @@ export const rentApi = {
   createPayPalPayment: (contractId, body) =>
     apiClient.post(`/api/rent/contracts/${contractId}/paypal`, body),
 
-  
-  executePayPalPayment: (contractId, paymentId, payerId) =>
+  executePayPalPayment: (contractId, paymentId, payerId, installmentNo) =>
     apiClient.post(`/api/rent/contracts/${contractId}/paypal/execute`, null, {
-      params: { paymentId, payerId },
+      params: { paymentId, payerId, ...(installmentNo ? { installmentNo } : {}) },
     }),
+
+  createCardPayment: (contractId, body) =>
+    apiClient.post(`/api/rent/contracts/${contractId}/card-payment`, body),
 };
 
 
 
 
-export const uploadApi = {
-  // No-op: images are converted to base64 client-side and sent via JSON
-  uploadOne: () => Promise.resolve({ data: { url: null } }),
+export const notificationApi = {
+  getMyNotifications: () => apiClient.get("/api/notifications/my"),
+  markAsRead: (id) => apiClient.put(`/api/notifications/${id}/read`),
 };
 
 export default apiClient;

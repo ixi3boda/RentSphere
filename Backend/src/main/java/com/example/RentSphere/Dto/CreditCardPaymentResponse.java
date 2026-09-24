@@ -5,17 +5,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ErrorResponse {
+@Builder
+public class CreditCardPaymentResponse {
+    private String transactionRef;
+    private String status;
     private String message;
-    private int status;
-    private LocalDateTime timestamp;
-    private String error;
-    private Map<String, String> errors;
+    private Integer installmentNo;
+    private BigDecimal amountPaid;
+    private LocalDateTime paidDate;
 }

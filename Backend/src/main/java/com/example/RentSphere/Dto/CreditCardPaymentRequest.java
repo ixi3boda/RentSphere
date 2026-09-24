@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PayPalPaymentRequest {
-    private Double amount;
-    private String currency;
-    private String description;
-    private String cancelUrl;
-    private String successUrl;
+public class CreditCardPaymentRequest {
+    private String cardNumber;
+    private String cardHolderName;
+    private String expiryMonth;
+    private String expiryYear;
+    private String cvv;
     private Integer installmentNo;
 }
