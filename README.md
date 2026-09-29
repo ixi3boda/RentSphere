@@ -105,15 +105,22 @@ docker compose down -v
 
 ---
 
-##  Default Credentials (Dev Only)
+##  Local Configuration
 
->  Change all credentials before any production deployment.
+All credentials come from a gitignored `.env` at the repo root. Copy the template and fill it in:
 
-| Field    | Value             |
-|----------|-------------------|
-| DB User  | `rentsphere`      |
-| DB Pass  | `rentsphere123`   |
-| DB Name  | `RentSphereSchema`|
+```bash
+cp .env.example .env
+```
+
+`docker compose` reads `.env` automatically, and Spring Boot imports it when you run the
+backend directly with `mvn spring-boot:run`.
+
+| Field    | Value                          |
+|----------|--------------------------------|
+| DB User  | `MYSQL_USER` from `.env`       |
+| DB Pass  | `MYSQL_PASSWORD` from `.env`   |
+| DB Name  | `RentSphereSchema`             |
 
 ---
 

@@ -1,6 +1,6 @@
 -- RentSphere index benchmark: runs the exact repository query shapes against
 -- the seeded 100k-listing dataset and shows which index the optimizer picks.
--- Usage: docker compose exec -T mysql mysql -N RentSphereSchema -urentsphere -prentsphere123 < Performance/db-benchmark.sql
+-- Usage: docker compose exec -T mysql mysql -N RentSphereSchema -urentsphere -p"<MYSQL_PASSWORD from .env>" < Performance/db-benchmark.sql
 
 SELECT '=== INDEX INVENTORY (must show 12 explicit non-unique indexes) ===' AS section;
 SELECT TABLE_NAME, INDEX_NAME, GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX) AS cols

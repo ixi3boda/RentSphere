@@ -2,7 +2,7 @@
 -- Generates a realistically large dataset for index/query benchmarking and
 -- JMeter load tests: 5,000 users, 100,000 properties, plus images, favorites,
 -- rental requests, contracts, installments and notifications.
--- Usage: docker compose exec -T mysql mysql -urentsphere -prentsphere123 RentSphereSchema < Database/seed-large-dataset.sql
+-- Usage: docker compose exec -T mysql mysql -urentsphere -p"<MYSQL_PASSWORD from .env>" RentSphereSchema < Database/seed-large-dataset.sql
 
 SET SESSION sql_mode = '';
 SET SESSION cte_max_recursion_depth = 1000000;
