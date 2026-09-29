@@ -13,7 +13,10 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -77,6 +80,39 @@ public class PropertyRepository {
         return new PropertyDetails(property, images, coverPic);
     }
 
+    private List<PropertyDetails> buildPropertyDetailsBatch(List<Property> properties) {
+
+        List<Long> ids = properties.stream().map(Property::getPropertyId).toList();
+        Map<Long, List<String>> imagesById = new LinkedHashMap<>();
+        Map<Long, String> coverById = new LinkedHashMap<>();
+
+        final int chunkSize = 500;
+        for (int i = 0; i < ids.size(); i += chunkSize) {
+            List<Long> slice = ids.subList(i, Math.min(i + chunkSize, ids.size()));
+            String placeholders = String.join(",", Collections.nCopies(slice.size(), "?"));
+            String sql = "SELECT property_id, image_url, is_cover FROM property_images WHERE property_id IN (" + placeholders + ")";
+
+            jdbcTemplate.query(sql, (ResultSet rs) -> {
+                while (rs.next()) {
+                    long pid = rs.getLong("property_id");
+                    String url = rs.getString("image_url");
+                    imagesById.computeIfAbsent(pid, k -> new ArrayList<>()).add(url);
+                    if (rs.getBoolean("is_cover")) {
+                        coverById.putIfAbsent(pid, url);
+                    }
+                }
+                return null;
+            }, slice.toArray());
+        }
+
+        return properties.stream()
+                .map(p -> new PropertyDetails(
+                        p,
+                        imagesById.getOrDefault(p.getPropertyId(), List.of()),
+                        coverById.get(p.getPropertyId())))
+                .toList();
+    }
+
     public int saveImage(Long property_id, String image_url, boolean is_cover) {
         String sql = """
         INSERT INTO property_images (property_id, image_url, is_cover)
@@ -135,11 +171,8 @@ public class PropertyRepository {
 
         List<Property> properties = jdbcTemplate.query(sql, mapper);
 
-        return properties.stream()
-                .map(this::buildPropertyDetails)
-                .toList();
+        return buildPropertyDetailsBatch(properties);
     }
-
     public Optional<PropertyDetails> findById(Long id) {
 
         String propertySql = "SELECT * FROM properties WHERE property_id = ?";
@@ -304,11 +337,8 @@ public class PropertyRepository {
 
         List<Property> properties = jdbcTemplate.query(sql.toString(), mapper, params.toArray());
 
-        return properties.stream()
-                .map(this::buildPropertyDetails)
-                .toList();
+        return buildPropertyDetailsBatch(properties);
     }
-
     public List<PropertyDetails> searchByPrefix(String prefix) {
 
         String sql = """
@@ -333,11 +363,8 @@ public class PropertyRepository {
                 search
         );
 
-        return properties.stream()
-                .map(this::buildPropertyDetails)
-                .toList();
+        return buildPropertyDetailsBatch(properties);
     }
-
     public Favorite favorite(int propertyId, int tenantId) {
         
         String checkSql = "SELECT COUNT(*) FROM favorites WHERE tenant_id = ? AND property_id = ?";

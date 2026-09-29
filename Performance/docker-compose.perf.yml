@@ -1,0 +1,6 @@
+# Local override for load testing when host port 8080 is taken by another project.
+# Usage: docker compose -f docker-compose.yml -f Performance/docker-compose.perf.yml up -d mysql backend
+services:
+  backend:
+    ports: !override
+      - "8090:8080"

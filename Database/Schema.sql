@@ -51,11 +51,9 @@ CREATE TABLE properties (
     PRIMARY KEY (property_id),
     CONSTRAINT chk_type CHECK (property_type IN ('APARTMENT', 'STUDIO', 'VILLA', 'DUPLEX','OFFICE','SHOP','WAREHOUSE')),
     CONSTRAINT fk_properties_owner      FOREIGN KEY (owner_id)         REFERENCES users (user_id) ON DELETE CASCADE,
-    -- Performance: Search & filter indexes
+    -- Performance: only indexes exercised by real queries (verified with EXPLAIN);
+    -- redundant prefixes and unused single-column indexes removed.
     INDEX idx_properties_owner          (owner_id),
-    INDEX idx_properties_city           (city),
-    INDEX idx_properties_price          (price_per_month),
-    INDEX idx_properties_available      (is_available),
     INDEX idx_properties_location       (city, district),
     INDEX idx_properties_avail_city_price (is_available, city, price_per_month)
 );
@@ -98,8 +96,7 @@ CREATE TABLE rental_requests (
     CONSTRAINT fk_rental_requests_property FOREIGN KEY (property_id) REFERENCES properties (property_id) ON DELETE CASCADE,
     CONSTRAINT fk_rental_requests_tenant   FOREIGN KEY (tenant_id)   REFERENCES users(user_id) ON DELETE CASCADE,
     INDEX idx_rental_requests_property (property_id),
-    INDEX idx_rental_requests_tenant   (tenant_id),
-    INDEX idx_rental_requests_status   (req_status)
+    INDEX idx_rental_requests_tenant   (tenant_id)
 );
 
 -- contracts  (auto-created on request approval)
@@ -148,7 +145,7 @@ CREATE TABLE payments (
     CONSTRAINT chk_payment_status CHECK (payment_status IN ('PENDING', 'PAID', 'OVERDUE', 'WAIVED')),
     CONSTRAINT uq_payments_contract_installment UNIQUE (contract_id, installment_no),
     CONSTRAINT fk_payments_contract FOREIGN KEY (contract_id) REFERENCES contracts (contract_id) ON DELETE CASCADE,
-    INDEX idx_payments_contract  (contract_id),
+    -- FK and contract_id lookups served by uq_payments_contract_installment prefix
     INDEX idx_payments_due_date  (due_date)
 );
 
@@ -164,7 +161,7 @@ CREATE TABLE notifications (
     PRIMARY KEY (noti_id),
     CONSTRAINT chk_noti_type CHECK (notification_type IN ('NEW_REQUEST','REQUEST_ACCEPTED','REQUEST_REJECTED','REQUEST_CANCELLED','CONTRACT_CREATED','CONTRACT_COMPLETED','PAYMENT_REMINDER','PAYMENT_RECEIVED')),
     CONSTRAINT fk_notifications_recipient FOREIGN KEY (recipient_id)  REFERENCES users  (user_id) ON DELETE CASCADE,
-    INDEX idx_notifications_recipient (recipient_id),
+    -- covers both the FK and unread-notification queries
     INDEX idx_notifications_read      (recipient_id, is_read)
 );
 

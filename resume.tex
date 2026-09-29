@@ -1,0 +1,200 @@
+%-------------------------
+% Resume in LaTeX — Single Page ATS-Optimized
+%-------------------------
+
+\documentclass[letterpaper,9.5pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\usepackage[T1]{fontenc}
+
+\renewcommand*\familydefault{\sfdefault}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Tight margins for single page
+\addtolength{\oddsidemargin}{-0.65in}
+\addtolength{\evensidemargin}{-0.65in}
+\addtolength{\textwidth}{1.3in}
+\addtolength{\topmargin}{-0.95in}
+\addtolength{\textheight}{1.8in}
+
+\urlstyle{same}
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Section formatting
+\titleformat{\section}{
+  \vspace{-5pt}\scshape\raggedright\large\bfseries
+}{}{0em}{}[\titlerule \vspace{-4pt}]
+
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item \small{#1 \vspace{-2pt}}
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+  \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+    \textbf{#1} & #2 \\
+    \textit{#3} & \textit{#4} \\
+  \end{tabular*}\vspace{-6pt}\par
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+  \item
+  \begin{tabular*}{\textwidth}{p{0.76\textwidth}@{\extracolsep{\fill}}r}
+    \small\textbf{#1} & \small #2 \\
+  \end{tabular*}\vspace{-4pt}\par
+}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+
+\newcommand{\resumeItemListStart}{
+\begin{itemize}[leftmargin=0.15in, topsep=0pt, itemsep=0pt, parsep=0pt]
+}
+
+\newcommand{\resumeItemListEnd}{
+\end{itemize}\vspace{2pt}\par
+}
+
+%-------------------------------------------
+\begin{document}
+
+%----------HEADING----------
+\begin{center}
+    {\Huge \textbf{Abdelrahman Essam}} \\ \vspace{3pt}
+    \textbf{Software Engineering Student $|$ Full-Stack \& Systems Developer} \\ \vspace{4pt}
+    \small
+    +(20) 115 160 4204 $|$
+    \href{mailto:abdelrahmanessm508@gmail.com}{abdelrahmanessm508@gmail.com} $|$
+    Alexandria, Egypt $|$
+    \href{https://www.linkedin.com/in/ixi3boda}{LinkedIn} $|$
+    \href{https://github.com/ixi3boda}{GitHub} $|$
+    \href{https://leetcode.com/ixi3boda}{LeetCode}
+\end{center}
+\vspace{-6pt}
+
+%-----------SUMMARY-----------
+\section{Summary}
+\begin{itemize}[leftmargin=0in, label={}, topsep=0pt]
+\small{\item{
+Computer \& Communication Engineering student (GPA 3.76/4.0, top 20 in cohort) applying competitive-programming problem-solving to scalable full-stack systems. Builds and \textbf{load-tests} production-grade apps with Java, Spring Boot, React/Next.js, NestJS, MySQL, Kafka, and Docker. Seeking a software engineering internship or junior developer role.
+}}
+\end{itemize}
+\vspace{-4pt}
+
+%-----------EDUCATION-----------
+\section{Education}
+\resumeSubHeadingListStart
+\resumeSubheading
+  {Faculty of Engineering, Alexandria University}{Oct 2022 -- July 2027}
+  {B.Sc. in Computer and Communication Engineering}{Alexandria, Egypt}
+  \resumeItemListStart
+    \resumeItem{\textbf{GPA: 3.76/4.0} --- Ranked in the top 20 of the cohort.}
+    \resumeItem{\textbf{Relevant Coursework:} Algorithms, Data Structures, OS, Computer Networks, Databases, Software Engineering, OOP, Multithreading, Design Patterns.}
+  \resumeItemListEnd
+\resumeSubHeadingListEnd
+
+%-----------TECHNICAL SKILLS-----------
+\section{Technical Skills}
+\begin{itemize}[leftmargin=0in, label={}, topsep=0pt]
+\small{\item{
+\textbf{Languages:} Java, C++, C, Python, JavaScript, Typescript, Bash, C\# \quad\quad
+\textbf{Frontend:} React.js, Next.js, HTML5, CSS3, Tailwind CSS \\
+\textbf{Backend:} Spring Boot, Spring Security, NestJS, .NET, RESTful APIs, JWT, JPA/Hibernate, Microservices Architecture \\
+\textbf{Databases:} MySQL, SQL, Postgres, Relational Database Design, Query Optimization \\
+\textbf{DevOps \& Tools:} Docker, AWS (EC2, RDS), Nginx, Linux, Apache Kafka, Zookeeper, pgBoss, Git, GitHub Actions, CI/CD, Maven, JUnit, Mockito, JaCoCo, Jest, JMeter \\
+\textbf{Core CS:} Data Structures, Algorithms, OOP, Design Patterns, Multithreading, POSIX, RBAC, WebSockets
+}}
+\end{itemize}
+
+%-----------PROJECTS-----------
+\section{Projects}
+\resumeSubHeadingListStart
+
+  \resumeProjectHeading
+    {RentSphere --- Rental Platform $|$
+    \href{https://github.com/ixi3boda/RentSphere}{GitHub} $|$
+    \emph{Spring Boot, React.js, MySQL, AWS, Docker, JMeter}}
+    {Oct 2025 -- Jan 2026}
+    \resumeItemListStart
+      \resumeItem{Built a full-stack rental marketplace: \textbf{27 RESTful APIs}, \textbf{3-role Spring Security RBAC} (\textbf{JWT}, \textbf{BCrypt}), with search, rental requests, contracts, and \textbf{PayPal} installment checkout.}
+      \resumeItem{Modeled \textbf{8 MySQL tables} and tuned indexing \textbf{18 $\rightarrow$ 12} by \textbf{EXPLAIN}-verifying every query path on a seeded \textbf{100k-listing} dataset.}
+      \resumeItem{\textbf{JMeter} load tests (25--200 concurrent users) exposed \textbf{N+1} image queries on listing endpoints; batched them with chunked \textbf{IN} fetches, cutting mixed-workload mean latency from \textbf{1.7\,s to 42\,ms} at 50 users.}
+      \resumeItem{System sustains \textbf{200 concurrent users} at \textbf{0\%} errors ($\approx$71\,req/s); at 100 users, \textbf{p95 $\approx$ 0.3\,s} overall, listing-detail \textbf{p95 $\approx$ 15\,ms} against 100k rows.}
+      \resumeItem{Deployed a \textbf{4-service Docker Compose} stack (\textbf{MySQL 8}, \textbf{Spring Boot}, \textbf{React}, \textbf{Nginx}) on \textbf{AWS EC2 + RDS} with \textbf{rate limiting}, gzip, security headers, and \textbf{Actuator} health/metrics.}
+      \resumeItem{Automated CI/CD via \textbf{GitHub Actions}: \textbf{233} tests (\textbf{182 JUnit/Mockito}, \textbf{51 Jest}), \textbf{JaCoCo} 72\% line coverage, and \textbf{Docker} build gates.}
+    \resumeItemListEnd
+
+  \resumeProjectHeading
+    {IoT Weather Station Monitoring $|$
+    \href{https://github.com/Mazen-Azhary/Weather-Station-Monitoring/tree/main/TeamWork/DataIntensiveProject}{GitHub} $|$
+    \emph{Java, Apache Kafka, Zookeeper, Docker}}
+    {Feb 2026 -- May 2026}
+    \resumeItemListStart
+      \resumeItem{Engineered a concurrent acquisition system in \textbf{Java} ingesting 10 independent IoT stations via multi-threaded executor pools.}
+      \resumeItem{Streamed real-time data into \textbf{Apache Kafka} (\textbf{acks=all}, idempotent) through a REST adapter on the \textbf{Open-Meteo API}; containerized with multi-stage \textbf{Docker} builds.}
+    \resumeItemListEnd
+
+  \resumeProjectHeading
+    {Social Media Application $|$
+    \href{https://github.com/ixi3boda/SocialMediaApp}{GitHub} $|$
+    \emph{Spring Boot, React.js, MySQL, JWT, WebSockets, Apache JMeter}}
+    {May 2025 -- Sep 2025}
+    \resumeItemListStart
+      \resumeItem{Produced \textbf{45+ RESTful APIs} with role-based, stateless \textbf{JWT} security and real-time \textbf{WebSocket} (STOMP) messaging for 100+ concurrent users.}
+      \resumeItem{Eliminated bottlenecks via \textbf{JPA fetch optimization}; \textbf{JMeter} tests cut average response time from \textbf{80\,ms to 35\,ms}.}
+    \resumeItemListEnd
+
+\resumeSubHeadingListEnd
+
+%-----------EXPERIENCE-----------
+\section{Experience}
+\resumeSubHeadingListStart
+
+  \resumeSubheading
+  {Mylo $|$ finX Squad $|$ \emph{React, Next.js, NestJS, TypeScript, pgBoss}}
+  {Aug 2026 -- Present}
+  {Full-Stack Software Engineering Intern}
+  {Egypt}
+  \resumeItemListStart
+    \resumeItem{Shipped to \textbf{production} a consumer-search and loan rescheduling view in \textbf{React/Next.js}, letting internal agents reschedule multiple loans per consumer in one flow --- handling time cut from \textbf{15 to 9 minutes}.}
+    \resumeItem{Fixed a \textbf{NestJS} metadata bug that dropped stored loan updates from the \textbf{LMS} service, restoring correct processing for \textbf{100\%} of affected financial requests.}
+    \resumeItem{Re-architected the fix around \textbf{pgBoss} job queues and shipped it to \textbf{production}: \textbf{500+ jobs/day} processed with zero dropped jobs.}
+    \resumeItem{Migrated \textbf{10 UI components} to the \textbf{MyloKit} design system and \textbf{3 BFF endpoints} to \textbf{Next.js Server Actions}, removing an intermediate API layer.}
+  \resumeItemListEnd
+
+ \resumeSubheading
+  {EJADA Systems $|$
+  \href{https://github.com/ixi3boda/Ejada-Spring-Practice}{GitHub} $|$
+  \emph{Java, SQL, Spring Boot}}
+  {Jul 2026 -- Aug 2026}
+  {Software Engineering Intern}
+  {Egypt}
+  \resumeItemListStart
+    \resumeItem{Designed relational schemas and \textbf{20+} complex SQL queries for enterprise-style data models; built Java modules exercising \textbf{multithreading} and \textbf{exception handling} under Agile code review.}
+  \resumeItemListEnd
+
+\resumeSubHeadingListEnd
+
+%-----------ACHIEVEMENTS-----------
+\section{Achievements}
+\begin{itemize}[leftmargin=0.15in, topsep=0pt, itemsep=0pt, parsep=0pt]
+\small{
+\item \textbf{ECPC 2025 Finalist} --- Ranked \textbf{98th nationally} (Egyptian Collegiate Programming Contest); \textbf{1,000+} problems on LeetCode \& Codeforces (graphs, DP, system design).
+}
+\end{itemize}
+
+\end{document}

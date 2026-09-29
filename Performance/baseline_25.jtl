@@ -1,0 +1,655 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,Connect
+1790707559797,58,GET /api/properties/filter,200,,Browsing Tenants 1-1,true,,127928,235,4,4,http://localhost:8090/api/properties/filter?city=Cairo&district=District-1&isAvailable=true&minPrice=1500&maxPrice=6500,55,8
+1790707560044,36,GET /api/properties/filter,200,,Browsing Tenants 1-2,true,,128705,236,4,4,http://localhost:8090/api/properties/filter?city=Cairo&district=District-2&isAvailable=true&minPrice=6500&maxPrice=11500,34,1
+1790707560185,38,GET /api/properties/filter,200,,Browsing Tenants 1-3,true,,128828,237,5,5,http://localhost:8090/api/properties/filter?city=Cairo&district=District-3&isAvailable=true&minPrice=11500&maxPrice=16500,37,1
+1790707560727,41,GET /api/properties/filter,200,,Browsing Tenants 1-4,true,,127352,237,5,5,http://localhost:8090/api/properties/filter?city=Cairo&district=District-4&isAvailable=true&minPrice=16500&maxPrice=21500,40,1
+1790707561329,51,GET /api/properties/filter,200,,Browsing Tenants 1-5,true,,128107,237,6,6,http://localhost:8090/api/properties/filter?city=Cairo&district=District-5&isAvailable=true&minPrice=21500&maxPrice=26500,50,1
+1790707562596,38,GET /api/properties/filter,200,,Browsing Tenants 1-7,true,,126614,237,9,9,http://localhost:8090/api/properties/filter?city=Cairo&district=District-6&isAvailable=true&minPrice=26500&maxPrice=31500,36,0
+1790707562726,39,GET /api/properties/filter,200,,Browsing Tenants 1-6,true,,129698,242,9,9,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-1&isAvailable=true&minPrice=31500&maxPrice=36500,38,1
+1790707563440,40,GET /api/properties/filter,200,,Browsing Tenants 1-8,true,,128226,242,10,10,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-2&isAvailable=true&minPrice=36500&maxPrice=41500,40,0
+1790707561444,2533,GET /api/properties/search,200,,Browsing Tenants 1-3,true,,10573591,171,11,11,http://localhost:8090/api/properties/search?prefix=shop,2456,0
+1790707561564,2489,GET /api/properties/search,200,,Browsing Tenants 1-1,true,,10630796,173,11,11,http://localhost:8090/api/properties/search?prefix=office,2443,0
+1790707564129,42,GET /api/properties/filter,200,,Browsing Tenants 1-9,true,,128240,242,11,11,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-3&isAvailable=true&minPrice=41500&maxPrice=46500,41,1
+1790707561872,2461,GET /api/properties/search,200,,Browsing Tenants 1-2,true,,10715843,176,11,11,http://localhost:8090/api/properties/search?prefix=warehouse,2418,0
+1790707562312,2513,GET /api/properties/search,200,,Browsing Tenants 1-4,true,,10602161,172,12,12,http://localhost:8090/api/properties/search?prefix=villa,2464,0
+1790707563263,1816,GET /api/properties/search,200,,Browsing Tenants 1-5,true,,7451099,175,13,13,http://localhost:8090/api/properties/search?prefix=mansoura,1781,0
+1790707565117,3,GET /api/properties/{id},200,,Browsing Tenants 1-3,true,,1180,158,13,13,http://localhost:8090/api/properties/73730,3,0
+1790707565117,30,GET /api/properties/filter,200,,Browsing Tenants 1-10,true,,128795,240,13,13,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-4&isAvailable=true&minPrice=1500&maxPrice=6500,29,0
+1790707565266,33,GET /api/properties/filter,200,,Browsing Tenants 1-11,true,,127336,241,13,13,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-5&isAvailable=true&minPrice=6500&maxPrice=11500,32,1
+1790707565412,3,GET /api/properties/{id},200,,Browsing Tenants 1-2,true,,1186,158,13,13,http://localhost:8090/api/properties/66619,3,0
+1790707564054,1577,GET /api/properties/search,200,,Browsing Tenants 1-6,true,,7421074,172,14,14,http://localhost:8090/api/properties/search?prefix=aswan,1543,0
+1790707565692,5,GET /api/properties/{id},200,,Browsing Tenants 1-1,true,,1181,158,14,14,http://localhost:8090/api/properties/33814,5,0
+1790707564318,1558,GET /api/properties/search,200,,Browsing Tenants 1-7,true,,7431086,172,14,14,http://localhost:8090/api/properties/search?prefix=luxor,1530,0
+1790707566108,3,GET /api/properties/{id},200,,Browsing Tenants 1-5,true,,1179,158,14,14,http://localhost:8090/api/properties/14440,3,0
+1790707564644,1518,GET /api/properties/search,200,,Browsing Tenants 1-8,true,,7411050,171,14,14,http://localhost:8090/api/properties/search?prefix=giza,1487,0
+1790707566346,29,GET /api/properties/filter,200,,Browsing Tenants 1-12,true,,128198,242,15,15,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-6&isAvailable=true&minPrice=11500&maxPrice=16500,28,0
+1790707566787,2,GET /api/properties/{id},200,,Browsing Tenants 1-4,true,,1171,158,15,15,http://localhost:8090/api/properties/10957,2,0
+1790707566822,30,GET /api/properties/filter,200,,Browsing Tenants 1-13,true,,127908,236,16,16,http://localhost:8090/api/properties/filter?city=Giza&district=District-1&isAvailable=true&minPrice=16500&maxPrice=21500,29,1
+1790707566968,6,GET /api/user/me (authed),200,,Browsing Tenants 1-1,true,,760,353,16,16,http://localhost:8090/api/user/me,5,0
+1790707565575,1428,GET /api/properties/search,200,,Browsing Tenants 1-9,true,,7421064,172,16,16,http://localhost:8090/api/properties/search?prefix=tanta,1386,0
+1790707567033,2,GET /api/properties/{id},200,,Browsing Tenants 1-6,true,,1179,158,16,16,http://localhost:8090/api/properties/34869,2,0
+1790707567070,4,GET /api/user/me (authed),200,,Browsing Tenants 1-3,true,,760,353,16,16,http://localhost:8090/api/user/me,4,0
+1790707567112,4,GET /api/user/me (authed),200,,Browsing Tenants 1-2,true,,760,353,16,16,http://localhost:8090/api/user/me,4,0
+1790707567448,28,GET /api/properties/filter,200,,Browsing Tenants 1-14,true,,128621,236,17,17,http://localhost:8090/api/properties/filter?city=Giza&district=District-2&isAvailable=true&minPrice=21500&maxPrice=26500,28,0
+1790707567575,29,GET /api/properties/filter,200,,Browsing Tenants 1-15,true,,126438,236,17,17,http://localhost:8090/api/properties/filter?city=Giza&district=District-3&isAvailable=true&minPrice=26500&maxPrice=31500,29,1
+1790707566410,1357,GET /api/properties/search,200,,Browsing Tenants 1-10,true,,7501139,173,17,17,http://localhost:8090/api/properties/search?prefix=sheikh,1325,0
+1790707567839,3,GET /api/properties/{id},200,,Browsing Tenants 1-7,true,,1173,158,17,17,http://localhost:8090/api/properties/58297,2,0
+1790707567857,4,GET /api/user/me (authed),200,,Browsing Tenants 1-4,true,,760,353,17,17,http://localhost:8090/api/user/me,4,0
+1790707567932,3,GET /api/properties/{id},200,,Browsing Tenants 1-8,true,,1172,158,17,17,http://localhost:8090/api/properties/72852,3,0
+1790707568023,4,GET /api/user/me (authed),200,,Browsing Tenants 1-5,true,,760,353,18,18,http://localhost:8090/api/user/me,4,0
+1790707568201,36,GET /api/properties/filter,200,,Browsing Tenants 1-1,true,,127928,235,18,18,http://localhost:8090/api/properties/filter?city=Cairo&district=District-1&isAvailable=true&minPrice=1500&maxPrice=6500,35,0
+1790707568398,4,GET /api/properties/{id},200,,Browsing Tenants 1-9,true,,1174,158,18,18,http://localhost:8090/api/properties/59230,4,0
+1790707566728,1987,GET /api/properties/search,200,,Browsing Tenants 1-11,true,,10573591,171,19,19,http://localhost:8090/api/properties/search?prefix=shop,1945,0
+1790707568751,28,GET /api/properties/filter,200,,Browsing Tenants 1-16,true,,127182,236,19,19,http://localhost:8090/api/properties/filter?city=Giza&district=District-4&isAvailable=true&minPrice=31500&maxPrice=36500,27,0
+1790707568954,2,GET /api/properties/{id},200,,Browsing Tenants 1-10,true,,1185,158,19,19,http://localhost:8090/api/properties/17051,2,0
+1790707568973,29,GET /api/properties/filter,200,,Browsing Tenants 1-3,true,,128828,237,19,19,http://localhost:8090/api/properties/filter?city=Cairo&district=District-3&isAvailable=true&minPrice=11500&maxPrice=16500,29,0
+1790707569034,4,GET /api/user/me (authed),200,,Browsing Tenants 1-6,true,,760,353,19,19,http://localhost:8090/api/user/me,4,0
+1790707569034,30,GET /api/properties/filter,200,,Browsing Tenants 1-18,true,,127943,236,19,19,http://localhost:8090/api/properties/filter?city=Giza&district=District-5&isAvailable=true&minPrice=36500&maxPrice=41500,29,0
+1790707569073,31,GET /api/properties/filter,200,,Browsing Tenants 1-2,true,,128705,236,19,19,http://localhost:8090/api/properties/filter?city=Cairo&district=District-2&isAvailable=true&minPrice=6500&maxPrice=11500,30,0
+1790707569089,32,GET /api/properties/filter,200,,Browsing Tenants 1-5,true,,128107,237,19,19,http://localhost:8090/api/properties/filter?city=Cairo&district=District-5&isAvailable=true&minPrice=21500&maxPrice=26500,31,0
+1790707569152,4,GET /api/user/me (authed),200,,Browsing Tenants 1-8,true,,760,353,19,19,http://localhost:8090/api/user/me,4,0
+1790707569283,39,GET /api/properties/filter,200,,Browsing Tenants 1-4,true,,127352,237,20,20,http://localhost:8090/api/properties/filter?city=Cairo&district=District-4&isAvailable=true&minPrice=16500&maxPrice=21500,38,0
+1790707569284,39,GET /api/properties/filter,200,,Browsing Tenants 1-17,true,,126463,236,20,20,http://localhost:8090/api/properties/filter?city=Giza&district=District-6&isAvailable=true&minPrice=41500&maxPrice=46500,38,1
+1790707567463,2082,GET /api/properties/search,200,,Browsing Tenants 1-12,true,,10630796,173,20,20,http://localhost:8090/api/properties/search?prefix=office,2031,0
+1790707569545,5,GET /api/user/me (authed),200,,Browsing Tenants 1-7,true,,760,353,20,20,http://localhost:8090/api/user/me,5,0
+1790707569779,39,GET /api/properties/filter,200,,Browsing Tenants 1-19,true,,129347,239,21,21,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-1&isAvailable=true&minPrice=1500&maxPrice=6500,38,0
+1790707569958,4,GET /api/properties/{id},200,,Browsing Tenants 1-11,true,,1176,158,21,21,http://localhost:8090/api/properties/56261,3,0
+1790707568013,2197,GET /api/properties/search,200,,Browsing Tenants 1-13,true,,10715843,176,21,21,http://localhost:8090/api/properties/search?prefix=warehouse,2150,0
+1790707570213,34,GET /api/properties/filter,200,,Browsing Tenants 1-6,true,,129698,242,21,21,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-1&isAvailable=true&minPrice=31500&maxPrice=36500,33,0
+1790707570254,4,GET /api/user/me (authed),200,,Browsing Tenants 1-9,true,,760,353,21,21,http://localhost:8090/api/user/me,4,0
+1790707570529,6,GET /api/user/me (authed),200,,Browsing Tenants 1-10,true,,760,353,22,22,http://localhost:8090/api/user/me,5,0
+1790707570731,4,GET /api/properties/{id},200,,Browsing Tenants 1-12,true,,1169,158,22,22,http://localhost:8090/api/properties/88100,4,0
+1790707570911,58,GET /api/properties/filter,200,,Browsing Tenants 1-20,true,,130134,240,22,22,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-2&isAvailable=true&minPrice=6500&maxPrice=11500,44,1
+1790707570925,45,GET /api/properties/filter,200,,Browsing Tenants 1-8,true,,128226,242,22,22,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-2&isAvailable=true&minPrice=36500&maxPrice=41500,40,0
+1790707571041,69,GET /api/properties/filter,200,,Browsing Tenants 1-7,true,,126614,237,23,23,http://localhost:8090/api/properties/filter?city=Cairo&district=District-6&isAvailable=true&minPrice=26500&maxPrice=31500,48,0
+1790707568862,2293,GET /api/properties/search,200,,Browsing Tenants 1-14,true,,10602161,172,23,23,http://localhost:8090/api/properties/search?prefix=villa,2074,0
+1790707569484,1689,GET /api/properties/search,200,,Browsing Tenants 1-15,true,,7451099,175,23,23,http://localhost:8090/api/properties/search?prefix=mansoura,1588,0
+1790707571477,15,GET /api/user/me (authed),200,,Browsing Tenants 1-11,true,,760,353,23,23,http://localhost:8090/api/user/me,15,0
+1790707570326,1249,GET /api/properties/search,200,,Browsing Tenants 1-18,true,,7421074,172,23,23,http://localhost:8090/api/properties/search?prefix=aswan,1172,0
+1790707570370,1298,GET /api/properties/search,200,,Browsing Tenants 1-16,true,,7431086,172,24,24,http://localhost:8090/api/properties/search?prefix=luxor,1220,0
+1790707571654,75,GET /api/properties/filter,200,,Browsing Tenants 1-21,true,,128033,241,24,24,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-4&isAvailable=true&minPrice=16500&maxPrice=21500,74,0
+1790707569520,2210,GET /api/properties/search,200,,Browsing Tenants 1-1,true,,10630796,173,24,24,http://localhost:8090/api/properties/search?prefix=office,2015,0
+1790707571634,110,GET /api/properties/filter,200,,Browsing Tenants 1-22,true,,128030,241,24,24,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-3&isAvailable=true&minPrice=11500&maxPrice=16500,100,0
+1790707570649,1214,GET /api/properties/search,200,,Browsing Tenants 1-17,true,,7411050,171,24,24,http://localhost:8090/api/properties/search?prefix=giza,1150,0
+1790707572050,11,GET /api/properties/{id},200,,Browsing Tenants 1-13,true,,1151,155,24,24,http://localhost:8090/api/properties/88,11,0
+1790707572221,5,GET /api/properties/{id},200,,Browsing Tenants 1-15,true,,1175,157,25,25,http://localhost:8090/api/properties/4414,4,0
+1790707570497,1754,GET /api/properties/search,200,,Browsing Tenants 1-3,true,,10573591,171,25,25,http://localhost:8090/api/properties/search?prefix=shop,1704,0
+1790707570913,1394,GET /api/properties/search,200,,Browsing Tenants 1-5,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1362,0
+1790707572260,50,GET /api/properties/filter,200,,Browsing Tenants 1-9,true,,128240,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-3&isAvailable=true&minPrice=41500&maxPrice=46500,49,0
+1790707570424,1970,GET /api/properties/search,200,,Browsing Tenants 1-2,true,,10715843,176,25,25,http://localhost:8090/api/properties/search?prefix=warehouse,1920,0
+1790707572411,42,GET /api/properties/filter,200,,Browsing Tenants 1-10,true,,128795,240,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-4&isAvailable=true&minPrice=1500&maxPrice=6500,41,0
+1790707572462,3,GET /api/properties/{id},200,,Browsing Tenants 1-14,true,,1184,158,25,25,http://localhost:8090/api/properties/74003,3,0
+1790707572641,5,GET /api/properties/{id},200,,Browsing Tenants 1-18,true,,1176,158,25,25,http://localhost:8090/api/properties/46814,4,0
+1790707572655,7,GET /api/user/me (authed),200,,Browsing Tenants 1-12,true,,760,353,25,25,http://localhost:8090/api/user/me,7,0
+1790707572682,47,GET /api/properties/filter,200,,Browsing Tenants 1-23,true,,128047,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-5&isAvailable=true&minPrice=21500&maxPrice=26500,46,0
+1790707572727,70,GET /api/properties/filter,200,,Browsing Tenants 1-24,true,,128808,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-6&isAvailable=true&minPrice=26500&maxPrice=31500,66,0
+1790707572744,70,GET /api/properties/filter,200,,Browsing Tenants 1-11,true,,127336,241,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-5&isAvailable=true&minPrice=6500&maxPrice=11500,69,0
+1790707572912,3,GET /api/properties/{id},200,,Browsing Tenants 1-1,true,,1181,158,25,25,http://localhost:8090/api/properties/76068,3,0
+1790707570816,2259,GET /api/properties/search,200,,Browsing Tenants 1-4,true,,10602161,172,25,25,http://localhost:8090/api/properties/search?prefix=villa,2209,0
+1790707573318,10,GET /api/user/me (authed),200,,Browsing Tenants 1-15,true,,760,353,25,25,http://localhost:8090/api/user/me,10,0
+1790707573333,6,GET /api/properties/{id},200,,Browsing Tenants 1-3,true,,1174,158,25,25,http://localhost:8090/api/properties/61338,5,0
+1790707571491,1917,GET /api/properties/search,200,,Browsing Tenants 1-19,true,,7421064,172,25,25,http://localhost:8090/api/properties/search?prefix=tanta,1792,0
+1790707573504,3,GET /api/properties/{id},200,,Browsing Tenants 1-16,true,,1173,158,25,25,http://localhost:8090/api/properties/38238,3,0
+1790707573559,2,GET /api/properties/{id},200,,Browsing Tenants 1-17,true,,1176,158,25,25,http://localhost:8090/api/properties/12765,2,0
+1790707571641,2112,GET /api/properties/search,200,,Browsing Tenants 1-6,true,,7421074,172,25,25,http://localhost:8090/api/properties/search?prefix=aswan,2078,0
+1790707573750,4,GET /api/user/me (authed),200,,Browsing Tenants 1-13,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707574022,28,GET /api/properties/filter,200,,Browsing Tenants 1-25,true,,129642,246,25,25,http://localhost:8090/api/properties/filter?city=6th+of+October&district=District-1&isAvailable=true&minPrice=31500&maxPrice=36500,27,1
+1790707574056,3,GET /api/properties/{id},200,,Browsing Tenants 1-5,true,,1174,158,25,25,http://localhost:8090/api/properties/62087,3,0
+1790707574077,37,GET /api/properties/filter,200,,Browsing Tenants 1-12,true,,128198,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-6&isAvailable=true&minPrice=11500&maxPrice=16500,36,0
+1790707574166,5,GET /api/user/me (authed),200,,Browsing Tenants 1-1,true,,760,353,25,25,http://localhost:8090/api/user/me,5,0
+1790707574170,6,GET /api/properties/{id},200,,Browsing Tenants 1-2,true,,1172,158,25,25,http://localhost:8090/api/properties/28915,4,0
+1790707572328,1968,GET /api/properties/search,200,,Browsing Tenants 1-8,true,,7411050,171,25,25,http://localhost:8090/api/properties/search?prefix=giza,1904,0
+1790707574350,7,GET /api/user/me (authed),200,,Browsing Tenants 1-18,true,,760,353,25,25,http://localhost:8090/api/user/me,7,0
+1790707574353,8,GET /api/user/me (authed),200,,Browsing Tenants 1-14,true,,760,353,25,25,http://localhost:8090/api/user/me,8,0
+1790707572641,1772,GET /api/properties/search,200,,Browsing Tenants 1-20,true,,7501139,173,25,25,http://localhost:8090/api/properties/search?prefix=sheikh,1710,0
+1790707574527,38,GET /api/user/me (authed),200,,Browsing Tenants 1-16,true,,760,353,25,25,http://localhost:8090/api/user/me,38,0
+1790707572967,1680,GET /api/properties/search,200,,Browsing Tenants 1-7,true,,7431086,172,25,25,http://localhost:8090/api/properties/search?prefix=luxor,1644,0
+1790707573534,1252,GET /api/properties/search,200,,Browsing Tenants 1-9,true,,7421064,172,25,25,http://localhost:8090/api/properties/search?prefix=tanta,1218,0
+1790707574909,4,GET /api/properties/{id},200,,Browsing Tenants 1-19,true,,1184,158,25,25,http://localhost:8090/api/properties/82851,4,0
+1790707574976,2,GET /api/properties/{id},200,,Browsing Tenants 1-4,true,,1174,158,25,25,http://localhost:8090/api/properties/90667,2,0
+1790707575044,31,GET /api/properties/filter,200,,Browsing Tenants 1-13,true,,127908,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-1&isAvailable=true&minPrice=16500&maxPrice=21500,30,0
+1790707575100,6,GET /api/user/me (authed),200,,Browsing Tenants 1-17,true,,760,353,25,25,http://localhost:8090/api/user/me,6,0
+1790707575138,21,GET /api/properties/filter,200,,Browsing Tenants 1-15,true,,126438,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-3&isAvailable=true&minPrice=26500&maxPrice=31500,20,0
+1790707575187,2,GET /api/properties/{id},200,,Browsing Tenants 1-6,true,,1174,158,25,25,http://localhost:8090/api/properties/23797,2,0
+1790707575221,4,GET /api/user/me (authed),200,,Browsing Tenants 1-5,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707573141,2139,GET /api/properties/search,200,,Browsing Tenants 1-21,true,,10573591,171,25,25,http://localhost:8090/api/properties/search?prefix=shop,2095,0
+1790707575293,6,GET /api/user/me (authed),200,,Browsing Tenants 1-3,true,,760,353,25,25,http://localhost:8090/api/user/me,6,0
+1790707574066,1339,GET /api/properties/search,200,,Browsing Tenants 1-10,true,,7501139,173,25,25,http://localhost:8090/api/properties/search?prefix=sheikh,1289,0
+1790707573558,1939,GET /api/properties/search,200,,Browsing Tenants 1-22,true,,10630796,173,25,25,http://localhost:8090/api/properties/search?prefix=office,1876,0
+1790707575636,2,GET /api/properties/{id},200,,Browsing Tenants 1-8,true,,1187,158,25,25,http://localhost:8090/api/properties/35469,2,0
+1790707575648,2,GET /api/properties/{id},200,,Browsing Tenants 1-20,true,,1173,158,25,25,http://localhost:8090/api/properties/99537,2,0
+1790707575755,31,GET /api/properties/filter,200,,Browsing Tenants 1-14,true,,128621,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-2&isAvailable=true&minPrice=21500&maxPrice=26500,30,0
+1790707575978,4,GET /api/user/me (authed),200,,Browsing Tenants 1-2,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707575983,4,GET /api/user/me (authed),200,,Browsing Tenants 1-19,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707574116,1990,GET /api/properties/search,200,,Browsing Tenants 1-23,true,,10715843,176,25,25,http://localhost:8090/api/properties/search?prefix=warehouse,1939,0
+1790707576074,55,GET /api/properties/filter,200,,Browsing Tenants 1-1,true,,127928,235,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-1&isAvailable=true&minPrice=1500&maxPrice=6500,54,0
+1790707576298,6,GET /api/user/me (authed),200,,Browsing Tenants 1-6,true,,760,353,25,25,http://localhost:8090/api/user/me,6,0
+1790707576269,37,GET /api/properties/filter,200,,Browsing Tenants 1-18,true,,127943,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-5&isAvailable=true&minPrice=36500&maxPrice=41500,36,0
+1790707576337,35,GET /api/properties/filter,200,,Browsing Tenants 1-16,true,,127182,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-4&isAvailable=true&minPrice=31500&maxPrice=36500,34,0
+1790707574176,2317,GET /api/properties/search,200,,Browsing Tenants 1-24,true,,10602161,172,25,25,http://localhost:8090/api/properties/search?prefix=villa,2265,0
+1790707576516,3,GET /api/properties/{id},200,,Browsing Tenants 1-7,true,,1173,158,25,25,http://localhost:8090/api/properties/42437,3,0
+1790707576593,4,GET /api/user/me (authed),200,,Browsing Tenants 1-4,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707576596,2,GET /api/properties/{id},200,,Browsing Tenants 1-21,true,,1187,158,25,25,http://localhost:8090/api/properties/75509,2,0
+1790707576634,2,GET /api/properties/{id},200,,Browsing Tenants 1-9,true,,1172,158,25,25,http://localhost:8090/api/properties/91940,2,0
+1790707576667,2,GET /api/user/me (authed),200,,Browsing Tenants 1-20,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707576650,33,GET /api/properties/filter,200,,Browsing Tenants 1-17,true,,126463,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-6&isAvailable=true&minPrice=41500&maxPrice=46500,32,0
+1790707576720,6,GET /api/user/me (authed),200,,Browsing Tenants 1-8,true,,760,353,25,25,http://localhost:8090/api/user/me,6,0
+1790707574445,2308,GET /api/properties/search,200,,Browsing Tenants 1-11,true,,10573591,171,25,25,http://localhost:8090/api/properties/search?prefix=shop,2270,0
+1790707576764,2,GET /api/properties/{id},200,,Browsing Tenants 1-10,true,,1173,158,25,25,http://localhost:8090/api/properties/14232,2,0
+1790707575274,1674,GET /api/properties/search,200,,Browsing Tenants 1-25,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1642,0
+1790707577053,27,GET /api/properties/filter,200,,Browsing Tenants 1-5,true,,128107,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-5&isAvailable=true&minPrice=21500&maxPrice=26500,27,0
+1790707577197,2,GET /api/properties/{id},200,,Browsing Tenants 1-23,true,,1168,158,25,25,http://localhost:8090/api/properties/78020,2,0
+1790707577207,27,GET /api/properties/filter,200,,Browsing Tenants 1-3,true,,128828,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-3&isAvailable=true&minPrice=11500&maxPrice=16500,27,0
+1790707577496,2,GET /api/properties/{id},200,,Browsing Tenants 1-22,true,,1164,156,25,25,http://localhost:8090/api/properties/814,2,0
+1790707577594,31,GET /api/properties/filter,200,,Browsing Tenants 1-2,true,,128705,236,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-2&isAvailable=true&minPrice=6500&maxPrice=11500,30,0
+1790707577661,31,GET /api/properties/filter,200,,Browsing Tenants 1-19,true,,129347,239,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-1&isAvailable=true&minPrice=1500&maxPrice=6500,31,0
+1790707576212,1546,GET /api/properties/search,200,,Browsing Tenants 1-15,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1520,0
+1790707577822,3,GET /api/user/me (authed),200,,Browsing Tenants 1-10,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707577978,33,GET /api/properties/filter,200,,Browsing Tenants 1-20,true,,130134,240,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-2&isAvailable=true&minPrice=6500&maxPrice=11500,32,0
+1790707578046,33,GET /api/properties/filter,200,,Browsing Tenants 1-6,true,,129698,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-1&isAvailable=true&minPrice=31500&maxPrice=36500,32,0
+1790707578093,3,GET /api/user/me (authed),200,,Browsing Tenants 1-21,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707578097,2,GET /api/properties/{id},200,,Browsing Tenants 1-25,true,,1189,158,25,25,http://localhost:8090/api/properties/40214,2,0
+1790707578124,4,GET /api/user/me (authed),200,,Browsing Tenants 1-7,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707575864,2283,GET /api/properties/search,200,,Browsing Tenants 1-12,true,,10630796,173,25,25,http://localhost:8090/api/properties/search?prefix=office,2243,0
+1790707578100,53,GET /api/properties/filter,200,,Browsing Tenants 1-8,true,,128226,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-2&isAvailable=true&minPrice=36500&maxPrice=41500,52,0
+1790707578224,2,GET /api/properties/{id},200,,Browsing Tenants 1-24,true,,1171,158,25,25,http://localhost:8090/api/properties/41120,2,0
+1790707578261,3,GET /api/user/me (authed),200,,Browsing Tenants 1-9,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707578386,2,GET /api/properties/{id},200,,Browsing Tenants 1-11,true,,1183,158,25,25,http://localhost:8090/api/properties/67045,2,0
+1790707578550,23,GET /api/properties/filter,200,,Browsing Tenants 1-4,true,,127352,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-4&isAvailable=true&minPrice=16500&maxPrice=21500,22,0
+1790707578576,3,GET /api/user/me (authed),200,,Browsing Tenants 1-23,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707576783,2064,GET /api/properties/search,200,,Browsing Tenants 1-13,true,,10715843,176,25,25,http://localhost:8090/api/properties/search?prefix=warehouse,2023,0
+1790707578946,3,GET /api/user/me (authed),200,,Browsing Tenants 1-22,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707579270,2,GET /api/properties/{id},200,,Browsing Tenants 1-12,true,,1181,158,25,25,http://localhost:8090/api/properties/74458,2,0
+1790707579491,13,GET /api/user/me (authed),200,,Browsing Tenants 1-11,true,,760,353,25,25,http://localhost:8090/api/user/me,13,0
+1790707578258,1285,GET /api/properties/search,200,,Browsing Tenants 1-16,true,,7431086,172,25,25,http://localhost:8090/api/properties/search?prefix=luxor,1228,0
+1790707577498,2051,GET /api/properties/search,200,,Browsing Tenants 1-1,true,,10630796,173,25,25,http://localhost:8090/api/properties/search?prefix=office,1966,0
+1790707578237,1353,GET /api/properties/search,200,,Browsing Tenants 1-18,true,,7421074,172,25,25,http://localhost:8090/api/properties/search?prefix=aswan,1318,0
+1790707578330,1282,GET /api/properties/search,200,,Browsing Tenants 1-5,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1193,0
+1790707579595,58,GET /api/properties/filter,200,,Browsing Tenants 1-10,true,,128795,240,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-4&isAvailable=true&minPrice=1500&maxPrice=6500,57,0
+1790707579678,27,GET /api/properties/{id},200,,Browsing Tenants 1-15,true,,1179,158,25,25,http://localhost:8090/api/properties/54751,17,0
+1790707578472,1238,GET /api/properties/search,200,,Browsing Tenants 1-17,true,,7411050,171,25,25,http://localhost:8090/api/properties/search?prefix=giza,1184,0
+1790707579657,73,GET /api/properties/filter,200,,Browsing Tenants 1-23,true,,128047,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-5&isAvailable=true&minPrice=21500&maxPrice=26500,73,0
+1790707579760,10,GET /api/user/me (authed),200,,Browsing Tenants 1-25,true,,760,353,25,25,http://localhost:8090/api/user/me,9,0
+1790707577745,2057,GET /api/properties/search,200,,Browsing Tenants 1-14,true,,10602161,172,25,25,http://localhost:8090/api/properties/search?prefix=villa,2006,0
+1790707579892,25,GET /api/properties/filter,200,,Browsing Tenants 1-9,true,,128240,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-3&isAvailable=true&minPrice=41500&maxPrice=46500,24,0
+1790707579940,29,GET /api/properties/filter,200,,Browsing Tenants 1-7,true,,126614,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-6&isAvailable=true&minPrice=26500&maxPrice=31500,28,0
+1790707579949,31,GET /api/properties/filter,200,,Browsing Tenants 1-21,true,,128033,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-4&isAvailable=true&minPrice=16500&maxPrice=21500,30,0
+1790707580008,3,GET /api/user/me (authed),200,,Browsing Tenants 1-24,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707580575,6,GET /api/user/me (authed),200,,Browsing Tenants 1-12,true,,760,353,25,25,http://localhost:8090/api/user/me,5,0
+1790707580614,3,GET /api/properties/{id},200,,Browsing Tenants 1-13,true,,1171,158,25,25,http://localhost:8090/api/properties/43262,3,0
+1790707579304,1351,GET /api/properties/search,200,,Browsing Tenants 1-19,true,,7421064,172,25,25,http://localhost:8090/api/properties/search?prefix=tanta,1321,0
+1790707580651,24,GET /api/properties/filter,200,,Browsing Tenants 1-11,true,,127336,241,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-5&isAvailable=true&minPrice=6500&maxPrice=11500,24,0
+1790707580776,5,GET /api/user/me (authed),200,,Browsing Tenants 1-15,true,,760,353,25,25,http://localhost:8090/api/user/me,5,0
+1790707580796,3,GET /api/properties/{id},200,,Browsing Tenants 1-17,true,,1174,158,25,25,http://localhost:8090/api/properties/68996,3,0
+1790707580851,36,GET /api/properties/filter,200,,Browsing Tenants 1-22,true,,128030,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-3&isAvailable=true&minPrice=11500&maxPrice=16500,34,0
+1790707580894,3,GET /api/properties/{id},200,,Browsing Tenants 1-16,true,,1166,157,25,25,http://localhost:8090/api/properties/5916,3,0
+1790707578885,2027,GET /api/properties/search,200,,Browsing Tenants 1-3,true,,10573591,171,25,25,http://localhost:8090/api/properties/search?prefix=shop,1987,0
+1790707579499,1461,GET /api/properties/search,200,,Browsing Tenants 1-6,true,,7421074,172,25,25,http://localhost:8090/api/properties/search?prefix=aswan,1434,0
+1790707581014,2,GET /api/properties/{id},200,,Browsing Tenants 1-5,true,,1179,158,25,25,http://localhost:8090/api/properties/43792,2,0
+1790707581028,1,GET /api/properties/{id},200,,Browsing Tenants 1-14,true,,1179,158,25,25,http://localhost:8090/api/properties/37926,1,0
+1790707581101,2,GET /api/properties/{id},200,,Browsing Tenants 1-1,true,,1173,158,25,25,http://localhost:8090/api/properties/74093,2,0
+1790707581136,45,GET /api/properties/filter,200,,Browsing Tenants 1-24,true,,128808,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-6&isAvailable=true&minPrice=26500&maxPrice=31500,43,0
+1790707579634,1568,GET /api/properties/search,200,,Browsing Tenants 1-20,true,,7501139,173,25,25,http://localhost:8090/api/properties/search?prefix=sheikh,1538,0
+1790707579551,1694,GET /api/properties/search,200,,Browsing Tenants 1-8,true,,7411050,171,25,25,http://localhost:8090/api/properties/search?prefix=giza,1654,0
+1790707581451,3,GET /api/properties/{id},200,,Browsing Tenants 1-18,true,,1175,158,25,25,http://localhost:8090/api/properties/59243,3,0
+1790707581521,28,GET /api/properties/filter,200,,Browsing Tenants 1-25,true,,129642,246,25,25,http://localhost:8090/api/properties/filter?city=6th+of+October&district=District-1&isAvailable=true&minPrice=31500&maxPrice=36500,27,0
+1790707581957,46,GET /api/properties/filter,200,,Browsing Tenants 1-12,true,,128198,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-6&isAvailable=true&minPrice=11500&maxPrice=16500,44,0
+1790707579581,2465,GET /api/properties/search,200,,Browsing Tenants 1-2,true,,10715843,176,25,25,http://localhost:8090/api/properties/search?prefix=warehouse,2378,0
+1790707582071,3,GET /api/user/me (authed),200,,Browsing Tenants 1-14,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707582139,6,GET /api/user/me (authed),200,,Browsing Tenants 1-16,true,,760,353,25,25,http://localhost:8090/api/user/me,6,0
+1790707582200,3,GET /api/properties/{id},200,,Browsing Tenants 1-6,true,,1175,158,25,25,http://localhost:8090/api/properties/96101,3,0
+1790707582244,35,GET /api/properties/filter,200,,Browsing Tenants 1-15,true,,126438,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-3&isAvailable=true&minPrice=26500&maxPrice=31500,34,0
+1790707582373,2,GET /api/properties/{id},200,,Browsing Tenants 1-19,true,,1178,158,25,25,http://localhost:8090/api/properties/74973,2,0
+1790707582456,7,GET /api/user/me (authed),200,,Browsing Tenants 1-17,true,,760,353,25,25,http://localhost:8090/api/user/me,7,0
+1790707582458,9,GET /api/user/me (authed),200,,Browsing Tenants 1-13,true,,760,353,25,25,http://localhost:8090/api/user/me,9,0
+1790707582546,5,GET /api/properties/{id},200,,Browsing Tenants 1-3,true,,1171,158,25,25,http://localhost:8090/api/properties/67722,5,0
+1790707581182,1408,GET /api/properties/search,200,,Browsing Tenants 1-10,true,,7501139,173,25,25,http://localhost:8090/api/properties/search?prefix=sheikh,1354,0
+1790707581108,1516,GET /api/properties/search,200,,Browsing Tenants 1-9,true,,7421064,172,25,25,http://localhost:8090/api/properties/search?prefix=tanta,1485,0
+1790707580456,2331,GET /api/properties/search,200,,Browsing Tenants 1-4,true,,10602161,172,25,25,http://localhost:8090/api/properties/search?prefix=villa,2245,0
+1790707582812,3,GET /api/user/me (authed),200,,Browsing Tenants 1-5,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707582862,2,GET /api/properties/{id},200,,Browsing Tenants 1-20,true,,1175,158,25,25,http://localhost:8090/api/properties/85563,2,0
+1790707582950,4,GET /api/user/me (authed),200,,Browsing Tenants 1-1,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707583125,3,GET /api/properties/{id},200,,Browsing Tenants 1-8,true,,1174,158,25,25,http://localhost:8090/api/properties/70456,3,0
+1790707583236,30,GET /api/properties/filter,200,,Browsing Tenants 1-14,true,,128621,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-2&isAvailable=true&minPrice=21500&maxPrice=26500,29,0
+1790707581875,1433,GET /api/properties/search,200,,Browsing Tenants 1-7,true,,7431086,172,25,25,http://localhost:8090/api/properties/search?prefix=luxor,1404,0
+1790707583439,5,GET /api/user/me (authed),200,,Browsing Tenants 1-18,true,,760,353,25,25,http://localhost:8090/api/user/me,5,0
+1790707581237,2246,GET /api/properties/search,200,,Browsing Tenants 1-23,true,,10715843,176,25,25,http://localhost:8090/api/properties/search?prefix=warehouse,2158,0
+1790707583448,40,GET /api/properties/filter,200,,Browsing Tenants 1-16,true,,127182,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-4&isAvailable=true&minPrice=31500&maxPrice=36500,39,0
+1790707583740,2,GET /api/properties/{id},200,,Browsing Tenants 1-2,true,,1185,158,25,25,http://localhost:8090/api/properties/35021,2,0
+1790707583852,4,GET /api/user/me (authed),200,,Browsing Tenants 1-19,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707583987,6,GET /api/user/me (authed),200,,Browsing Tenants 1-3,true,,760,353,25,25,http://localhost:8090/api/user/me,6,0
+1790707581935,2089,GET /api/properties/search,200,,Browsing Tenants 1-21,true,,10573591,171,25,25,http://localhost:8090/api/properties/search?prefix=shop,2041,0
+1790707584005,41,GET /api/properties/filter,200,,Browsing Tenants 1-1,true,,127928,235,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-1&isAvailable=true&minPrice=1500&maxPrice=6500,40,0
+1790707584069,5,GET /api/user/me (authed),200,,Browsing Tenants 1-6,true,,760,353,25,25,http://localhost:8090/api/user/me,5,0
+1790707584138,2,GET /api/properties/{id},200,,Browsing Tenants 1-10,true,,1180,158,25,25,http://localhost:8090/api/properties/76166,2,0
+1790707584154,7,GET /api/user/me (authed),200,,Browsing Tenants 1-8,true,,760,353,25,25,http://localhost:8090/api/user/me,7,0
+1790707582059,2124,GET /api/properties/search,200,,Browsing Tenants 1-11,true,,10573591,171,25,25,http://localhost:8090/api/properties/search?prefix=shop,2085,0
+1790707584187,2,GET /api/properties/{id},200,,Browsing Tenants 1-4,true,,1170,158,25,25,http://localhost:8090/api/properties/51336,2,0
+1790707584273,33,GET /api/properties/filter,200,,Browsing Tenants 1-17,true,,126463,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-6&isAvailable=true&minPrice=41500&maxPrice=46500,33,0
+1790707584360,2,GET /api/properties/{id},200,,Browsing Tenants 1-9,true,,1178,158,25,25,http://localhost:8090/api/properties/30493,2,0
+1790707584374,33,GET /api/properties/filter,200,,Browsing Tenants 1-13,true,,127908,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-1&isAvailable=true&minPrice=16500&maxPrice=21500,32,0
+1790707582853,1646,GET /api/properties/search,200,,Browsing Tenants 1-25,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1619,0
+1790707584530,43,GET /api/properties/filter,200,,Browsing Tenants 1-5,true,,128107,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-5&isAvailable=true&minPrice=21500&maxPrice=26500,42,0
+1790707582320,2254,GET /api/properties/search,200,,Browsing Tenants 1-22,true,,10630796,173,25,25,http://localhost:8090/api/properties/search?prefix=office,2216,0
+1790707584709,2,GET /api/properties/{id},200,,Browsing Tenants 1-7,true,,1180,158,25,25,http://localhost:8090/api/properties/43759,2,0
+1790707584782,3,GET /api/user/me (authed),200,,Browsing Tenants 1-20,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707584980,2,GET /api/properties/{id},200,,Browsing Tenants 1-23,true,,1170,158,25,25,http://localhost:8090/api/properties/62512,2,0
+1790707585027,31,GET /api/properties/filter,200,,Browsing Tenants 1-19,true,,129347,239,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-1&isAvailable=true&minPrice=1500&maxPrice=6500,30,0
+1790707585262,31,GET /api/properties/filter,200,,Browsing Tenants 1-6,true,,129698,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-1&isAvailable=true&minPrice=31500&maxPrice=36500,30,0
+1790707585358,32,GET /api/properties/filter,200,,Browsing Tenants 1-18,true,,127943,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-5&isAvailable=true&minPrice=36500&maxPrice=41500,31,0
+1790707583874,1590,GET /api/properties/search,200,,Browsing Tenants 1-15,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1562,0
+1790707583179,2353,GET /api/properties/search,200,,Browsing Tenants 1-24,true,,10602161,172,25,25,http://localhost:8090/api/properties/search?prefix=villa,2314,0
+1790707585541,3,GET /api/user/me (authed),200,,Browsing Tenants 1-2,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707585563,2,GET /api/properties/{id},200,,Browsing Tenants 1-25,true,,1171,158,25,25,http://localhost:8090/api/properties/28488,2,0
+1790707585713,3,GET /api/user/me (authed),200,,Browsing Tenants 1-10,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707585795,33,GET /api/properties/filter,200,,Browsing Tenants 1-3,true,,128828,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-3&isAvailable=true&minPrice=11500&maxPrice=16500,32,0
+1790707585950,36,GET /api/properties/filter,200,,Browsing Tenants 1-8,true,,128226,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-2&isAvailable=true&minPrice=36500&maxPrice=41500,35,0
+1790707585997,2,GET /api/properties/{id},200,,Browsing Tenants 1-21,true,,1173,158,25,25,http://localhost:8090/api/properties/98267,2,0
+1790707586017,3,GET /api/user/me (authed),200,,Browsing Tenants 1-9,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707586036,2,GET /api/properties/{id},200,,Browsing Tenants 1-11,true,,1181,158,25,25,http://localhost:8090/api/properties/12499,2,0
+1790707586108,4,GET /api/user/me (authed),200,,Browsing Tenants 1-4,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707586181,3,GET /api/user/me (authed),200,,Browsing Tenants 1-7,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707583928,2317,GET /api/properties/search,200,,Browsing Tenants 1-12,true,,10630796,173,25,25,http://localhost:8090/api/properties/search?prefix=office,2277,0
+1790707586253,3,GET /api/properties/{id},200,,Browsing Tenants 1-22,true,,1175,158,25,25,http://localhost:8090/api/properties/63108,3,0
+1790707586427,3,GET /api/user/me (authed),200,,Browsing Tenants 1-23,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707586598,30,GET /api/properties/filter,200,,Browsing Tenants 1-20,true,,130134,240,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-2&isAvailable=true&minPrice=6500&maxPrice=11500,29,0
+1790707586788,26,GET /api/properties/filter,200,,Browsing Tenants 1-10,true,,128795,240,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-4&isAvailable=true&minPrice=1500&maxPrice=6500,23,0
+1790707584709,2135,GET /api/properties/search,200,,Browsing Tenants 1-14,true,,10602161,172,25,25,http://localhost:8090/api/properties/search?prefix=villa,2085,0
+1790707586849,5,GET /api/user/me (authed),200,,Browsing Tenants 1-25,true,,760,353,25,25,http://localhost:8090/api/user/me,5,0
+1790707586879,24,GET /api/properties/filter,200,,Browsing Tenants 1-2,true,,128705,236,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-2&isAvailable=true&minPrice=6500&maxPrice=11500,23,0
+1790707585504,1438,GET /api/properties/search,200,,Browsing Tenants 1-17,true,,7411050,171,25,25,http://localhost:8090/api/properties/search?prefix=giza,1406,0
+1790707585440,1562,GET /api/properties/search,200,,Browsing Tenants 1-16,true,,7431086,172,25,25,http://localhost:8090/api/properties/search?prefix=luxor,1515,0
+1790707587141,2,GET /api/properties/{id},200,,Browsing Tenants 1-24,true,,1186,158,25,25,http://localhost:8090/api/properties/72289,2,0
+1790707587162,2,GET /api/properties/{id},200,,Browsing Tenants 1-15,true,,1173,158,25,25,http://localhost:8090/api/properties/20630,2,0
+1790707587192,35,GET /api/properties/filter,200,,Browsing Tenants 1-4,true,,127352,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-4&isAvailable=true&minPrice=16500&maxPrice=21500,34,0
+1790707587245,3,GET /api/user/me (authed),200,,Browsing Tenants 1-21,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707586005,1501,GET /api/properties/search,200,,Browsing Tenants 1-5,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1471,0
+1790707587644,3,GET /api/user/me (authed),200,,Browsing Tenants 1-22,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707587716,3,GET /api/user/me (authed),200,,Browsing Tenants 1-11,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707587722,18,GET /api/properties/filter,200,,Browsing Tenants 1-7,true,,126614,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-6&isAvailable=true&minPrice=26500&maxPrice=31500,17,0
+1790707586323,1509,GET /api/properties/search,200,,Browsing Tenants 1-6,true,,7421074,172,25,25,http://localhost:8090/api/properties/search?prefix=aswan,1451,0
+1790707585652,2182,GET /api/properties/search,200,,Browsing Tenants 1-1,true,,10630796,173,25,25,http://localhost:8090/api/properties/search?prefix=office,2113,0
+1790707587903,34,GET /api/properties/filter,200,,Browsing Tenants 1-9,true,,128240,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-3&isAvailable=true&minPrice=41500&maxPrice=46500,34,0
+1790707587982,2,GET /api/properties/{id},200,,Browsing Tenants 1-12,true,,1170,158,25,25,http://localhost:8090/api/properties/66190,2,0
+1790707587998,34,GET /api/properties/filter,200,,Browsing Tenants 1-25,true,,129642,246,25,25,http://localhost:8090/api/properties/filter?city=6th+of+October&district=District-1&isAvailable=true&minPrice=31500&maxPrice=36500,33,0
+1790707586008,2197,GET /api/properties/search,200,,Browsing Tenants 1-13,true,,10715843,176,25,25,http://localhost:8090/api/properties/search?prefix=warehouse,2154,0
+1790707588324,25,GET /api/properties/filter,200,,Browsing Tenants 1-23,true,,128047,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-5&isAvailable=true&minPrice=21500&maxPrice=26500,24,0
+1790707588412,2,GET /api/properties/{id},200,,Browsing Tenants 1-17,true,,1185,158,25,25,http://localhost:8090/api/properties/30631,2,0
+1790707588417,4,GET /api/user/me (authed),200,,Browsing Tenants 1-24,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707586807,1679,GET /api/properties/search,200,,Browsing Tenants 1-19,true,,7421064,172,25,25,http://localhost:8090/api/properties/search?prefix=tanta,1650,0
+1790707588515,2,GET /api/properties/{id},200,,Browsing Tenants 1-14,true,,1177,158,25,25,http://localhost:8090/api/properties/84751,2,0
+1790707588565,3,GET /api/user/me (authed),200,,Browsing Tenants 1-15,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707588579,1,GET /api/properties/{id},200,,Browsing Tenants 1-5,true,,1172,158,25,25,http://localhost:8090/api/properties/77402,1,0
+1790707588723,1,GET /api/properties/{id},200,,Browsing Tenants 1-16,true,,1181,158,25,25,http://localhost:8090/api/properties/61014,1,0
+1790707588736,29,GET /api/properties/filter,200,,Browsing Tenants 1-21,true,,128033,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-4&isAvailable=true&minPrice=16500&maxPrice=21500,29,0
+1790707588940,2,GET /api/properties/{id},200,,Browsing Tenants 1-1,true,,1173,158,25,25,http://localhost:8090/api/properties/44740,2,0
+1790707587506,1511,GET /api/properties/search,200,,Browsing Tenants 1-8,true,,7411050,171,25,25,http://localhost:8090/api/properties/search?prefix=giza,1473,0
+1790707587390,1641,GET /api/properties/search,200,,Browsing Tenants 1-18,true,,7421074,172,25,25,http://localhost:8090/api/properties/search?prefix=aswan,1569,0
+1790707589084,3,GET /api/user/me (authed),200,,Browsing Tenants 1-12,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707589084,30,GET /api/properties/filter,200,,Browsing Tenants 1-22,true,,128030,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-3&isAvailable=true&minPrice=11500&maxPrice=16500,29,0
+1790707589248,2,GET /api/properties/{id},200,,Browsing Tenants 1-6,true,,1177,158,25,25,http://localhost:8090/api/properties/97833,2,0
+1790707587970,1607,GET /api/properties/search,200,,Browsing Tenants 1-10,true,,7501139,173,25,25,http://localhost:8090/api/properties/search?prefix=sheikh,1573,0
+1790707589638,36,GET /api/properties/filter,200,,Browsing Tenants 1-15,true,,126438,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-3&isAvailable=true&minPrice=26500&maxPrice=31500,32,0
+1790707588138,1558,GET /api/properties/search,200,,Browsing Tenants 1-20,true,,7501139,173,25,25,http://localhost:8090/api/properties/search?prefix=sheikh,1517,0
+1790707587526,2210,GET /api/properties/search,200,,Browsing Tenants 1-3,true,,10573591,171,25,25,http://localhost:8090/api/properties/search?prefix=shop,2169,0
+1790707589704,46,GET /api/properties/filter,200,,Browsing Tenants 1-11,true,,127336,241,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-5&isAvailable=true&minPrice=6500&maxPrice=11500,45,0
+1790707589860,2,GET /api/user/me (authed),200,,Browsing Tenants 1-5,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707590010,31,GET /api/properties/filter,200,,Browsing Tenants 1-24,true,,128808,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-6&isAvailable=true&minPrice=26500&maxPrice=31500,31,0
+1790707590068,3,GET /api/user/me (authed),200,,Browsing Tenants 1-16,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707590087,1,GET /api/properties/{id},200,,Browsing Tenants 1-18,true,,1177,158,25,25,http://localhost:8090/api/properties/80061,1,0
+1790707590131,3,GET /api/user/me (authed),200,,Browsing Tenants 1-14,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707590200,2,GET /api/properties/{id},200,,Browsing Tenants 1-13,true,,1175,158,25,25,http://localhost:8090/api/properties/25005,2,0
+1790707590293,3,GET /api/user/me (authed),200,,Browsing Tenants 1-17,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707590336,2,GET /api/properties/{id},200,,Browsing Tenants 1-19,true,,1175,158,25,25,http://localhost:8090/api/properties/84015,2,0
+1790707590340,4,GET /api/user/me (authed),200,,Browsing Tenants 1-1,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707590367,7,GET /api/user/me (authed),200,,Browsing Tenants 1-6,true,,760,353,25,25,http://localhost:8090/api/user/me,7,0
+1790707588235,2278,GET /api/properties/search,200,,Browsing Tenants 1-4,true,,10602161,172,25,25,http://localhost:8090/api/properties/search?prefix=villa,2222,0
+1790707590525,3,GET /api/properties/{id},200,,Browsing Tenants 1-8,true,,1176,158,25,25,http://localhost:8090/api/properties/96619,3,0
+1790707589015,1575,GET /api/properties/search,200,,Browsing Tenants 1-7,true,,7431086,172,25,25,http://localhost:8090/api/properties/search?prefix=luxor,1548,0
+1790707590983,24,GET /api/properties/filter,200,,Browsing Tenants 1-12,true,,128198,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-6&isAvailable=true&minPrice=11500&maxPrice=16500,23,0
+1790707588822,2234,GET /api/properties/search,200,,Browsing Tenants 1-2,true,,10715843,176,25,25,http://localhost:8090/api/properties/search?prefix=warehouse,2194,0
+1790707591064,30,GET /api/properties/filter,200,,Browsing Tenants 1-5,true,,128107,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-5&isAvailable=true&minPrice=21500&maxPrice=26500,29,0
+1790707591215,21,GET /api/properties/filter,200,,Browsing Tenants 1-16,true,,127182,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-4&isAvailable=true&minPrice=31500&maxPrice=36500,19,0
+1790707591302,3,GET /api/properties/{id},200,,Browsing Tenants 1-20,true,,1174,158,25,25,http://localhost:8090/api/properties/94636,3,0
+1790707589856,1492,GET /api/properties/search,200,,Browsing Tenants 1-25,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1459,0
+1790707591350,3,GET /api/properties/{id},200,,Browsing Tenants 1-10,true,,1174,158,25,25,http://localhost:8090/api/properties/20157,2,0
+1790707591359,5,GET /api/user/me (authed),200,,Browsing Tenants 1-13,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707589888,1524,GET /api/properties/search,200,,Browsing Tenants 1-9,true,,7421064,172,25,25,http://localhost:8090/api/properties/search?prefix=tanta,1495,0
+1790707591474,3,GET /api/user/me (authed),200,,Browsing Tenants 1-18,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707591596,5,GET /api/properties/{id},200,,Browsing Tenants 1-3,true,,1170,158,25,25,http://localhost:8090/api/properties/78472,5,0
+1790707589457,2190,GET /api/properties/search,200,,Browsing Tenants 1-23,true,,10715843,176,25,25,http://localhost:8090/api/properties/search?prefix=warehouse,2150,0
+1790707591654,3,GET /api/user/me (authed),200,,Browsing Tenants 1-8,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707591795,34,GET /api/properties/filter,200,,Browsing Tenants 1-6,true,,129698,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-1&isAvailable=true&minPrice=31500&maxPrice=36500,33,0
+1790707591849,27,GET /api/properties/filter,200,,Browsing Tenants 1-14,true,,128621,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-2&isAvailable=true&minPrice=21500&maxPrice=26500,26,0
+1790707591889,48,GET /api/properties/filter,200,,Browsing Tenants 1-17,true,,126463,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-6&isAvailable=true&minPrice=41500&maxPrice=46500,48,0
+1790707591985,2,GET /api/properties/{id},200,,Browsing Tenants 1-4,true,,1173,158,25,25,http://localhost:8090/api/properties/89356,2,0
+1790707592031,2,GET /api/properties/{id},200,,Browsing Tenants 1-7,true,,1179,158,25,25,http://localhost:8090/api/properties/72820,2,0
+1790707592204,42,GET /api/properties/filter,200,,Browsing Tenants 1-1,true,,127928,235,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-1&isAvailable=true&minPrice=1500&maxPrice=6500,41,0
+1790707592258,3,GET /api/user/me (authed),200,,Browsing Tenants 1-19,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707590300,2192,GET /api/properties/search,200,,Browsing Tenants 1-21,true,,10573591,171,25,25,http://localhost:8090/api/properties/search?prefix=shop,2155,0
+1790707592515,36,GET /api/properties/filter,200,,Browsing Tenants 1-13,true,,127908,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-1&isAvailable=true&minPrice=16500&maxPrice=21500,36,0
+1790707592625,5,GET /api/properties/{id},200,,Browsing Tenants 1-9,true,,1172,158,25,25,http://localhost:8090/api/properties/63107,5,0
+1790707592627,6,GET /api/user/me (authed),200,,Browsing Tenants 1-3,true,,760,353,25,25,http://localhost:8090/api/user/me,6,0
+1790707591117,1528,GET /api/properties/search,200,,Browsing Tenants 1-15,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1500,0
+1790707592821,3,GET /api/properties/{id},200,,Browsing Tenants 1-2,true,,1180,158,25,25,http://localhost:8090/api/properties/29149,3,0
+1790707592923,34,GET /api/properties/filter,200,,Browsing Tenants 1-8,true,,128226,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-2&isAvailable=true&minPrice=36500&maxPrice=41500,33,0
+1790707592958,3,GET /api/user/me (authed),200,,Browsing Tenants 1-20,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707590853,2182,GET /api/properties/search,200,,Browsing Tenants 1-11,true,,10573591,171,25,25,http://localhost:8090/api/properties/search?prefix=shop,2110,0
+1790707593049,2,GET /api/properties/{id},200,,Browsing Tenants 1-25,true,,1183,158,25,25,http://localhost:8090/api/properties/17135,2,0
+1790707590878,2183,GET /api/properties/search,200,,Browsing Tenants 1-22,true,,10630796,173,25,25,http://localhost:8090/api/properties/search?prefix=office,2115,0
+1790707593099,3,GET /api/user/me (authed),200,,Browsing Tenants 1-10,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707593100,34,GET /api/properties/filter,200,,Browsing Tenants 1-18,true,,127943,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-5&isAvailable=true&minPrice=36500&maxPrice=41500,33,0
+1790707593203,2,GET /api/user/me (authed),200,,Browsing Tenants 1-4,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707593379,2,GET /api/properties/{id},200,,Browsing Tenants 1-23,true,,1164,156,25,25,http://localhost:8090/api/properties/919,2,0
+1790707593544,9,GET /api/user/me (authed),200,,Browsing Tenants 1-7,true,,760,353,25,25,http://localhost:8090/api/user/me,9,0
+1790707591100,2465,GET /api/properties/search,200,,Browsing Tenants 1-24,true,,10602161,172,25,25,http://localhost:8090/api/properties/search?prefix=villa,2406,0
+1790707593774,30,GET /api/properties/filter,200,,Browsing Tenants 1-19,true,,129347,239,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-1&isAvailable=true&minPrice=1500&maxPrice=6500,30,0
+1790707594041,4,GET /api/properties/{id},200,,Browsing Tenants 1-15,true,,1171,158,25,25,http://localhost:8090/api/properties/81548,4,0
+1790707594052,10,GET /api/user/me (authed),200,,Browsing Tenants 1-9,true,,760,353,25,25,http://localhost:8090/api/user/me,9,0
+1790707594108,29,GET /api/properties/filter,200,,Browsing Tenants 1-3,true,,128828,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-3&isAvailable=true&minPrice=11500&maxPrice=16500,28,0
+1790707594302,6,GET /api/user/me (authed),200,,Browsing Tenants 1-2,true,,760,353,25,25,http://localhost:8090/api/user/me,6,0
+1790707594311,5,GET /api/properties/{id},200,,Browsing Tenants 1-21,true,,1180,158,25,25,http://localhost:8090/api/properties/42009,5,0
+1790707592948,1512,GET /api/properties/search,200,,Browsing Tenants 1-5,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1477,0
+1790707593096,1411,GET /api/properties/search,200,,Browsing Tenants 1-16,true,,7431086,172,25,25,http://localhost:8090/api/properties/search?prefix=luxor,1384,0
+1790707594545,5,GET /api/user/me (authed),200,,Browsing Tenants 1-25,true,,760,353,25,25,http://localhost:8090/api/user/me,5,0
+1790707594612,2,GET /api/properties/{id},200,,Browsing Tenants 1-22,true,,1182,158,25,25,http://localhost:8090/api/properties/18369,2,0
+1790707592522,2132,GET /api/properties/search,200,,Browsing Tenants 1-12,true,,10630796,173,25,25,http://localhost:8090/api/properties/search?prefix=office,2093,0
+1790707594632,38,GET /api/properties/filter,200,,Browsing Tenants 1-20,true,,130134,240,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-2&isAvailable=true&minPrice=6500&maxPrice=11500,37,0
+1790707594662,35,GET /api/properties/filter,200,,Browsing Tenants 1-10,true,,128795,240,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-4&isAvailable=true&minPrice=1500&maxPrice=6500,34,0
+1790707594736,2,GET /api/properties/{id},200,,Browsing Tenants 1-11,true,,1187,158,25,25,http://localhost:8090/api/properties/82704,2,0
+1790707594867,27,GET /api/properties/filter,200,,Browsing Tenants 1-4,true,,127352,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-4&isAvailable=true&minPrice=16500&maxPrice=21500,26,0
+1790707593594,1381,GET /api/properties/search,200,,Browsing Tenants 1-17,true,,7411050,171,25,25,http://localhost:8090/api/properties/search?prefix=giza,1322,0
+1790707595040,6,GET /api/user/me (authed),200,,Browsing Tenants 1-23,true,,760,353,25,25,http://localhost:8090/api/user/me,6,0
+1790707593817,1232,GET /api/properties/search,200,,Browsing Tenants 1-6,true,,7421074,172,25,25,http://localhost:8090/api/properties/search?prefix=aswan,1197,0
+1790707595356,32,GET /api/properties/filter,200,,Browsing Tenants 1-9,true,,128240,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-3&isAvailable=true&minPrice=41500&maxPrice=46500,30,0
+1790707593200,2226,GET /api/properties/search,200,,Browsing Tenants 1-14,true,,10602161,172,25,25,http://localhost:8090/api/properties/search?prefix=villa,2185,0
+1790707595442,2,GET /api/properties/{id},200,,Browsing Tenants 1-24,true,,1183,158,25,25,http://localhost:8090/api/properties/18655,2,0
+1790707595467,2,GET /api/properties/{id},200,,Browsing Tenants 1-5,true,,1183,158,25,25,http://localhost:8090/api/properties/62475,1,0
+1790707595457,45,GET /api/properties/filter,200,,Browsing Tenants 1-7,true,,126614,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-6&isAvailable=true&minPrice=26500&maxPrice=31500,44,0
+1790707595675,3,GET /api/user/me (authed),200,,Browsing Tenants 1-15,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707593473,2207,GET /api/properties/search,200,,Browsing Tenants 1-1,true,,10630796,173,25,25,http://localhost:8090/api/properties/search?prefix=office,2138,0
+1790707595736,2,GET /api/properties/{id},200,,Browsing Tenants 1-12,true,,1174,158,25,25,http://localhost:8090/api/properties/91106,2,0
+1790707595782,3,GET /api/user/me (authed),200,,Browsing Tenants 1-22,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707595792,2,GET /api/user/me (authed),200,,Browsing Tenants 1-11,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707595878,5,GET /api/user/me (authed),200,,Browsing Tenants 1-21,true,,760,353,25,25,http://localhost:8090/api/user/me,5,0
+1790707595946,36,GET /api/properties/filter,200,,Browsing Tenants 1-2,true,,128705,236,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-2&isAvailable=true&minPrice=6500&maxPrice=11500,35,0
+1790707596065,3,GET /api/properties/{id},200,,Browsing Tenants 1-17,true,,1169,158,25,25,http://localhost:8090/api/properties/86616,2,0
+1790707593894,2210,GET /api/properties/search,200,,Browsing Tenants 1-13,true,,10715843,176,25,25,http://localhost:8090/api/properties/search?prefix=warehouse,2164,0
+1790707596112,36,GET /api/properties/filter,200,,Browsing Tenants 1-25,true,,129642,246,25,25,http://localhost:8090/api/properties/filter?city=6th+of+October&district=District-1&isAvailable=true&minPrice=31500&maxPrice=36500,35,0
+1790707596358,2,GET /api/properties/{id},200,,Browsing Tenants 1-16,true,,1172,158,25,25,http://localhost:8090/api/properties/67835,2,0
+1790707596407,5,GET /api/properties/{id},200,,Browsing Tenants 1-6,true,,1178,158,25,25,http://localhost:8090/api/properties/22303,5,0
+1790707596452,2,GET /api/properties/{id},200,,Browsing Tenants 1-14,true,,1181,158,25,25,http://localhost:8090/api/properties/37754,2,0
+1790707596436,31,GET /api/properties/filter,200,,Browsing Tenants 1-23,true,,128047,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-5&isAvailable=true&minPrice=21500&maxPrice=26500,30,0
+1790707594784,1730,GET /api/properties/search,200,,Browsing Tenants 1-8,true,,7411050,171,25,25,http://localhost:8090/api/properties/search?prefix=giza,1703,0
+1790707594871,1786,GET /api/properties/search,200,,Browsing Tenants 1-18,true,,7421074,172,25,25,http://localhost:8090/api/properties/search?prefix=aswan,1758,0
+1790707596865,2,GET /api/properties/{id},200,,Browsing Tenants 1-1,true,,1170,157,25,25,http://localhost:8090/api/properties/4577,2,0
+1790707597058,3,GET /api/user/me (authed),200,,Browsing Tenants 1-5,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707595442,1832,GET /api/properties/search,200,,Browsing Tenants 1-19,true,,7421064,172,25,25,http://localhost:8090/api/properties/search?prefix=tanta,1774,0
+1790707597288,10,GET /api/user/me (authed),200,,Browsing Tenants 1-24,true,,760,353,25,25,http://localhost:8090/api/user/me,10,0
+1790707597267,35,GET /api/properties/filter,200,,Browsing Tenants 1-11,true,,127336,241,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-5&isAvailable=true&minPrice=6500&maxPrice=11500,34,0
+1790707597305,2,GET /api/properties/{id},200,,Browsing Tenants 1-13,true,,1187,158,25,25,http://localhost:8090/api/properties/34769,2,0
+1790707597359,27,GET /api/properties/filter,200,,Browsing Tenants 1-21,true,,128033,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-4&isAvailable=true&minPrice=16500&maxPrice=21500,26,0
+1790707597422,22,GET /api/properties/filter,200,,Browsing Tenants 1-15,true,,126438,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-3&isAvailable=true&minPrice=26500&maxPrice=31500,21,0
+1790707597453,3,GET /api/user/me (authed),200,,Browsing Tenants 1-12,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707595192,2389,GET /api/properties/search,200,,Browsing Tenants 1-3,true,,10573591,171,25,25,http://localhost:8090/api/properties/search?prefix=shop,2312,0
+1790707596035,1549,GET /api/properties/search,200,,Browsing Tenants 1-10,true,,7501139,173,25,25,http://localhost:8090/api/properties/search?prefix=sheikh,1473,0
+1790707597619,19,GET /api/properties/filter,200,,Browsing Tenants 1-22,true,,128030,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-3&isAvailable=true&minPrice=11500&maxPrice=16500,18,0
+1790707596241,1497,GET /api/properties/search,200,,Browsing Tenants 1-20,true,,7501139,173,25,25,http://localhost:8090/api/properties/search?prefix=sheikh,1458,0
+1790707597926,8,GET /api/user/me (authed),200,,Browsing Tenants 1-17,true,,760,353,25,25,http://localhost:8090/api/user/me,8,0
+1790707597943,5,GET /api/user/me (authed),200,,Browsing Tenants 1-1,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707598025,2,GET /api/properties/{id},200,,Browsing Tenants 1-18,true,,1172,158,25,25,http://localhost:8090/api/properties/29433,2,0
+1790707598047,3,GET /api/user/me (authed),200,,Browsing Tenants 1-16,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707598135,4,GET /api/user/me (authed),200,,Browsing Tenants 1-6,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707598381,5,GET /api/user/me (authed),200,,Browsing Tenants 1-14,true,,760,353,25,25,http://localhost:8090/api/user/me,5,0
+1790707598433,2,GET /api/properties/{id},200,,Browsing Tenants 1-8,true,,1173,158,25,25,http://localhost:8090/api/properties/36125,2,0
+1790707598447,3,GET /api/user/me (authed),200,,Browsing Tenants 1-13,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707596997,1466,GET /api/properties/search,200,,Browsing Tenants 1-7,true,,7431086,172,25,25,http://localhost:8090/api/properties/search?prefix=luxor,1438,0
+1790707598739,8,GET /api/properties/{id},200,,Browsing Tenants 1-3,true,,1175,158,25,25,http://localhost:8090/api/properties/52158,7,0
+1790707597251,1524,GET /api/properties/search,200,,Browsing Tenants 1-9,true,,7421064,172,25,25,http://localhost:8090/api/properties/search?prefix=tanta,1488,0
+1790707598881,33,GET /api/properties/filter,200,,Browsing Tenants 1-12,true,,128198,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-6&isAvailable=true&minPrice=11500&maxPrice=16500,32,0
+1790707598973,2,GET /api/properties/{id},200,,Browsing Tenants 1-20,true,,1176,158,25,25,http://localhost:8090/api/properties/58819,2,0
+1790707596687,2292,GET /api/properties/search,200,,Browsing Tenants 1-4,true,,10602161,172,25,25,http://localhost:8090/api/properties/search?prefix=villa,2217,0
+1790707599017,35,GET /api/properties/filter,200,,Browsing Tenants 1-5,true,,128107,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-5&isAvailable=true&minPrice=21500&maxPrice=26500,35,0
+1790707599110,2,GET /api/properties/{id},200,,Browsing Tenants 1-10,true,,1173,158,25,25,http://localhost:8090/api/properties/49792,2,0
+1790707599083,31,GET /api/properties/filter,200,,Browsing Tenants 1-24,true,,128808,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-6&isAvailable=true&minPrice=26500&maxPrice=31500,30,0
+1790707599117,2,GET /api/properties/{id},200,,Browsing Tenants 1-19,true,,1177,158,25,25,http://localhost:8090/api/properties/70535,2,0
+1790707599147,33,GET /api/properties/filter,200,,Browsing Tenants 1-1,true,,127928,235,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-1&isAvailable=true&minPrice=1500&maxPrice=6500,32,0
+1790707599332,36,GET /api/properties/filter,200,,Browsing Tenants 1-16,true,,127182,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-4&isAvailable=true&minPrice=31500&maxPrice=36500,29,0
+1790707597721,1666,GET /api/properties/search,200,,Browsing Tenants 1-25,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1634,0
+1790707599365,44,GET /api/properties/filter,200,,Browsing Tenants 1-17,true,,126463,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-6&isAvailable=true&minPrice=41500&maxPrice=46500,43,0
+1790707599504,3,GET /api/user/me (authed),200,,Browsing Tenants 1-8,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707597267,2295,GET /api/properties/search,200,,Browsing Tenants 1-2,true,,10715843,176,25,25,http://localhost:8090/api/properties/search?prefix=warehouse,2253,0
+1790707599557,34,GET /api/properties/filter,200,,Browsing Tenants 1-6,true,,129698,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-1&isAvailable=true&minPrice=31500&maxPrice=36500,33,0
+1790707599619,2,GET /api/properties/{id},200,,Browsing Tenants 1-7,true,,1169,158,25,25,http://localhost:8090/api/properties/53272,2,0
+1790707599651,3,GET /api/user/me (authed),200,,Browsing Tenants 1-18,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707599781,34,GET /api/properties/filter,200,,Browsing Tenants 1-14,true,,128621,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-2&isAvailable=true&minPrice=21500&maxPrice=26500,34,0
+1790707599988,2,GET /api/properties/{id},200,,Browsing Tenants 1-4,true,,1167,158,25,25,http://localhost:8090/api/properties/29692,2,0
+1790707597679,2355,GET /api/properties/search,200,,Browsing Tenants 1-23,true,,10715843,176,25,25,http://localhost:8090/api/properties/search?prefix=warehouse,2307,0
+1790707600101,33,GET /api/properties/filter,200,,Browsing Tenants 1-13,true,,127908,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-1&isAvailable=true&minPrice=16500&maxPrice=21500,33,0
+1790707598644,1723,GET /api/properties/search,200,,Browsing Tenants 1-15,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1693,0
+1790707600490,2,GET /api/user/me (authed),200,,Browsing Tenants 1-10,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707600581,2,GET /api/properties/{id},200,,Browsing Tenants 1-9,true,,1174,158,25,25,http://localhost:8090/api/properties/57607,2,0
+1790707600637,3,GET /api/user/me (authed),200,,Browsing Tenants 1-20,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707600721,4,GET /api/user/me (authed),200,,Browsing Tenants 1-3,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707600754,2,GET /api/properties/{id},200,,Browsing Tenants 1-25,true,,1172,158,25,25,http://localhost:8090/api/properties/14338,2,0
+1790707601019,14,GET /api/user/me (authed),200,,Browsing Tenants 1-19,true,,760,353,25,25,http://localhost:8090/api/user/me,12,0
+1790707601046,7,GET /api/properties/{id},200,,Browsing Tenants 1-2,true,,1176,158,25,25,http://localhost:8090/api/properties/20035,7,0
+1790707601041,38,GET /api/properties/filter,200,,Browsing Tenants 1-8,true,,128226,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-2&isAvailable=true&minPrice=36500&maxPrice=41500,23,0
+1790707598699,2403,GET /api/properties/search,200,,Browsing Tenants 1-11,true,,10573591,171,25,25,http://localhost:8090/api/properties/search?prefix=shop,2320,0
+1790707601120,10,GET /api/user/me (authed),200,,Browsing Tenants 1-7,true,,760,353,25,25,http://localhost:8090/api/user/me,10,0
+1790707601195,33,GET /api/properties/filter,200,,Browsing Tenants 1-18,true,,127943,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-5&isAvailable=true&minPrice=36500&maxPrice=41500,31,0
+1790707601340,8,GET /api/user/me (authed),200,,Browsing Tenants 1-4,true,,760,353,25,25,http://localhost:8090/api/user/me,8,0
+1790707599202,2202,GET /api/properties/search,200,,Browsing Tenants 1-21,true,,10573591,171,25,25,http://localhost:8090/api/properties/search?prefix=shop,2080,0
+1790707599445,2054,GET /api/properties/search,200,,Browsing Tenants 1-22,true,,10630796,173,25,25,http://localhost:8090/api/properties/search?prefix=office,1991,0
+1790707600613,1033,GET /api/properties/search,200,,Browsing Tenants 1-17,true,,7411050,171,25,25,http://localhost:8090/api/properties/search?prefix=giza,987,0
+1790707601725,2,GET /api/properties/{id},200,,Browsing Tenants 1-23,true,,1181,158,25,25,http://localhost:8090/api/properties/35903,2,0
+1790707600807,1034,GET /api/properties/search,200,,Browsing Tenants 1-5,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,994,0
+1790707601865,4,GET /api/user/me (authed),200,,Browsing Tenants 1-9,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707601974,2,GET /api/properties/{id},200,,Browsing Tenants 1-15,true,,1173,158,25,25,http://localhost:8090/api/properties/44553,2,0
+1790707602102,32,GET /api/properties/filter,200,,Browsing Tenants 1-20,true,,130134,240,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-2&isAvailable=true&minPrice=6500&maxPrice=11500,27,0
+1790707600860,1290,GET /api/properties/search,200,,Browsing Tenants 1-16,true,,7431086,172,25,25,http://localhost:8090/api/properties/search?prefix=luxor,1257,0
+1790707602150,28,GET /api/properties/filter,200,,Browsing Tenants 1-3,true,,128828,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-3&isAvailable=true&minPrice=11500&maxPrice=16500,27,0
+1790707600437,1797,GET /api/properties/search,200,,Browsing Tenants 1-1,true,,10630796,173,25,25,http://localhost:8090/api/properties/search?prefix=office,1756,0
+1790707602339,2,GET /api/properties/{id},200,,Browsing Tenants 1-11,true,,1178,158,25,25,http://localhost:8090/api/properties/71053,2,0
+1790707600629,1760,GET /api/properties/search,200,,Browsing Tenants 1-12,true,,10630796,173,25,25,http://localhost:8090/api/properties/search?prefix=office,1722,0
+1790707602438,30,GET /api/properties/filter,200,,Browsing Tenants 1-10,true,,128795,240,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-4&isAvailable=true&minPrice=1500&maxPrice=6500,29,0
+1790707602488,30,GET /api/properties/filter,200,,Browsing Tenants 1-19,true,,129347,239,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-1&isAvailable=true&minPrice=1500&maxPrice=6500,30,0
+1790707602600,5,GET /api/user/me (authed),200,,Browsing Tenants 1-25,true,,760,353,25,25,http://localhost:8090/api/user/me,5,0
+1790707601154,1472,GET /api/properties/search,200,,Browsing Tenants 1-6,true,,7421074,172,25,25,http://localhost:8090/api/properties/search?prefix=aswan,1444,0
+1790707602876,1,GET /api/properties/{id},200,,Browsing Tenants 1-5,true,,1183,158,25,25,http://localhost:8090/api/properties/79225,1,0
+1790707602945,4,GET /api/user/me (authed),200,,Browsing Tenants 1-2,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707600940,2031,GET /api/properties/search,200,,Browsing Tenants 1-24,true,,10602161,172,25,25,http://localhost:8090/api/properties/search?prefix=villa,1993,0
+1790707602980,30,GET /api/properties/filter,200,,Browsing Tenants 1-7,true,,126614,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-6&isAvailable=true&minPrice=26500&maxPrice=31500,30,0
+1790707603198,10,GET /api/properties/{id},200,,Browsing Tenants 1-21,true,,1180,158,25,25,http://localhost:8090/api/properties/34026,10,0
+1790707603197,39,GET /api/properties/filter,200,,Browsing Tenants 1-4,true,,127352,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-4&isAvailable=true&minPrice=16500&maxPrice=21500,38,0
+1790707603235,2,GET /api/properties/{id},200,,Browsing Tenants 1-17,true,,1179,158,25,25,http://localhost:8090/api/properties/89749,2,0
+1790707603253,2,GET /api/user/me (authed),200,,Browsing Tenants 1-23,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707603351,2,GET /api/properties/{id},200,,Browsing Tenants 1-22,true,,1180,158,25,25,http://localhost:8090/api/properties/16267,2,0
+1790707603468,2,GET /api/properties/{id},200,,Browsing Tenants 1-16,true,,1176,158,25,25,http://localhost:8090/api/properties/14841,2,0
+1790707603500,2,GET /api/user/me (authed),200,,Browsing Tenants 1-15,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707603702,3,GET /api/user/me (authed),200,,Browsing Tenants 1-11,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707603691,34,GET /api/properties/filter,200,,Browsing Tenants 1-9,true,,128240,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-3&isAvailable=true&minPrice=41500&maxPrice=46500,34,0
+1790707603972,2,GET /api/properties/{id},200,,Browsing Tenants 1-12,true,,1181,158,25,25,http://localhost:8090/api/properties/28958,1,0
+1790707603973,7,GET /api/properties/{id},200,,Browsing Tenants 1-24,true,,1174,158,25,25,http://localhost:8090/api/properties/40188,7,0
+1790707604082,49,GET /api/properties/filter,200,,Browsing Tenants 1-25,true,,129642,246,25,25,http://localhost:8090/api/properties/filter?city=6th+of+October&district=District-1&isAvailable=true&minPrice=31500&maxPrice=36500,41,0
+1790707601780,2352,GET /api/properties/search,200,,Browsing Tenants 1-14,true,,10602161,172,25,25,http://localhost:8090/api/properties/search?prefix=villa,2294,0
+1790707601919,2245,GET /api/properties/search,200,,Browsing Tenants 1-13,true,,10715843,176,25,25,http://localhost:8090/api/properties/search?prefix=warehouse,2191,0
+1790707604212,2,GET /api/properties/{id},200,,Browsing Tenants 1-1,true,,1172,158,25,25,http://localhost:8090/api/properties/24972,2,0
+1790707602578,1643,GET /api/properties/search,200,,Browsing Tenants 1-8,true,,7411050,171,25,25,http://localhost:8090/api/properties/search?prefix=giza,1611,0
+1790707604252,2,GET /api/properties/{id},200,,Browsing Tenants 1-6,true,,1182,158,25,25,http://localhost:8090/api/properties/36569,2,0
+1790707604493,5,GET /api/user/me (authed),200,,Browsing Tenants 1-21,true,,760,353,25,25,http://localhost:8090/api/user/me,5,0
+1790707603213,1354,GET /api/properties/search,200,,Browsing Tenants 1-18,true,,7421074,172,25,25,http://localhost:8090/api/properties/search?prefix=aswan,1321,0
+1790707604570,26,GET /api/properties/filter,200,,Browsing Tenants 1-2,true,,128705,236,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-2&isAvailable=true&minPrice=6500&maxPrice=11500,24,0
+1790707604659,6,GET /api/user/me (authed),200,,Browsing Tenants 1-5,true,,760,353,25,25,http://localhost:8090/api/user/me,6,0
+1790707604747,37,GET /api/properties/filter,200,,Browsing Tenants 1-15,true,,126438,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-3&isAvailable=true&minPrice=26500&maxPrice=31500,36,0
+1790707604859,3,GET /api/user/me (authed),200,,Browsing Tenants 1-17,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707603849,1253,GET /api/properties/search,200,,Browsing Tenants 1-19,true,,7421064,172,25,25,http://localhost:8090/api/properties/search?prefix=tanta,1220,0
+1790707605098,6,GET /api/user/me (authed),200,,Browsing Tenants 1-22,true,,760,353,25,25,http://localhost:8090/api/user/me,6,0
+1790707605180,7,GET /api/user/me (authed),200,,Browsing Tenants 1-16,true,,760,353,25,25,http://localhost:8090/api/user/me,7,0
+1790707605164,33,GET /api/properties/filter,200,,Browsing Tenants 1-23,true,,128047,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-5&isAvailable=true&minPrice=21500&maxPrice=26500,30,0
+1790707603886,1342,GET /api/properties/search,200,,Browsing Tenants 1-20,true,,7501139,173,25,25,http://localhost:8090/api/properties/search?prefix=sheikh,1305,0
+1790707605263,3,GET /api/user/me (authed),200,,Browsing Tenants 1-24,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707605382,4,GET /api/user/me (authed),200,,Browsing Tenants 1-12,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707603401,2002,GET /api/properties/search,200,,Browsing Tenants 1-3,true,,10573591,171,25,25,http://localhost:8090/api/properties/search?prefix=shop,1963,0
+1790707605452,2,GET /api/user/me (authed),200,,Browsing Tenants 1-6,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707605527,1,GET /api/properties/{id},200,,Browsing Tenants 1-8,true,,1182,158,25,25,http://localhost:8090/api/properties/20259,1,0
+1790707605499,39,GET /api/properties/filter,200,,Browsing Tenants 1-11,true,,127336,241,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-5&isAvailable=true&minPrice=6500&maxPrice=11500,38,0
+1790707604212,1372,GET /api/properties/search,200,,Browsing Tenants 1-7,true,,7431086,172,25,25,http://localhost:8090/api/properties/search?prefix=luxor,1342,0
+1790707603997,1630,GET /api/properties/search,200,,Browsing Tenants 1-10,true,,7501139,173,25,25,http://localhost:8090/api/properties/search?prefix=sheikh,1592,0
+1790707605670,3,GET /api/properties/{id},200,,Browsing Tenants 1-13,true,,1173,158,25,25,http://localhost:8090/api/properties/22767,3,0
+1790707605777,2,GET /api/properties/{id},200,,Browsing Tenants 1-14,true,,1174,158,25,25,http://localhost:8090/api/properties/63297,2,0
+1790707606083,3,GET /api/user/me (authed),200,,Browsing Tenants 1-1,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707606114,34,GET /api/properties/filter,200,,Browsing Tenants 1-21,true,,128033,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-4&isAvailable=true&minPrice=16500&maxPrice=21500,33,0
+1790707606340,4,GET /api/properties/{id},200,,Browsing Tenants 1-18,true,,1183,158,25,25,http://localhost:8090/api/properties/81465,4,0
+1790707606354,25,GET /api/properties/filter,200,,Browsing Tenants 1-5,true,,128107,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-5&isAvailable=true&minPrice=21500&maxPrice=26500,24,0
+1790707604927,1544,GET /api/properties/search,200,,Browsing Tenants 1-9,true,,7421064,172,25,25,http://localhost:8090/api/properties/search?prefix=tanta,1505,0
+1790707606475,3,GET /api/properties/{id},200,,Browsing Tenants 1-19,true,,1189,158,25,25,http://localhost:8090/api/properties/51044,3,0
+1790707606493,3,GET /api/properties/{id},200,,Browsing Tenants 1-20,true,,1171,158,25,25,http://localhost:8090/api/properties/29752,3,0
+1790707606497,2,GET /api/properties/{id},200,,Browsing Tenants 1-3,true,,1177,158,25,25,http://localhost:8090/api/properties/90981,2,0
+1790707606558,15,GET /api/properties/filter,200,,Browsing Tenants 1-22,true,,128030,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-3&isAvailable=true&minPrice=11500&maxPrice=16500,14,0
+1790707606620,32,GET /api/properties/filter,200,,Browsing Tenants 1-6,true,,129698,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-1&isAvailable=true&minPrice=31500&maxPrice=36500,31,0
+1790707606690,31,GET /api/properties/filter,200,,Browsing Tenants 1-12,true,,128198,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-6&isAvailable=true&minPrice=11500&maxPrice=16500,31,0
+1790707606789,32,GET /api/properties/filter,200,,Browsing Tenants 1-17,true,,126463,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-6&isAvailable=true&minPrice=41500&maxPrice=46500,31,0
+1790707606915,30,GET /api/properties/filter,200,,Browsing Tenants 1-16,true,,127182,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-4&isAvailable=true&minPrice=31500&maxPrice=36500,30,0
+1790707605582,1482,GET /api/properties/search,200,,Browsing Tenants 1-25,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1449,0
+1790707607100,5,GET /api/user/me (authed),200,,Browsing Tenants 1-8,true,,760,353,25,25,http://localhost:8090/api/user/me,5,0
+1790707605141,2086,GET /api/properties/search,200,,Browsing Tenants 1-4,true,,10602161,172,25,25,http://localhost:8090/api/properties/search?prefix=villa,2013,0
+1790707607244,2,GET /api/properties/{id},200,,Browsing Tenants 1-10,true,,1174,158,25,25,http://localhost:8090/api/properties/14946,2,0
+1790707607258,19,GET /api/properties/filter,200,,Browsing Tenants 1-24,true,,128808,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-6&isAvailable=true&minPrice=26500&maxPrice=31500,18,0
+1790707606010,1406,GET /api/properties/search,200,,Browsing Tenants 1-15,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1376,0
+1790707607490,2,GET /api/user/me (authed),200,,Browsing Tenants 1-13,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707607474,31,GET /api/properties/filter,200,,Browsing Tenants 1-1,true,,127928,235,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-1&isAvailable=true&minPrice=1500&maxPrice=6500,30,0
+1790707607527,3,GET /api/properties/{id},200,,Browsing Tenants 1-7,true,,1180,158,25,25,http://localhost:8090/api/properties/46676,3,0
+1790707607660,4,GET /api/user/me (authed),200,,Browsing Tenants 1-3,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707607670,3,GET /api/user/me (authed),200,,Browsing Tenants 1-18,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707607697,3,GET /api/user/me (authed),200,,Browsing Tenants 1-14,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707607998,3,GET /api/user/me (authed),200,,Browsing Tenants 1-19,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707606203,1894,GET /api/properties/search,200,,Browsing Tenants 1-2,true,,10715843,176,25,25,http://localhost:8090/api/properties/search?prefix=warehouse,1853,0
+1790707608159,31,GET /api/properties/filter,200,,Browsing Tenants 1-8,true,,128226,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-2&isAvailable=true&minPrice=36500&maxPrice=41500,30,0
+1790707608268,2,GET /api/properties/{id},200,,Browsing Tenants 1-4,true,,1170,158,25,25,http://localhost:8090/api/properties/64377,2,0
+1790707608338,2,GET /api/properties/{id},200,,Browsing Tenants 1-9,true,,1174,158,25,25,http://localhost:8090/api/properties/40667,2,0
+1790707608340,3,GET /api/user/me (authed),200,,Browsing Tenants 1-20,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707608466,3,GET /api/properties/{id},200,,Browsing Tenants 1-25,true,,1187,158,25,25,http://localhost:8090/api/properties/51239,3,0
+1790707608713,38,GET /api/properties/filter,200,,Browsing Tenants 1-3,true,,128828,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-3&isAvailable=true&minPrice=11500&maxPrice=16500,28,0
+1790707608693,59,GET /api/properties/filter,200,,Browsing Tenants 1-18,true,,127943,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-5&isAvailable=true&minPrice=36500&maxPrice=41500,56,0
+1790707608760,33,GET /api/properties/filter,200,,Browsing Tenants 1-13,true,,127908,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-1&isAvailable=true&minPrice=16500&maxPrice=21500,29,0
+1790707608805,9,GET /api/user/me (authed),200,,Browsing Tenants 1-10,true,,760,353,25,25,http://localhost:8090/api/user/me,8,0
+1790707608833,4,GET /api/user/me (authed),200,,Browsing Tenants 1-7,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707608921,4,GET /api/properties/{id},200,,Browsing Tenants 1-15,true,,1159,156,25,25,http://localhost:8090/api/properties/368,3,0
+1790707607654,1640,GET /api/properties/search,200,,Browsing Tenants 1-5,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1487,0
+1790707607156,2299,GET /api/properties/search,200,,Browsing Tenants 1-11,true,,10573591,171,25,25,http://localhost:8090/api/properties/search?prefix=shop,2187,0
+1790707607857,1603,GET /api/properties/search,200,,Browsing Tenants 1-6,true,,7421074,172,25,25,http://localhost:8090/api/properties/search?prefix=aswan,1402,0
+1790707607088,2388,GET /api/properties/search,200,,Browsing Tenants 1-23,true,,10715843,176,25,25,http://localhost:8090/api/properties/search?prefix=warehouse,2143,0
+1790707609608,35,GET /api/properties/filter,200,,Browsing Tenants 1-19,true,,129347,239,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-1&isAvailable=true&minPrice=1500&maxPrice=6500,31,0
+1790707609588,99,GET /api/properties/filter,200,,Browsing Tenants 1-14,true,,128621,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-2&isAvailable=true&minPrice=21500&maxPrice=26500,96,0
+1790707607641,2102,GET /api/properties/search,200,,Browsing Tenants 1-21,true,,10573591,171,25,25,http://localhost:8090/api/properties/search?prefix=shop,2045,0
+1790707609740,3,GET /api/user/me (authed),200,,Browsing Tenants 1-9,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707608339,1448,GET /api/properties/search,200,,Browsing Tenants 1-16,true,,7431086,172,25,25,http://localhost:8090/api/properties/search?prefix=luxor,1416,0
+1790707609949,29,GET /api/properties/filter,200,,Browsing Tenants 1-20,true,,130134,240,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-2&isAvailable=true&minPrice=6500&maxPrice=11500,29,0
+1790707610053,2,GET /api/properties/{id},200,,Browsing Tenants 1-2,true,,1173,158,25,25,http://localhost:8090/api/properties/21975,2,0
+1790707610114,7,GET /api/user/me (authed),200,,Browsing Tenants 1-15,true,,760,353,25,25,http://localhost:8090/api/user/me,7,0
+1790707607999,2153,GET /api/properties/search,200,,Browsing Tenants 1-22,true,,10630796,173,25,25,http://localhost:8090/api/properties/search?prefix=office,2092,0
+1790707610197,3,GET /api/user/me (authed),200,,Browsing Tenants 1-4,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707610302,5,GET /api/properties/{id},200,,Browsing Tenants 1-5,true,,1175,158,25,25,http://localhost:8090/api/properties/82828,5,0
+1790707608788,1528,GET /api/properties/search,200,,Browsing Tenants 1-17,true,,7411050,171,25,25,http://localhost:8090/api/properties/search?prefix=giza,1497,0
+1790707610349,3,GET /api/user/me (authed),200,,Browsing Tenants 1-25,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707610449,33,GET /api/properties/filter,200,,Browsing Tenants 1-10,true,,128795,240,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-4&isAvailable=true&minPrice=1500&maxPrice=6500,32,0
+1790707610611,32,GET /api/properties/filter,200,,Browsing Tenants 1-7,true,,126614,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-6&isAvailable=true&minPrice=26500&maxPrice=31500,31,0
+1790707610674,2,GET /api/properties/{id},200,,Browsing Tenants 1-23,true,,1170,158,25,25,http://localhost:8090/api/properties/34512,2,0
+1790707608677,2057,GET /api/properties/search,200,,Browsing Tenants 1-1,true,,10630796,173,25,25,http://localhost:8090/api/properties/search?prefix=office,2017,0
+1790707610815,10,GET /api/properties/{id},200,,Browsing Tenants 1-11,true,,1177,158,25,25,http://localhost:8090/api/properties/49649,10,0
+1790707608626,2225,GET /api/properties/search,200,,Browsing Tenants 1-12,true,,10630796,173,25,25,http://localhost:8090/api/properties/search?prefix=office,2162,0
+1790707611002,2,GET /api/properties/{id},200,,Browsing Tenants 1-6,true,,1179,158,25,25,http://localhost:8090/api/properties/35140,2,0
+1790707609412,1624,GET /api/properties/search,200,,Browsing Tenants 1-8,true,,7411050,171,25,25,http://localhost:8090/api/properties/search?prefix=giza,1595,0
+1790707611020,37,GET /api/properties/filter,200,,Browsing Tenants 1-9,true,,128240,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-3&isAvailable=true&minPrice=41500&maxPrice=46500,36,0
+1790707608847,2271,GET /api/properties/search,200,,Browsing Tenants 1-24,true,,10602161,172,25,25,http://localhost:8090/api/properties/search?prefix=villa,2231,0
+1790707611239,2,GET /api/properties/{id},200,,Browsing Tenants 1-16,true,,1169,158,25,25,http://localhost:8090/api/properties/56642,2,0
+1790707611249,2,GET /api/user/me (authed),200,,Browsing Tenants 1-2,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707611312,32,GET /api/properties/filter,200,,Browsing Tenants 1-4,true,,127352,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-4&isAvailable=true&minPrice=16500&maxPrice=21500,31,0
+1790707611618,3,GET /api/user/me (authed),200,,Browsing Tenants 1-5,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707611657,2,GET /api/properties/{id},200,,Browsing Tenants 1-21,true,,1173,157,25,25,http://localhost:8090/api/properties/7554,2,0
+1790707611659,1,GET /api/properties/{id},200,,Browsing Tenants 1-17,true,,1182,158,25,25,http://localhost:8090/api/properties/38119,1,0
+1790707612002,13,GET /api/properties/{id},200,,Browsing Tenants 1-22,true,,1166,157,25,25,http://localhost:8090/api/properties/6798,13,0
+1790707612011,44,GET /api/properties/filter,200,,Browsing Tenants 1-15,true,,126438,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-3&isAvailable=true&minPrice=26500&maxPrice=31500,43,0
+1790707612134,3,GET /api/properties/{id},200,,Browsing Tenants 1-12,true,,1181,158,25,25,http://localhost:8090/api/properties/71499,3,0
+1790707612155,3,GET /api/user/me (authed),200,,Browsing Tenants 1-6,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707612204,20,GET /api/properties/filter,200,,Browsing Tenants 1-25,true,,129642,246,25,25,http://localhost:8090/api/properties/filter?city=6th+of+October&district=District-1&isAvailable=true&minPrice=31500&maxPrice=36500,19,0
+1790707610620,1648,GET /api/properties/search,200,,Browsing Tenants 1-18,true,,7421074,172,25,25,http://localhost:8090/api/properties/search?prefix=aswan,1614,0
+1790707612327,10,GET /api/properties/{id},200,,Browsing Tenants 1-1,true,,1172,157,25,25,http://localhost:8090/api/properties/5810,8,0
+1790707610066,2293,GET /api/properties/search,200,,Browsing Tenants 1-13,true,,10715843,176,25,25,http://localhost:8090/api/properties/search?prefix=warehouse,2232,0
+1790707612494,3,GET /api/properties/{id},200,,Browsing Tenants 1-8,true,,1174,158,25,25,http://localhost:8090/api/properties/72679,3,0
+1790707610211,2338,GET /api/properties/search,200,,Browsing Tenants 1-3,true,,10573591,171,25,25,http://localhost:8090/api/properties/search?prefix=shop,2288,0
+1790707612586,3,GET /api/user/me (authed),200,,Browsing Tenants 1-23,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707611109,1498,GET /api/properties/search,200,,Browsing Tenants 1-19,true,,7421064,172,25,25,http://localhost:8090/api/properties/search?prefix=tanta,1464,0
+1790707612613,3,GET /api/user/me (authed),200,,Browsing Tenants 1-16,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707612695,3,GET /api/user/me (authed),200,,Browsing Tenants 1-21,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707612817,4,GET /api/user/me (authed),200,,Browsing Tenants 1-11,true,,760,353,25,25,http://localhost:8090/api/user/me,4,0
+1790707612871,26,GET /api/properties/filter,200,,Browsing Tenants 1-2,true,,128705,236,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-2&isAvailable=true&minPrice=6500&maxPrice=11500,25,0
+1790707612963,2,GET /api/properties/{id},200,,Browsing Tenants 1-24,true,,1170,157,25,25,http://localhost:8090/api/properties/2783,1,0
+1790707613069,27,GET /api/properties/filter,200,,Browsing Tenants 1-5,true,,128107,237,25,25,http://localhost:8090/api/properties/filter?city=Cairo&district=District-5&isAvailable=true&minPrice=21500&maxPrice=26500,26,0
+1790707611572,1569,GET /api/properties/search,200,,Browsing Tenants 1-20,true,,7501139,173,25,25,http://localhost:8090/api/properties/search?prefix=sheikh,1540,0
+1790707613223,3,GET /api/user/me (authed),200,,Browsing Tenants 1-12,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707611665,1606,GET /api/properties/search,200,,Browsing Tenants 1-7,true,,7431086,172,25,25,http://localhost:8090/api/properties/search?prefix=luxor,1577,0
+1790707613358,2,GET /api/properties/{id},200,,Browsing Tenants 1-18,true,,1180,158,25,25,http://localhost:8090/api/properties/17507,2,0
+1790707613350,32,GET /api/properties/filter,200,,Browsing Tenants 1-6,true,,129698,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-1&isAvailable=true&minPrice=31500&maxPrice=36500,32,0
+1790707613551,2,GET /api/user/me (authed),200,,Browsing Tenants 1-17,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707611574,2299,GET /api/properties/search,200,,Browsing Tenants 1-14,true,,10602161,172,25,25,http://localhost:8090/api/properties/search?prefix=villa,2256,0
+1790707613843,35,GET /api/properties/filter,200,,Browsing Tenants 1-21,true,,128033,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-4&isAvailable=true&minPrice=16500&maxPrice=21500,34,0
+1790707613884,2,GET /api/user/me (authed),200,,Browsing Tenants 1-8,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707612180,1783,GET /api/properties/search,200,,Browsing Tenants 1-9,true,,7421064,172,25,25,http://localhost:8090/api/properties/search?prefix=tanta,1755,0
+1790707613977,3,GET /api/user/me (authed),200,,Browsing Tenants 1-22,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707614002,2,GET /api/properties/{id},200,,Browsing Tenants 1-19,true,,1172,158,25,25,http://localhost:8090/api/properties/12212,2,0
+1790707612349,1672,GET /api/properties/search,200,,Browsing Tenants 1-10,true,,7501139,173,25,25,http://localhost:8090/api/properties/search?prefix=sheikh,1639,0
+1790707614085,28,GET /api/properties/filter,200,,Browsing Tenants 1-16,true,,127182,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-4&isAvailable=true&minPrice=31500&maxPrice=36500,27,0
+1790707614117,2,GET /api/properties/{id},200,,Browsing Tenants 1-3,true,,1177,158,25,25,http://localhost:8090/api/properties/61373,2,0
+1790707614184,2,GET /api/properties/{id},200,,Browsing Tenants 1-13,true,,1171,158,25,25,http://localhost:8090/api/properties/24922,2,0
+1790707614207,2,GET /api/user/me (authed),200,,Browsing Tenants 1-1,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707614344,33,GET /api/properties/filter,200,,Browsing Tenants 1-23,true,,128047,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-5&isAvailable=true&minPrice=21500&maxPrice=26500,32,0
+1790707614463,3,GET /api/user/me (authed),200,,Browsing Tenants 1-18,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707614489,2,GET /api/user/me (authed),200,,Browsing Tenants 1-24,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707614492,34,GET /api/properties/filter,200,,Browsing Tenants 1-11,true,,127336,241,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-5&isAvailable=true&minPrice=6500&maxPrice=11500,33,0
+1790707614851,2,GET /api/properties/{id},200,,Browsing Tenants 1-7,true,,1180,158,25,25,http://localhost:8090/api/properties/98359,2,0
+1790707614850,42,GET /api/properties/filter,200,,Browsing Tenants 1-17,true,,126463,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-6&isAvailable=true&minPrice=41500&maxPrice=46500,41,0
+1790707612546,2355,GET /api/properties/search,200,,Browsing Tenants 1-4,true,,10602161,172,25,25,http://localhost:8090/api/properties/search?prefix=villa,2278,0
+1790707614890,32,GET /api/properties/filter,200,,Browsing Tenants 1-12,true,,128198,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-6&isAvailable=true&minPrice=11500&maxPrice=16500,32,0
+1790707614948,2,GET /api/properties/{id},200,,Browsing Tenants 1-20,true,,1177,158,25,25,http://localhost:8090/api/properties/29053,2,0
+1790707613423,1744,GET /api/properties/search,200,,Browsing Tenants 1-25,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1715,0
+1790707615174,3,GET /api/user/me (authed),200,,Browsing Tenants 1-19,true,,760,353,25,25,http://localhost:8090/api/user/me,3,0
+1790707613572,1763,GET /api/properties/search,200,,Browsing Tenants 1-15,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1735,0
+1790707615558,1,GET /api/properties/{id},200,,Browsing Tenants 1-9,true,,1172,158,25,25,http://localhost:8090/api/properties/83042,1,0
+1790707615620,30,GET /api/properties/filter,200,,Browsing Tenants 1-22,true,,128030,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-3&isAvailable=true&minPrice=11500&maxPrice=16500,29,0
+1790707615692,31,GET /api/properties/filter,200,,Browsing Tenants 1-18,true,,127943,236,25,25,http://localhost:8090/api/properties/filter?city=Giza&district=District-5&isAvailable=true&minPrice=36500&maxPrice=41500,30,0
+1790707615794,2,GET /api/user/me (authed),200,,Browsing Tenants 1-13,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707615782,30,GET /api/properties/filter,200,,Browsing Tenants 1-24,true,,128808,241,25,25,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-6&isAvailable=true&minPrice=26500&maxPrice=31500,30,0
+1790707615826,2,GET /api/properties/{id},200,,Browsing Tenants 1-10,true,,1170,158,25,25,http://localhost:8090/api/properties/13302,2,0
+1790707615812,31,GET /api/properties/filter,200,,Browsing Tenants 1-8,true,,128226,242,25,25,http://localhost:8090/api/properties/filter?city=Alexandria&district=District-2&isAvailable=true&minPrice=36500&maxPrice=41500,31,0
+1790707615876,1,GET /api/properties/{id},200,,Browsing Tenants 1-14,true,,1175,158,25,25,http://localhost:8090/api/properties/94508,1,0
+1790707614263,1713,GET /api/properties/search,200,,Browsing Tenants 1-5,true,,7451099,175,25,25,http://localhost:8090/api/properties/search?prefix=mansoura,1684,0
+1790707616024,2,GET /api/user/me (authed),200,,Browsing Tenants 1-3,true,,760,353,25,25,http://localhost:8090/api/user/me,2,0
+1790707616058,34,GET /api/properties/filter,200,,Browsing Tenants 1-1,true,,127928,235,24,24,http://localhost:8090/api/properties/filter?city=Cairo&district=District-1&isAvailable=true&minPrice=1500&maxPrice=6500,33,0
+1790707616134,2,GET /api/properties/{id},200,,Browsing Tenants 1-4,true,,1173,158,24,24,http://localhost:8090/api/properties/93753,2,0
+1790707616168,2,GET /api/properties/{id},200,,Browsing Tenants 1-25,true,,1179,158,24,24,http://localhost:8090/api/properties/25184,2,0
+1790707614926,1684,GET /api/properties/search,200,,Browsing Tenants 1-6,true,,7421074,172,24,24,http://localhost:8090/api/properties/search?prefix=aswan,1654,0
+1790707616773,5,GET /api/user/me (authed),200,,Browsing Tenants 1-9,true,,760,353,23,23,http://localhost:8090/api/user/me,5,0
+1790707614372,2408,GET /api/properties/search,200,,Browsing Tenants 1-2,true,,10715843,176,22,22,http://localhost:8090/api/properties/search?prefix=warehouse,2364,0
+1790707616822,16,GET /api/user/me (authed),200,,Browsing Tenants 1-7,true,,760,353,21,21,http://localhost:8090/api/user/me,16,0
+1790707616892,21,GET /api/user/me (authed),200,,Browsing Tenants 1-20,true,,760,353,20,20,http://localhost:8090/api/user/me,21,0
+1790707617032,7,GET /api/properties/{id},200,,Browsing Tenants 1-15,true,,1174,158,19,19,http://localhost:8090/api/properties/88890,7,0
+1790707617085,68,GET /api/properties/filter,200,,Browsing Tenants 1-19,true,,129347,239,18,18,http://localhost:8090/api/properties/filter?city=New+Cairo&district=District-1&isAvailable=true&minPrice=1500&maxPrice=6500,44,0
+1790707617326,27,GET /api/user/me (authed),200,,Browsing Tenants 1-14,true,,760,353,17,17,http://localhost:8090/api/user/me,27,0
+1790707617212,156,GET /api/properties/filter,200,,Browsing Tenants 1-13,true,,127908,236,16,16,http://localhost:8090/api/properties/filter?city=Giza&district=District-1&isAvailable=true&minPrice=16500&maxPrice=21500,154,0
+1790707617452,49,GET /api/user/me (authed),200,,Browsing Tenants 1-25,true,,760,353,15,15,http://localhost:8090/api/user/me,49,0
+1790707617584,29,GET /api/user/me (authed),200,,Browsing Tenants 1-4,true,,760,353,14,14,http://localhost:8090/api/user/me,28,0
+1790707617622,26,GET /api/user/me (authed),200,,Browsing Tenants 1-10,true,,760,353,13,13,http://localhost:8090/api/user/me,25,0
+1790707617674,27,GET /api/properties/{id},200,,Browsing Tenants 1-5,true,,1175,158,12,12,http://localhost:8090/api/properties/25005,27,0
+1790707616036,2164,GET /api/properties/search,200,,Browsing Tenants 1-16,true,,7431086,172,11,11,http://localhost:8090/api/properties/search?prefix=luxor,2092,0
+1790707615149,3184,GET /api/properties/search,200,,Browsing Tenants 1-21,true,,10573591,171,10,10,http://localhost:8090/api/properties/search?prefix=shop,3040,0
+1790707616496,2323,GET /api/properties/search,200,,Browsing Tenants 1-17,true,,7411050,171,9,9,http://localhost:8090/api/properties/search?prefix=giza,2239,0
+1790707616809,2121,GET /api/properties/search,200,,Browsing Tenants 1-18,true,,7421074,172,8,8,http://localhost:8090/api/properties/search?prefix=aswan,2070,0
+1790707616290,2722,GET /api/properties/search,200,,Browsing Tenants 1-23,true,,10715843,176,7,7,http://localhost:8090/api/properties/search?prefix=warehouse,2640,0
+1790707616421,2707,GET /api/properties/search,200,,Browsing Tenants 1-11,true,,10573591,171,6,6,http://localhost:8090/api/properties/search?prefix=shop,2618,0
+1790707617502,1822,GET /api/properties/search,200,,Browsing Tenants 1-8,true,,7411050,171,5,5,http://localhost:8090/api/properties/search?prefix=giza,1783,0
+1790707617144,2652,GET /api/properties/search,200,,Browsing Tenants 1-24,true,,10602161,172,4,4,http://localhost:8090/api/properties/search?prefix=villa,2614,0
+1790707616912,2944,GET /api/properties/search,200,,Browsing Tenants 1-12,true,,10630796,173,3,3,http://localhost:8090/api/properties/search?prefix=office,2908,0
+1790707617386,2623,GET /api/properties/search,200,,Browsing Tenants 1-22,true,,10630796,173,2,2,http://localhost:8090/api/properties/search?prefix=office,2584,0
+1790707617723,2378,GET /api/properties/search,200,,Browsing Tenants 1-1,true,,10630796,173,1,1,http://localhost:8090/api/properties/search?prefix=office,2344,0
