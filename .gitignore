@@ -42,3 +42,5 @@ Performance/jmeter.log
 # Personal CV files
 resume.pdf
 resume.tex
+# JMeter raw results stay local
+Performance/*.jtl
