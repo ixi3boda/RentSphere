@@ -84,12 +84,12 @@ function AdminPropertyCard({ property, onDelete, index }) {
 
 function AdminDashboard() {
   const { user } = useAuth();
-  const { properties, loading: propsLoading, error: propsError, fetchOwnerProperties, deleteProperty } = useProperty();
+  const { properties, loading: propsLoading, fetchOwnerProperties, deleteProperty } = useProperty();
   const navigate = useNavigate();
 
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
-  const [statsError, setStatsError] = useState('');
+  const [, setStatsError] = useState('');
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [toast, setToast] = useState(null);

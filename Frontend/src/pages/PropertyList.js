@@ -63,9 +63,9 @@ function PropertyList() {
   const [typeFilter, setTypeFilter] = useState("");
   const [cityFilter, setCityFilter] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
-  const [minPrice, setMinPrice] = useState("");
-  const [minRooms, setMinRooms] = useState("");
-  const [availableOnly, setAvailableOnly] = useState(false);
+  const [minPrice] = useState("");
+  const [minRooms] = useState("");
+  const [availableOnly] = useState(false);
   const [sortBy, setSortBy] = useState("newest");
   const [page, setPage] = useState(1);
 
