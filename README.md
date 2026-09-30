@@ -37,6 +37,7 @@ A full-stack property rental platform connecting **landlords** and **tenants** w
 | Database   | MySQL 8.0                           |
 | Auth       | JWT (JSON Web Tokens)               |
 | DevOps     | Docker, Docker Compose              |
+| Performance | Apache JMeter 5.6.3, MySQL `EXPLAIN` |
 | Build Tool | Maven                               |
 
 ---
@@ -62,7 +63,12 @@ RentSphere/
 │   │   └── services/         # API client
 │   └── Dockerfile
 ├── Database/
-│   └── Schema.sql            # DB initialization script
+│   ├── Schema.sql              # DB initialization script
+│   └── seed-large-dataset.sql  # 100k listings / 300k images, for load testing
+├── Performance/      # JMeter plan, DB benchmarks, run proofs
+│   ├── rentsphere-load-test.jmx
+│   ├── db-benchmark.sql
+│   └── proof/                  # JMeter GUI screenshots + session log
 └── docker-compose.yml        # Full stack orchestration
 ```
 
@@ -151,6 +157,40 @@ Key entities managed by the MySQL schema:
 - **Properties** — id, title, description, location, price, status, landlord_id
 - **Rental Requests** — id, property_id, tenant_id, status (PENDING / APPROVED / REJECTED), dates
 - **Rental Agreements** — id, rental_request_id, start_date, end_date, total_price
+
+---
+
+## Performance work
+
+The listing read path was benchmarked at scale instead of guessed at. Everything behind the
+numbers — the test plan, the seed script, the raw session log and screenshots of the JMeter
+GUI runs — is in [`Performance/`](Performance/README.md).
+
+**Setup.** 100,000 properties, 300,000 images and 5,000 users seeded into MySQL 8 in Docker;
+Apache JMeter 5.6.3 driving a mixed workload (filtered browse, prefix search, listing detail,
+authenticated profile) with 1-2 s randomized think time, 60 s per step, ramp 10 s.
+
+**What was measured.**
+
+| | Before | After |
+|---|---:|---:|
+| Mean latency, 50 concurrent users | 1,702 ms | 42 ms |
+| `GET /api/properties/search` mean | 6,228 ms | 155 ms |
+| Indexes on the schema | 18 | 12 |
+| Sustained load, 200 concurrent users | — | 0 % errors, ~68 req/s |
+| p95 at 100 concurrent users | — | ~0.3 s |
+
+**Two changes got the numbers.**
+
+1. **N+1 removed.** Listing endpoints mapped every row to a DTO through a single-property
+   builder, so one page issued one `property_images` query per listing. `buildPropertyDetailsBatch`
+   in [`PropertyRepository.java`](Backend/src/main/java/com/example/RentSphere/Repository/PropertyRepository.java)
+   loads images for 500 ids at a time and groups them in memory: one query per 500 listings.
+2. **Index prune.** `EXPLAIN` against the real query shapes showed 6 of 18 indexes were
+   unused by the read path, so they were dropped — smaller write amplification, same reads.
+
+Reproduce it in about ten minutes with the runbook in
+[`Performance/README.md`](Performance/README.md).
 
 ---
 
