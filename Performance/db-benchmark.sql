@@ -17,6 +17,29 @@ WHERE is_available = 1 AND city = 'Cairo' AND district = 'District-1'
 SELECT '=== 2. filter: city only ===' AS section;
 EXPLAIN SELECT * FROM properties WHERE is_available = 1 AND city = 'Cairo';
 
+-- The listing endpoint is paged, so these are the two shapes JMeter actually drives.
+SELECT '=== 2a. paged browse: filter + ORDER BY + LIMIT/OFFSET (load-test sampler "filter") ===' AS section;
+EXPLAIN SELECT * FROM properties
+WHERE city = 'Cairo' AND district = 'District-1'
+  AND price_per_month >= 1500 AND price_per_month <= 6500
+ORDER BY created_at DESC, property_id DESC
+LIMIT 9 OFFSET 18;
+
+SELECT '=== 2b. count half of the same request (the "total" the page returns) ===' AS section;
+EXPLAIN SELECT COUNT(*) FROM properties
+WHERE city = 'Cairo' AND district = 'District-1'
+  AND price_per_month >= 1500 AND price_per_month <= 6500;
+
+SELECT '=== 2c. free-text search: unanchored LIKE over title/city/district (sampler "filter?search") ===' AS section;
+EXPLAIN SELECT * FROM properties
+WHERE (LOWER(title) LIKE '%office%' OR LOWER(city) LIKE '%office%' OR LOWER(district) LIKE '%office%')
+ORDER BY created_at DESC, property_id DESC
+LIMIT 9 OFFSET 0;
+
+SELECT '=== 2d. batched photo fetch: one IN-list per page instead of one query per row ===' AS section;
+EXPLAIN SELECT property_id, image_url, is_cover FROM property_images
+WHERE property_id IN (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20);
+
 SELECT '=== 3. owner listings (idx_properties_owner / FK) ===' AS section;
 EXPLAIN SELECT * FROM properties WHERE owner_id = 42;
 

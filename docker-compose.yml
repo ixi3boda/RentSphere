@@ -14,7 +14,7 @@ services:
       - >
           echo "MySQL is ready at jdbc:mysql://mysql:3306/RentSphereSchema";
           echo "Follow live DB output with: docker compose logs -f mysql";
-          exec docker-entrypoint.sh mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --general-log=1 --general-log-file=/proc/1/fd/1
+          exec docker-entrypoint.sh mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     volumes:
       - mysql_data:/var/lib/mysql
       - ./Database/Schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
