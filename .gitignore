@@ -1,49 +1,29 @@
-# Node
+# Dependencies
 node_modules/
-dist/
-build/
-.next/
-out/
 
-# Java
+# Build output
 target/
-*.jar
-*.war
-*.ear
+build/
+dist/
+coverage/
 
 # IDE
 .idea/
 .vscode/
 *.iml
-*.class
+
 # OS
 .DS_Store
-Thumbs.db
 
 # Logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
-# Env files
+# Local environment
 .env
 .env.*
 !.env.example
-target/
-*.hprof
-__pycache__/
-*.pyc
-Performance/jmeter.log
-*.aux
 
-# Personal CV files
-resume.pdf
-resume.tex
-# JMeter raw results stay local
+# JMeter run artifacts
 Performance/*.jtl
-
-# Secrets — never commit
-.env
-.env.*
-!.env.example
+Performance/reports/
+!Performance/proof/*.log
