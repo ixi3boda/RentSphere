@@ -10,9 +10,9 @@ const makeId = () => `img-${Date.now()}-${++_idCounter}`;
 
 function ProgressBar({ percent }) {
   return (
-    <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1 overflow-hidden">
+    <div className="w-full bg-slate-200 rounded-full h-1.5 mt-1 overflow-hidden">
       <motion.div
-        className="h-full rounded-full bg-gradient-to-r from-rentsphere-teal to-rentsphere-orange"
+        className="h-full rounded-full bg-gradient-to-r from-brand to-accent"
         initial={{ width: 0 }}
         animate={{ width: `${percent}%` }}
         transition={{ ease: 'easeOut' }}
@@ -183,9 +183,9 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+      <label className="block text-sm font-medium text-slate-700 mb-2">
         Property Images{' '}
-        <span className="text-gray-400 text-xs">
+        <span className="text-slate-600 text-xs">
           ({totalCount}/{MAX_IMAGES} — {ACCEPTED_LABEL})
         </span>
       </label>
@@ -206,20 +206,20 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
           className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors duration-300 mb-3
             ${
               dragOver
-                ? 'border-rentsphere-teal bg-rentsphere-teal/5'
-                : 'border-gray-300 hover:border-rentsphere-teal hover:bg-rentsphere-teal/5'
+                ? 'border-brand bg-brand/5'
+                : 'border-slate-300 hover:border-brand hover:bg-brand/5'
             }`}
         >
           <div className="text-4xl mb-2">📸</div>
 
-          <p className="text-gray-600 text-sm">
+          <p className="text-slate-600 text-sm">
             Drag & drop images here, or{' '}
-            <span className="text-rentsphere-teal font-semibold">
+            <span className="text-brand font-semibold">
               click to browse
             </span>
           </p>
 
-          <p className="text-gray-400 text-xs mt-1">
+          <p className="text-slate-600 text-xs mt-1">
             {ACCEPTED_LABEL} — {MAX_IMAGES - totalCount} slot(s) remaining
           </p>
 
@@ -244,7 +244,7 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200"
+                className="relative group aspect-square rounded-lg overflow-hidden border border-slate-200"
               >
                 <img
                   src={url}
@@ -253,7 +253,7 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
                 />
 
                 {i === 0 && (
-                  <span className="absolute bottom-1 left-1 bg-rentsphere-teal text-white text-xs px-1.5 py-0.5 rounded">
+                  <span className="absolute bottom-1 left-1 bg-brand text-white text-xs px-1.5 py-0.5 rounded">
                     Cover
                   </span>
                 )}
@@ -262,7 +262,7 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
                   <button
                     type="button"
                     onClick={() => removeUploaded(url)}
-                    className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full text-sm font-bold flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                    className="absolute top-1 right-1 w-6 h-6 bg-red-600 text-white rounded-full text-sm font-bold flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
                   >
                     ×
                   </button>
@@ -282,7 +282,7 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
                   ${
                     item.status === 'error'
                       ? 'border-red-300 bg-red-50'
-                      : 'border-gray-200'
+                      : 'border-slate-200'
                   }`}
               >
                 <img
@@ -323,7 +323,7 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
                       <button
                         type="button"
                         onClick={() => retryItem(item)}
-                        className="text-xs bg-white text-rentsphere-teal font-semibold px-1.5 py-0.5 rounded"
+                        className="text-xs bg-white text-brand font-semibold px-1.5 py-0.5 rounded"
                       >
                         ↻
                       </button>
@@ -331,7 +331,7 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
                       <button
                         type="button"
                         onClick={() => removeQueueItem(item.id)}
-                        className="text-xs bg-white text-red-500 font-semibold px-1.5 py-0.5 rounded"
+                        className="text-xs bg-white text-red-700 font-semibold px-1.5 py-0.5 rounded"
                       >
                         ×
                       </button>
@@ -350,7 +350,7 @@ function ImageUpload({ value = [], onChange, error, disabled = false }) {
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="text-red-500 text-sm mt-2"
+            className="text-red-700 text-sm mt-2"
           >
             {allError}
           </motion.p>

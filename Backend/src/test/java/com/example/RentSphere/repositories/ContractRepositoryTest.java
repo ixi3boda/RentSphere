@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,11 +28,27 @@ class ContractRepositoryTest {
     private ContractRepository contractRepository;
 
     @Test
-    @DisplayName("findAll returns contracts")
-    void findAll_returnsContracts() {
-        
-        List<Contract> list = contractRepository.findAll();
+    @DisplayName("findAll returns one page of contracts")
+    void findAll_returnsContractsPage() {
+        List<Contract> list = contractRepository.findAll(null, 12, 0);
         assertThat(list).isNotNull();
+        assertThat(list).hasSizeLessThanOrEqualTo(12);
+    }
+
+    @Test
+    @DisplayName("findAll filters by status, case-insensitively")
+    void findAll_filtersByStatus() {
+        List<Contract> page = contractRepository.findAll("active", 10, 0);
+        assertThat(page).allSatisfy(c -> assertThat(c.getContractStatus()).isEqualTo("ACTIVE"));
+        assertThat(contractRepository.countContracts("ACTIVE")).isGreaterThanOrEqualTo(page.size());
+    }
+
+    @Test
+    @DisplayName("countContractsByStatus covers every contract exactly once")
+    void countContractsByStatus_totalsEveryRow() {
+        Map<String, Integer> counts = contractRepository.countContractsByStatus();
+        int grouped = counts.values().stream().mapToInt(Integer::intValue).sum();
+        assertThat(grouped).isEqualTo(contractRepository.countContracts(null));
     }
 
     @Test

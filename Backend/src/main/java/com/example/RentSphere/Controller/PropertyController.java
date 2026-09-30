@@ -6,25 +6,32 @@ import com.example.RentSphere.Dto.Favorite;
 import com.example.RentSphere.Dto.PropertyDetails;
 import com.example.RentSphere.Dto.UpdatePropertyRequest;
 import com.example.RentSphere.Dto.User;
+import com.example.RentSphere.Repository.PropertyRepository;
+import com.example.RentSphere.Service.ContractService;
 import com.example.RentSphere.Service.PropertyService;
 import com.example.RentSphere.Service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/properties")
 @RequiredArgsConstructor
 public class PropertyController {
 
+    private static final int MAX_PAGE_SIZE = 48;
+
     private final PropertyService propertyService;
     private final UserService userService;
+    private final ContractService contractService;
 
     private String getPrincipalEmail(Principal principal) {
         if (principal == null || principal.getName() == null || principal.getName().isBlank()) {
@@ -46,7 +53,7 @@ public class PropertyController {
     @PostMapping("/add")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addProperty(
-            @RequestBody CreatePropertyRequest request,
+            @RequestBody @Valid CreatePropertyRequest request,
             Principal principal
     ) {
         try {
@@ -59,7 +66,7 @@ public class PropertyController {
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            return buildErrorResponse("Failed to create property: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to create property", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -85,16 +92,42 @@ public class PropertyController {
         } catch (RuntimeException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            return buildErrorResponse("Failed to add image: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to add image", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<?> getAll() {
+    @GetMapping("/stats")
+    public ResponseEntity<?> getMarketplaceStats() {
         try {
-            return ResponseEntity.ok(propertyService.getAll());
+            return ResponseEntity.ok(Map.of(
+                    "totalListings", propertyService.countListings(),
+                    "availableListings", propertyService.countAvailableListings(),
+                    "activeLeases", contractService.countActiveContracts()
+            ));
         } catch (Exception e) {
-            return buildErrorResponse("Failed to fetch properties: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to fetch marketplace stats", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/cities")
+    public ResponseEntity<?> getCities() {
+        try {
+            return ResponseEntity.ok(propertyService.getCities());
+        } catch (Exception e) {
+            return buildErrorResponse("Failed to fetch cities", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<?> getMyProperties(Principal principal) {
+        try {
+            String email = getPrincipalEmail(principal);
+            int userId = userService.getCurrentUser(email).getUser_id();
+            return ResponseEntity.ok(propertyService.getByOwnerId(userId));
+        } catch (IllegalStateException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            return buildErrorResponse("Failed to fetch your properties", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -107,14 +140,14 @@ public class PropertyController {
         } catch (RuntimeException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            return buildErrorResponse("Failed to fetch property: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to fetch property", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PutMapping("/{id}/update")
     public ResponseEntity<?> update(
             @PathVariable Long id,
-            @RequestBody UpdatePropertyRequest request,
+            @RequestBody @Valid UpdatePropertyRequest request,
             Principal principal
     ) {
         try {
@@ -129,7 +162,7 @@ public class PropertyController {
         } catch (RuntimeException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            return buildErrorResponse("Failed to update property: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to update property", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -147,43 +180,40 @@ public class PropertyController {
         } catch (RuntimeException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            return buildErrorResponse("Failed to delete property: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to delete property", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/filter")
     public ResponseEntity<?> filterProperties(
+            @RequestParam(required = false) String search,
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String district,
+            @RequestParam(required = false) String propertyType,
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(required = false) Integer numRooms,
-            @RequestParam(required = false) Boolean isAvailable
+            @RequestParam(required = false) Boolean isAvailable,
+            @RequestParam(required = false, defaultValue = "newest") String sortBy,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "12") int size
     ) {
         try {
-            return ResponseEntity.ok(
-                    propertyService.filterProperties(
-                            city,
-                            district,
-                            minPrice,
-                            maxPrice,
-                            numRooms,
-                            isAvailable
-                    )
-            );
-        } catch (Exception e) {
-            return buildErrorResponse("Failed to search properties: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+            PropertyRepository.PropertyFilter filter = new PropertyRepository.PropertyFilter(
+                    search, city, district, propertyType, minPrice, maxPrice, numRooms, isAvailable);
 
-    @GetMapping("/search")
-    public ResponseEntity<?> search(@RequestParam String prefix) {
-        try {
-            return ResponseEntity.ok(propertyService.searchByPrefix(prefix));
-        } catch (IllegalArgumentException e) {
-            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+            int safePage = Math.max(0, page);
+            int safeSize = Math.min(MAX_PAGE_SIZE, Math.max(1, size));
+            int total = propertyService.countFilterProperties(filter);
+
+            return ResponseEntity.ok(Map.of(
+                    "items", propertyService.filterProperties(filter, sortBy, safePage, safeSize),
+                    "total", total,
+                    "page", safePage,
+                    "size", safeSize
+            ));
         } catch (Exception e) {
-            return buildErrorResponse("Search failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to search properties", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -201,7 +231,7 @@ public class PropertyController {
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            return buildErrorResponse("Favorite failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Favorite failed", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -216,7 +246,7 @@ public class PropertyController {
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            return buildErrorResponse("Favorite list failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Favorite list failed", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

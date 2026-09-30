@@ -26,12 +26,30 @@ class RentRepositoryTest {
     private RentRepository rentRepository;
 
     @Test
-    @DisplayName("findAll returns rental requests")
-    void findAll_returnsRequests() {
-        List<RentalRequest> list = rentRepository.findAll();
+    @DisplayName("findAll returns one page of rental requests, newest first")
+    void findAll_returnsRequestsPage() {
+        List<RentalRequest> list = rentRepository.findAll(null, 12, 0);
         assertThat(list).isNotEmpty();
-        
-        assertThat(list.size()).isGreaterThanOrEqualTo(1);
+
+        assertThat(list.size()).isLessThanOrEqualTo(12);
+    }
+
+    @Test
+    @DisplayName("findAll filters by status and count agrees with the page")
+    void findAll_filtersByStatus() {
+        List<RentalRequest> pending = rentRepository.findAll("pending", 12, 0);
+
+        assertThat(pending).isNotEmpty();
+        assertThat(pending).allMatch(r -> "PENDING".equals(r.getReqStatus()));
+        assertThat(rentRepository.countRequests("PENDING"))
+                .isGreaterThanOrEqualTo(pending.size());
+    }
+
+    @Test
+    @DisplayName("countRequestsByStatus totals every row")
+    void countRequestsByStatus_totalsEveryRow() {
+        assertThat(rentRepository.countRequestsByStatus().values().stream().mapToInt(Integer::intValue).sum())
+                .isEqualTo(rentRepository.countRequests(null));
     }
 
     @Test

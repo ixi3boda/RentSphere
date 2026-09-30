@@ -28,7 +28,7 @@ class NotificationRepositoryTest {
 
         Notification notification = Notification.builder()
                 .recipientId(1)
-                .notificationType("TEST")
+                .notificationType("NEW_REQUEST")
                 .title("Unique Title")
                 .body("Body Content")
                 .isRead(false)
@@ -36,7 +36,7 @@ class NotificationRepositoryTest {
 
         notificationRepository.save(notification);
 
-        boolean exists = notificationRepository.existsByRecipientTypeAndTitle(1, "TEST", "Unique Title");
+        boolean exists = notificationRepository.existsByRecipientTypeAndTitle(1, "NEW_REQUEST", "Unique Title");
         assertThat(exists).isTrue();
     }
 
@@ -46,14 +46,14 @@ class NotificationRepositoryTest {
 
         Notification notification = Notification.builder()
                 .recipientId(2)
-                .notificationType("ALERT")
+                .notificationType("CONTRACT_CREATED")
                 .title("Critical Alert")
                 .body("System failing")
                 .build();
         notificationRepository.save(notification);
 
-        assertThat(notificationRepository.existsByRecipientTypeAndTitle(2, "ALERT", "Critical Alert")).isTrue();
-        assertThat(notificationRepository.existsByRecipientTypeAndTitle(2, "ALERT", "Non Existent")).isFalse();
-        assertThat(notificationRepository.existsByRecipientTypeAndTitle(3, "ALERT", "Critical Alert")).isFalse();
+        assertThat(notificationRepository.existsByRecipientTypeAndTitle(2, "CONTRACT_CREATED", "Critical Alert")).isTrue();
+        assertThat(notificationRepository.existsByRecipientTypeAndTitle(2, "CONTRACT_CREATED", "Non Existent")).isFalse();
+        assertThat(notificationRepository.existsByRecipientTypeAndTitle(3, "CONTRACT_CREATED", "Critical Alert")).isFalse();
     }
 }

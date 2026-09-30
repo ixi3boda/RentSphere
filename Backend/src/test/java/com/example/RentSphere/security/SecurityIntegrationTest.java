@@ -36,13 +36,6 @@ class SecurityIntegrationTest {
     
 
     @Test
-    @DisplayName("GET /api/properties/all — accessible without token (public)")
-    void propertiesAll_publicAccess() throws Exception {
-        mockMvc.perform(get("/api/properties/all"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
     @DisplayName("GET /api/properties/filter — accessible without token (public)")
     void propertiesFilter_publicAccess() throws Exception {
         mockMvc.perform(get("/api/properties/filter"))
@@ -50,11 +43,25 @@ class SecurityIntegrationTest {
     }
 
     @Test
+    @DisplayName("GET /api/properties/stats — accessible without token (public)")
+    void propertiesStats_publicAccess() throws Exception {
+        mockMvc.perform(get("/api/properties/stats"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("GET /api/properties/my — blocked without token even though /api/properties/* is public")
+    void propertiesMy_requiresToken() throws Exception {
+        mockMvc.perform(get("/api/properties/my"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     @DisplayName("POST /api/user/register — accessible without token (public)")
     void register_publicAccess() throws Exception {
         mockMvc.perform(post("/api/user/register")
                         .contentType("application/json")
-                        .content("{\"email\":\"t@t.com\",\"password_hash\":\"pass\",\"username\":\"usr\"}"))
+                        .content("{\"email\":\"t@t.com\",\"password_hash\":\"password123\",\"username\":\"usr\",\"full_name\":\"Test User\"}"))
                 .andExpect(status().isOk()); 
     }
 

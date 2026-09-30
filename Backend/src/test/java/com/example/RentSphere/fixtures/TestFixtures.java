@@ -124,7 +124,7 @@ public class TestFixtures {
         return CreateRentalRequest.builder()
                 .propertyId(1L)
                 .message("I want to rent this property")
-                .desiredStart(java.time.LocalDate.parse("2025-01-01"))
+                .desiredStart(java.time.LocalDate.now().plusMonths(1))
                 .desiredMonths(12)
                 .build();
     }
@@ -135,7 +135,7 @@ public class TestFixtures {
                 .propertyId(1L)
                 .tenantId(2L)
                 .message("Test rental request")
-                .desiredStart(java.time.LocalDate.parse("2025-01-01"))
+                .desiredStart(java.time.LocalDate.now().plusMonths(1))
                 .desiredMonths(12)
                 .reqStatus("PENDING")
                 .createdAt(LocalDateTime.now())

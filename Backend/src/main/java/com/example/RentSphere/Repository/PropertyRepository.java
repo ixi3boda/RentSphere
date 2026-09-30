@@ -48,6 +48,9 @@ public class PropertyRepository {
         return p;
     };
 
+    // Pre-batching implementation: two queries per property. No production caller uses it any more,
+    // but Performance/README.md reproduces the "before" half of its benchmark by pointing the list
+    // builders at this method, so it stays.
     private PropertyDetails buildPropertyDetails(Property property) {
 
         Long propertyId = property.getPropertyId();
@@ -165,13 +168,26 @@ public class PropertyRepository {
                 .orElseThrow(() -> new RuntimeException("Property creation failed"));
     }
 
-    public List<PropertyDetails> findAll() {
+    public List<PropertyDetails> findByOwnerId(int ownerId) {
 
-        String sql = "SELECT * FROM properties ORDER BY created_at DESC";
+        String sql = "SELECT * FROM properties WHERE owner_id = ? ORDER BY created_at DESC";
 
-        List<Property> properties = jdbcTemplate.query(sql, mapper);
+        return buildPropertyDetailsBatch(jdbcTemplate.query(sql, mapper, ownerId));
+    }
 
-        return buildPropertyDetailsBatch(properties);
+    public int countAll() {
+        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM properties", Integer.class);
+        return count == null ? 0 : count;
+    }
+
+    public List<String> findDistinctCities() {
+        String sql = "SELECT DISTINCT city FROM properties WHERE city IS NOT NULL AND city <> '' ORDER BY city";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getString("city"));
+    }
+
+    public int countAvailable() {
+        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM properties WHERE is_available = TRUE", Integer.class);
+        return count == null ? 0 : count;
     }
     public Optional<PropertyDetails> findById(Long id) {
 
@@ -293,78 +309,92 @@ public class PropertyRepository {
         return jdbcTemplate.update("DELETE FROM properties WHERE property_id = ?", id);
     }
 
-    public List<PropertyDetails> filterProperties(
+    public record PropertyFilter(
+            String search,
             String city,
             String district,
+            String propertyType,
             Double minPrice,
             Double maxPrice,
             Integer numRooms,
             Boolean isAvailable
-    ) {
+    ) {}
 
-        StringBuilder sql = new StringBuilder("SELECT * FROM properties WHERE 1=1 ");
-        List<Object> params = new ArrayList<>();
+    // Sort keys are resolved through this whitelist so a request can never reach ORDER BY as raw SQL.
+    private static final Map<String, String> FILTER_ORDERS = Map.of(
+            "newest", "created_at DESC, property_id DESC",
+            "price_asc", "price_per_month ASC, property_id ASC",
+            "price_desc", "price_per_month DESC, property_id DESC"
+    );
 
-        if (city != null && !city.isBlank()) {
+    private String buildFilterWhere(PropertyFilter filter, List<Object> params) {
+        StringBuilder sql = new StringBuilder(" WHERE 1=1 ");
+
+        if (filter.search() != null && !filter.search().isBlank()) {
+            sql.append(" AND (LOWER(title) LIKE ? OR LOWER(city) LIKE ? OR LOWER(district) LIKE ?) ");
+            String like = "%" + filter.search().trim().toLowerCase() + "%";
+            params.add(like);
+            params.add(like);
+            params.add(like);
+        }
+
+        if (filter.city() != null && !filter.city().isBlank()) {
             sql.append(" AND city = ? ");
-            params.add(city);
+            params.add(filter.city());
         }
 
-        if (district != null && !district.isBlank()) {
+        if (filter.district() != null && !filter.district().isBlank()) {
             sql.append(" AND district = ? ");
-            params.add(district);
+            params.add(filter.district());
         }
 
-        if (minPrice != null) {
+        // chk_type stores property_type uppercased, while clients send the lowercase option value.
+        if (filter.propertyType() != null && !filter.propertyType().isBlank()) {
+            sql.append(" AND property_type = ? ");
+            params.add(filter.propertyType().trim().toUpperCase());
+        }
+
+        if (filter.minPrice() != null) {
             sql.append(" AND price_per_month >= ? ");
-            params.add(minPrice);
+            params.add(filter.minPrice());
         }
 
-        if (maxPrice != null) {
+        if (filter.maxPrice() != null) {
             sql.append(" AND price_per_month <= ? ");
-            params.add(maxPrice);
+            params.add(filter.maxPrice());
         }
 
-        if (numRooms != null) {
+        if (filter.numRooms() != null) {
             sql.append(" AND num_rooms = ? ");
-            params.add(numRooms);
+            params.add(filter.numRooms());
         }
 
-        if (isAvailable != null) {
+        if (filter.isAvailable() != null) {
             sql.append(" AND is_available = ? ");
-            params.add(isAvailable);
+            params.add(filter.isAvailable());
         }
 
-        List<Property> properties = jdbcTemplate.query(sql.toString(), mapper, params.toArray());
-
-        return buildPropertyDetailsBatch(properties);
+        return sql.toString();
     }
-    public List<PropertyDetails> searchByPrefix(String prefix) {
 
-        String sql = """
-        SELECT * FROM properties
-        WHERE LOWER(title) LIKE LOWER(?)
-           OR LOWER(property_type) LIKE LOWER(?)
-           OR LOWER(city) LIKE LOWER(?)
-           OR LOWER(district) LIKE LOWER(?)
-           OR LOWER(address) LIKE LOWER(?)
-        ORDER BY created_at DESC
-    """;
-
-        String search = prefix + "%";
-
-        List<Property> properties = jdbcTemplate.query(
-                sql,
-                mapper,
-                search,
-                search,
-                search,
-                search,
-                search
-        );
-
-        return buildPropertyDetailsBatch(properties);
+    public int countFilterProperties(PropertyFilter filter) {
+        List<Object> params = new ArrayList<>();
+        String sql = "SELECT COUNT(*) FROM properties" + buildFilterWhere(filter, params);
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, params.toArray());
+        return count == null ? 0 : count;
     }
+
+    public List<PropertyDetails> filterProperties(PropertyFilter filter, String sortBy, int limit, int offset) {
+        List<Object> params = new ArrayList<>();
+        String sql = "SELECT * FROM properties" + buildFilterWhere(filter, params)
+                + " ORDER BY " + FILTER_ORDERS.getOrDefault(sortBy, FILTER_ORDERS.get("newest"))
+                + " LIMIT ? OFFSET ?";
+        params.add(limit);
+        params.add(offset);
+
+        return buildPropertyDetailsBatch(jdbcTemplate.query(sql, mapper, params.toArray()));
+    }
+
     public Favorite favorite(int propertyId, int tenantId) {
         
         String checkSql = "SELECT COUNT(*) FROM favorites WHERE tenant_id = ? AND property_id = ?";

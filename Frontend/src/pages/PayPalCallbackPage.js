@@ -85,7 +85,7 @@ function PayPalCallbackPage() {
     },
     cancelled: {
       icon:      '🚫',
-      gradient:  'from-gray-400 to-gray-500',
+      gradient:  'from-slate-400 to-slate-500',
       title:     'Payment Cancelled',
       sub:       message,
       spinner:   false,
@@ -108,9 +108,8 @@ function PayPalCallbackPage() {
           initial={{ scale: 0.9, opacity: 0, y: 24 }}
           animate={{ scale: 1,   opacity: 1, y: 0  }}
           transition={{ type: 'spring', damping: 24, stiffness: 280 }}
-          className="glass-effect rounded-3xl p-10 max-w-md w-full text-center shadow-2xl"
+          className="card rounded-3xl p-10 max-w-md w-full text-center shadow-2xl"
         >
-          {}
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -120,7 +119,6 @@ function PayPalCallbackPage() {
             {cfg.icon}
           </motion.div>
 
-          {}
           {cfg.spinner && (
             <motion.div
               animate={{ rotate: 360 }}
@@ -129,15 +127,13 @@ function PayPalCallbackPage() {
             />
           )}
 
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">{cfg.title}</h1>
-          <p className="text-gray-500 mb-8 leading-relaxed">{cfg.sub}</p>
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">{cfg.title}</h1>
+          <p className="text-slate-500 mb-8 leading-relaxed">{cfg.sub}</p>
 
-          {}
           {status === 'success' && (
-            <p className="text-sm text-gray-400 mb-6">Redirecting to contracts in a moment…</p>
+            <p className="text-sm text-slate-600 mb-6">Redirecting to contracts in a moment…</p>
           )}
 
-          {}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               to="/contracts"

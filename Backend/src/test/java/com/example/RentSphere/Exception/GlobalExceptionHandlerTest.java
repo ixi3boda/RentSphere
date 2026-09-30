@@ -60,10 +60,36 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("Handle Generic Exception returns 500")
+    @DisplayName("Wrong HTTP method returns 405")
+    void handleMethodNotSupported() {
+        ResponseEntity<ErrorResponse> response = handler.handleMethodNotSupported(
+                new org.springframework.web.HttpRequestMethodNotSupportedException("DELETE"));
+        assertEquals(HttpStatus.METHOD_NOT_ALLOWED, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Unparseable body returns 400 without leaking Jackson text")
+    void handleUnreadableBody() {
+        ResponseEntity<ErrorResponse> response = handler.handleUnreadableBody(
+                new org.springframework.http.converter.HttpMessageNotReadableException(
+                        "Unexpected character at index 0 in com.fasterxml.jackson.core.JsonParseException",
+                        new org.springframework.http.HttpInputMessage() {
+                            public org.springframework.http.HttpHeaders getHeaders() {
+                                return new org.springframework.http.HttpHeaders();
+                            }
+                            public java.io.InputStream getBody() {
+                                return new java.io.ByteArrayInputStream(new byte[0]);
+                            }
+                        }));
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertFalse(response.getBody().getMessage().contains("Jackson"));
+    }
+
+    @Test
+    @DisplayName("Handle Generic Exception returns 500 without leaking internals")
     void handleGenericException() {
-        ResponseEntity<ErrorResponse> response = handler.handleGenericException(new RuntimeException("Crash"));
+        ResponseEntity<ErrorResponse> response = handler.handleGenericException(new RuntimeException("Connection refused to db host"));
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertTrue(response.getBody().getMessage().contains("Crash"));
+        assertFalse(response.getBody().getMessage().contains("Connection refused"));
     }
 }

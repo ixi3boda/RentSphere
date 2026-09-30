@@ -1,18 +1,24 @@
 package com.example.RentSphere.services;
 
 import com.example.RentSphere.Dto.*;
+import com.example.RentSphere.Exception.BadRequestException;
+import com.example.RentSphere.Exception.PaymentProcessingException;
+import com.example.RentSphere.Exception.ResourceNotFoundException;
 import com.example.RentSphere.Repository.ContractRepository;
 import com.example.RentSphere.Repository.UserRepository;
 import com.example.RentSphere.Service.ContractService;
 import com.example.RentSphere.Service.NotificationService;
 import com.example.RentSphere.Service.PayPalService;
 import com.example.RentSphere.fixtures.TestFixtures;
+import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.Payment;
+import com.paypal.api.payments.Transaction;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -24,6 +30,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ContractService Unit Tests")
 class ContractServiceTest {
+
+    private static final Long TENANT_ID = 2L;
+    private static final Long OWNER_ID = 1L;
 
     @Mock
     private ContractRepository contractRepository;
@@ -71,34 +80,33 @@ class ContractServiceTest {
         assertThat(result.getContractStatus()).isEqualTo("ACTIVE");
         verify(contractRepository).createContract(any());
         verify(contractRepository).createPaymentSchedule(eq(1L), any(BigDecimal.class), eq(12), any());
-        verify(userRepository).updateRole(eq(2), eq("TENANT"));
+        verify(userRepository).promoteVisitorToTenant(2);
     }
 
     @Test
     @DisplayName("createPayPalPaymentForContract — throws when contract not found")
     void createPayPalPayment_contractNotFound_throws() {
         when(contractRepository.findById(999L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> contractService.createPayPalPaymentForContract(999L, new PayPalPaymentRequest()))
-                .isInstanceOf(IllegalArgumentException.class)
+        assertThatThrownBy(() -> contractService.createPayPalPaymentForContract(999L, new PayPalPaymentRequest(), TENANT_ID, false))
+                .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Contract not found");
     }
 
     @Test
-    @DisplayName("createPayPalPaymentForContract — throws when no pending payments")
+    @DisplayName("createPayPalPaymentForContract — throws when no outstanding payments")
     void createPayPalPayment_noPendingPayments_throws() {
         when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
         when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> contractService.createPayPalPaymentForContract(1L, new PayPalPaymentRequest()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("No pending payment found");
+        assertThatThrownBy(() -> contractService.createPayPalPaymentForContract(1L, new PayPalPaymentRequest(), TENANT_ID, false))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("No outstanding installment");
     }
 
     @Test
     @DisplayName("createPayPalPaymentForContract — succeeds and delegates to PayPalService")
     void createPayPalPayment_succeeds() throws Exception {
-        Contract contract = TestFixtures.activeContract();
-        when(contractRepository.findById(1L)).thenReturn(Optional.of(contract));
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
 
         PaymentDto paymentDto = new PaymentDto();
         paymentDto.setAmountDue(new BigDecimal("1500.00"));
@@ -110,68 +118,147 @@ class ContractServiceTest {
 
         PayPalPaymentRequest req = new PayPalPaymentRequest();
         req.setCurrency("USD");
-        PayPalPaymentResponse response = contractService.createPayPalPaymentForContract(1L, req);
+        PayPalPaymentResponse response = contractService.createPayPalPaymentForContract(1L, req, TENANT_ID, false);
 
         assertThat(response).isNotNull();
         verify(payPalService).createPayment(any());
     }
 
     @Test
+    @DisplayName("payments — a user who is not the tenant is refused before anything is charged")
+    void payments_foreignActor_denied() {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+        CreditCardPaymentRequest cardReq = validCardRequest().build();
+
+        assertThatThrownBy(() -> contractService.processCreditCardPaymentForContract(1L, cardReq, 77L, false))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("does not belong");
+
+        verify(contractRepository, never()).markPaymentPaid(anyLong(), anyInt(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("payments — a cancelled contract cannot accept money")
+    void payments_cancelledContract_denied() {
+        Contract cancelled = TestFixtures.activeContract();
+        cancelled.setContractStatus("CANCELLED");
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(cancelled));
+
+        assertThatThrownBy(() -> contractService.processCreditCardPaymentForContract(1L, validCardRequest().build(), TENANT_ID, false))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("cannot accept payments");
+    }
+
+    @Test
+    @DisplayName("getPaymentsByContractId — the landlord on the contract may read it")
+    void payments_visibleToOwner() {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+        when(contractRepository.findPaymentsByContractId(1L)).thenReturn(java.util.List.of());
+
+        assertThat(contractService.getPaymentsByContractId(1L, OWNER_ID, false)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("getPaymentsByContractId — an unrelated user is refused")
+    void payments_hiddenFromStranger() {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+
+        assertThatThrownBy(() -> contractService.getPaymentsByContractId(1L, 77L, false))
+                .isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
     @DisplayName("executePayPalPaymentForContract — throws when payment fails")
     void executePayPalPayment_paymentFails_throws() throws Exception {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
         when(payPalService.executePayment(anyString(), anyString())).thenReturn(null);
 
-        assertThatThrownBy(() -> contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null))
-                .isInstanceOf(RuntimeException.class)
+        assertThatThrownBy(() -> contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null, TENANT_ID, false))
+                .isInstanceOf(PaymentProcessingException.class)
                 .hasMessageContaining("execution failed");
     }
 
     @Test
-    @DisplayName("executePayPalPaymentForContract — updates DB when approved")
+    @DisplayName("executePayPalPaymentForContract — updates DB when approved and amount matches")
     void executePayPalPayment_approved_updatesDB() throws Exception {
-        Payment mockPayment = new Payment();
-        mockPayment.setId("PAY-123");
-        mockPayment.setState("approved");
-        when(payPalService.executePayment("payId", "payerId")).thenReturn(mockPayment);
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+        when(payPalService.executePayment("payId", "payerId"))
+                .thenReturn(paypalPayment("approved", "1500.00"));
 
         PaymentDto pendingPayment = new PaymentDto();
         pendingPayment.setAmountDue(new BigDecimal("1500.00"));
         pendingPayment.setInstallmentNo(1);
         when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.of(pendingPayment));
-        when(contractRepository.countPendingPayments(1L)).thenReturn(0);
-        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+        when(contractRepository.markPaymentPaid(eq(1L), eq(1), any(), anyString())).thenReturn(1);
+        when(contractRepository.countUnsettledPayments(1L)).thenReturn(0);
 
-        PayPalPaymentResponse response = contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null);
+        PayPalPaymentResponse response = contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null, TENANT_ID, false);
 
         assertThat(response.getStatus()).isEqualTo("approved");
         verify(contractRepository).markPaymentPaid(eq(1L), eq(1), eq(new BigDecimal("1500.00")), eq("PAY-123"));
         verify(contractRepository).completeContract(1L);
+        // must be a type chk_noti_type actually allows, or the whole transaction rolls back
+        verify(notificationService).createNotification(eq(2), eq("PAYMENT_RECEIVED"), anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("executePayPalPaymentForContract — refuses to mark paid when less was captured")
+    void executePayPalPayment_amountMismatch_throws() throws Exception {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+        when(payPalService.executePayment("payId", "payerId"))
+                .thenReturn(paypalPayment("approved", "1.00"));
+
+        PaymentDto pendingPayment = new PaymentDto();
+        pendingPayment.setAmountDue(new BigDecimal("1500.00"));
+        pendingPayment.setInstallmentNo(1);
+        when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.of(pendingPayment));
+
+        assertThatThrownBy(() -> contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null, TENANT_ID, false))
+                .isInstanceOf(PaymentProcessingException.class)
+                .hasMessageContaining("Captured");
+
+        verify(contractRepository, never()).markPaymentPaid(anyLong(), anyInt(), any(), anyString());
     }
 
     @Test
     @DisplayName("processCreditCardPaymentForContract — succeeds and updates payment status")
     void processCreditCardPayment_succeeds() {
-        Contract contract = TestFixtures.activeContract();
-        when(contractRepository.findById(1L)).thenReturn(Optional.of(contract));
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
 
         PaymentDto pendingPayment = new PaymentDto();
         pendingPayment.setAmountDue(new BigDecimal("1500.00"));
         pendingPayment.setInstallmentNo(1);
         when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.of(pendingPayment));
+        when(contractRepository.markPaymentPaid(eq(1L), eq(1), any(), anyString())).thenReturn(1);
 
-        CreditCardPaymentRequest cardReq = CreditCardPaymentRequest.builder()
-                .cardNumber("4111111111111111")
-                .cardHolderName("John Doe")
-                .expiryMonth("12")
-                .expiryYear("28")
-                .cvv("123")
-                .build();
-
-        CreditCardPaymentResponse response = contractService.processCreditCardPaymentForContract(1L, cardReq);
+        CreditCardPaymentResponse response =
+                contractService.processCreditCardPaymentForContract(1L, validCardRequest().build(), TENANT_ID, false);
 
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo("PAID");
         assertThat(response.getAmountPaid()).isEqualTo(new BigDecimal("1500.00"));
         verify(contractRepository).markPaymentPaid(eq(1L), eq(1), eq(new BigDecimal("1500.00")), anyString());
+    }
+
+    private static CreditCardPaymentRequest.CreditCardPaymentRequestBuilder validCardRequest() {
+        return CreditCardPaymentRequest.builder()
+                .cardNumber("4111111111111111")
+                .cardHolderName("John Doe")
+                .expiryMonth("12")
+                .expiryYear("28")
+                .cvv("123");
+    }
+
+    private static Payment paypalPayment(String state, String total) {
+        Amount amount = new Amount();
+        amount.setTotal(total);
+        amount.setCurrency("USD");
+        Transaction transaction = new Transaction();
+        transaction.setAmount(amount);
+        Payment payment = new Payment();
+        payment.setId("PAY-123");
+        payment.setState(state);
+        payment.setTransactions(java.util.List.of(transaction));
+        return payment;
     }
 }

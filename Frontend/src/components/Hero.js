@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
+import { propertyApi } from '../utils/api';
+import { PROPERTY_TYPE_OPTIONS } from '../utils/propertyTypes';
 
 function Hero() {
   const navigate = useNavigate();
@@ -8,6 +10,20 @@ function Hero() {
   const [city, setCity] = useState('');
   const [type, setType] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+  const [stats, setStats] = useState(null);
+  const [statsFailed, setStatsFailed] = useState(false);
+  const [cities, setCities] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    propertyApi.getMarketplaceStats()
+      .then((res) => { if (!cancelled) setStats(res.data); })
+      .catch(() => { if (!cancelled) setStatsFailed(true); });
+    propertyApi.getCities()
+      .then((res) => { if (!cancelled && Array.isArray(res.data)) setCities(res.data); })
+      .catch(() => { if (!cancelled) setCities([]); });
+    return () => { cancelled = true; };
+  }, []);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -55,30 +71,26 @@ function Hero() {
               className="inline-flex items-center space-x-2 bg-slate-800/80 backdrop-blur-md border border-slate-700/80 px-4 py-2 rounded-full mb-8 shadow-glass"
             >
               <span className="flex h-2.5 w-2.5 rounded-full bg-sky-400 animate-pulse"></span>
-              <span className="text-xs font-bold text-sky-400 tracking-widest uppercase">Verified Real Estate Agency Platform</span>
+              <span className="text-xs font-bold text-sky-400 tracking-widest uppercase">Renting platform with contracts and instalments</span>
             </motion.div>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.1] mb-6 tracking-tight">
               Find & Lease Premier <br />
-              <span className="gradient-text">Properties Effortlessly.</span>
+              <span className="gradient-text-inverse">Properties Effortlessly.</span>
             </h1>
             
             <p className="text-lg sm:text-xl text-slate-300 mb-10 max-w-2xl font-medium leading-relaxed">
-              RentSphere connects discerning tenants with verified landlords through automated digital lease agreements, escrow protection, and 24/7 concierge support.
+              RentSphere turns an approved rental request into a signed-off contract with its own monthly instalment schedule, then tracks every payment against it.
             </p>
 
             {/* Quick Search Widget */}
-            <form onSubmit={handleSearchSubmit} className="bg-slate-800/90 backdrop-blur-2xl p-4 sm:p-6 rounded-[2rem] border border-slate-700/80 shadow-2xl mb-12">
+            <form onSubmit={handleSearchSubmit} className="bg-slate-800/90 backdrop-blur-2xl p-4 sm:p-6 rounded-2xl border border-slate-700/80 shadow-2xl mb-12">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 ml-1">Location</label>
                   <select value={city} onChange={(e) => setCity(e.target.value)} className="w-full bg-slate-900/80 border border-slate-700 text-white rounded-xl px-4 py-3 text-sm focus:border-sky-400 outline-none">
                     <option value="">All Locations</option>
-                    <option value="Cairo">Cairo</option>
-                    <option value="Alexandria">Alexandria</option>
-                    <option value="Giza">Giza</option>
-                    <option value="Riyadh">Riyadh</option>
-                    <option value="Dubai">Dubai</option>
+                    {cities.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
 
@@ -86,11 +98,7 @@ function Hero() {
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 ml-1">Property Type</label>
                   <select value={type} onChange={(e) => setType(e.target.value)} className="w-full bg-slate-900/80 border border-slate-700 text-white rounded-xl px-4 py-3 text-sm focus:border-sky-400 outline-none">
                     <option value="">All Types</option>
-                    <option value="apartment">Apartment</option>
-                    <option value="villa">Villa</option>
-                    <option value="studio">Studio</option>
-                    <option value="duplex">Duplex</option>
-                    <option value="office">Office</option>
+                    {PROPERTY_TYPE_OPTIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </select>
                 </div>
 
@@ -107,17 +115,21 @@ function Hero() {
               </div>
 
               <div className="mt-4 pt-4 border-t border-slate-700/60 flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-400">⚡ Over 500+ Luxury Spaces Ready for Occupancy</span>
-                <button type="submit" className="btn-accent text-sm px-8 py-3 shadow-glow-sky">
+                <span className="text-xs font-semibold text-slate-400">
+                  {stats
+                    ? `${stats.availableListings.toLocaleString()} of ${stats.totalListings.toLocaleString()} listings available now`
+                    : statsFailed ? 'Live counts unavailable — search still works' : 'Loading listings…'}
+                </span>
+                <button type="submit" className="btn-primary text-sm px-8 py-3 shadow-glow-sky">
                   Search Properties →
                 </button>
               </div>
             </form>
             
             <div className="grid grid-cols-3 gap-6 pt-4 border-t border-slate-800">
-              <StatItem label="Managed Assets" value="$12.4M+" />
-              <StatItem label="Active Leases" value="1,450+" />
-              <StatItem label="Tenant Satisfaction" value="99.6%" />
+              <StatItem label="Total Listings" value={stats ? stats.totalListings.toLocaleString() : '—'} />
+              <StatItem label="Available Now" value={stats ? stats.availableListings.toLocaleString() : '—'} />
+              <StatItem label="Active Leases" value={stats ? stats.activeLeases.toLocaleString() : '—'} />
             </div>
           </motion.div>
 
@@ -128,30 +140,35 @@ function Hero() {
             transition={{ duration: 0.9, ease: "easeOut" }}
             className="lg:col-span-5 relative hidden lg:block"
           >
-            <div className="relative z-10 rounded-[3rem] overflow-hidden shadow-2xl border-4 border-slate-700/60 bg-slate-800">
+            <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-700/60 bg-slate-800">
               <img 
                 src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=1000" 
-                alt="Luxury Real Estate Property" 
+                alt="Illustration: residential property" 
                 className="w-full h-[580px] object-cover hover:scale-105 transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
               
-              <div className="absolute bottom-8 left-8 right-8 glass-dark p-6 rounded-3xl border border-slate-700">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="badge-gold">👑 Agency Featured Listing</span>
-                  <span className="text-emerald-400 font-bold text-sm">Verified 100%</span>
-                </div>
-                <h3 className="text-white text-2xl font-extrabold mb-1">The Grand Horizon Estate</h3>
-                <p className="text-slate-400 text-xs mb-4">Downtown Marina • 4 Beds • 3 Baths • 320 sqm</p>
-                <div className="flex items-center justify-between pt-3 border-t border-slate-800">
-                  <div>
-                    <span className="text-2xl font-black text-white">$4,200</span>
-                    <span className="text-slate-400 text-xs"> / month</span>
-                  </div>
+              <div className="absolute bottom-8 left-8 right-8 surface-dark p-6 rounded-3xl border border-slate-700">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="badge-gold">How renting works</span>
                   <Link to="/properties" className="btn-primary text-xs !py-2.5">
-                    View Details
+                    Browse listings
                   </Link>
                 </div>
+                <ol className="space-y-3 text-sm">
+                  <li className="flex gap-3">
+                    <span className="text-sky-400 font-black">01</span>
+                    <span className="text-slate-300">Send a rental request with your start date and term</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-sky-400 font-black">02</span>
+                    <span className="text-slate-300">Approval creates the contract and its monthly instalment schedule</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-sky-400 font-black">03</span>
+                    <span className="text-slate-300">Pay each instalment by PayPal or card until the lease completes</span>
+                  </li>
+                </ol>
               </div>
             </div>
 
@@ -159,13 +176,13 @@ function Hero() {
             <motion.div 
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 4, repeat: Infinity }}
-              className="absolute -top-6 -left-6 glass-dark p-4 rounded-2xl border border-slate-700 shadow-2xl z-20"
+              className="absolute -top-6 -left-6 surface-dark p-4 rounded-2xl border border-slate-700 shadow-2xl z-20"
             >
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-sky-500/20 rounded-xl flex items-center justify-center text-xl">📄</div>
+                <div className="w-10 h-10 bg-sky-500/20 rounded-xl flex items-center justify-center text-xl">🔔</div>
                 <div>
-                  <p className="text-white font-bold text-sm">Digital Leases</p>
-                  <p className="text-slate-400 text-xs">Instant PDF Generation</p>
+                  <p className="text-white font-bold text-sm">Status notifications</p>
+                  <p className="text-slate-400 text-xs">Requests, approvals and payments</p>
                 </div>
               </div>
             </motion.div>

@@ -25,6 +25,24 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+// AuthContext registers a handler here so a rejected token can clear the stored session; without
+// it the app keeps rendering a logged-in shell whose every request then 401s.
+let onUnauthorized = null;
+export const setUnauthorizedHandler = (handler) => {
+  onUnauthorized = handler;
+};
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const hadToken = Boolean(error.config?.headers?.Authorization);
+    if (error.response?.status === 401 && hadToken && onUnauthorized) {
+      onUnauthorized();
+    }
+    return Promise.reject(error);
+  }
+);
+
 
 
 
@@ -50,7 +68,13 @@ export const authApi = {
 
 export const propertyApi = {
   
-  getAll: () => apiClient.get("/api/properties/all"),
+  getMarketplaceStats: () => apiClient.get("/api/properties/stats"),
+
+  
+  getMyProperties: () => apiClient.get("/api/properties/my"),
+
+  
+  getCities: () => apiClient.get("/api/properties/cities"),
 
   
   getById: (id) => apiClient.get(`/api/properties/${id}`),
@@ -67,10 +91,6 @@ export const propertyApi = {
 
   
   filter: (params = {}) => apiClient.get("/api/properties/filter", { params }),
-
-  
-  search: (prefix) =>
-    apiClient.get("/api/properties/search", { params: { prefix } }),
 
   
   favorite: (propertyId) =>
@@ -93,13 +113,20 @@ export const rentApi = {
   createRequest: (body) => apiClient.post("/api/rent/request", body),
 
   
-  getAllRequests: () => apiClient.get("/api/rent/requests/all"),
+  getAllRequests: (params = {}) => apiClient.get("/api/rent/requests/all", { params }),
+
+  
+  getRequestSummary: () => apiClient.get("/api/rent/requests/summary"),
 
   
   getRequestById: (id) => apiClient.get(`/api/rent/requests/${id}`),
 
   
   getAllContracts: () => apiClient.get("/api/rent/contracts/all"),
+
+  getManagedContracts: (params = {}) => apiClient.get("/api/rent/contracts/manage", { params }),
+
+  getContractSummary: () => apiClient.get("/api/rent/contracts/manage/summary"),
   getContractPayments: (contractId) => apiClient.get(`/api/rent/contracts/${contractId}/payments`),
 
   

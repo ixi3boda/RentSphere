@@ -48,7 +48,7 @@ public class NotificationController {
         } catch (IllegalStateException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
-            return buildErrorResponse("Failed to fetch notifications: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to fetch notifications", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -62,7 +62,7 @@ public class NotificationController {
         } catch (IllegalStateException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
-            return buildErrorResponse("Failed to update notification: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to update notification", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -17,7 +17,7 @@ export function PropertyProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const res  = await propertyApi.getAll();
+      const res  = await propertyApi.getMyProperties();
       const list = Array.isArray(res.data) ? res.data : [];
       setProperties(list.map(mapPropertyToFrontend));
       return { success: true };
@@ -87,7 +87,9 @@ export function PropertyProvider({ children }) {
     setError(null);
     try {
       const body = {
-        propertyType:        formData.propertyType        || undefined,
+        // chk_type only accepts the uppercased literals, and callers may hold the lowercased
+        // value mapPropertyToFrontend produces.
+        propertyType:        formData.propertyType ? formData.propertyType.toUpperCase() : undefined,
         title:               formData.title               || undefined,
         propertyDescription: formData.propertyDescription || formData.description || undefined,
         pricePerMonth:
@@ -108,13 +110,9 @@ export function PropertyProvider({ children }) {
 
       await propertyApi.update(id, body);
 
-      setProperties((prev) =>
-        prev.map((p) =>
-          p.id === String(id)
-            ? { ...p, ...mapFormToBackend(formData), id: String(id) }
-            : p
-        )
-      );
+      // Re-read the owner's listings so the cache keeps the frontend-shaped fields instead of
+      // grafting raw backend keys onto them.
+      await fetchOwnerProperties();
       return { success: true };
     } catch (err) {
       const msg = err.response?.data?.message || err.message;

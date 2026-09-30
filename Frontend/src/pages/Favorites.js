@@ -37,7 +37,7 @@ function Favorites() {
 
   return (
     <AnimatedPage>
-      <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen pt-32 pb-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: -16 }}
@@ -46,7 +46,7 @@ function Favorites() {
           >
             <div>
               <h1 className="text-4xl font-bold gradient-text mb-2">My Favorites</h1>
-              <p className="text-gray-500">
+              <p className="text-slate-500">
                 Saved properties you can revisit anytime.
               </p>
             </div>
@@ -67,11 +67,11 @@ function Favorites() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="glass-effect rounded-2xl p-16 text-center"
+              className="card rounded-2xl p-16 text-center"
             >
               <div className="text-6xl mb-4">🤍</div>
-              <h2 className="text-2xl font-bold text-gray-700 mb-2">No favorites yet</h2>
-              <p className="text-gray-500 mb-6">
+              <h2 className="text-2xl font-bold text-slate-700 mb-2">No favorites yet</h2>
+              <p className="text-slate-500 mb-6">
                 Tap the heart on any property to save it here.
               </p>
               <Link to="/properties" className="btn-primary inline-block !py-2.5 !px-8">

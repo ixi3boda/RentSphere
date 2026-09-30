@@ -98,4 +98,11 @@ public class UserRepository {
         String sql = "UPDATE users SET role_name = ?, updated_at = NOW() WHERE user_id = ?";
         return jdbcTemplate.update(sql, roleName, userId);
     }
+
+    // Signing a contract makes the applicant a tenant, but it must never demote an ADMIN who rents
+    // a property or overwrite a role they already hold.
+    public int promoteVisitorToTenant(int userId) {
+        String sql = "UPDATE users SET role_name = 'TENANT', updated_at = NOW() WHERE user_id = ? AND role_name = 'VISITOR'";
+        return jdbcTemplate.update(sql, userId);
+    }
 }

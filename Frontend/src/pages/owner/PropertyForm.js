@@ -5,7 +5,6 @@ import { useAuth } from '../../context/AuthContext';
 import { useProperty } from '../../context/PropertyContext';
 import { AnimatedPage, AnimatedButton } from '../../components/AnimatedPage';
 import ImageUpload from '../../components/ImageUpload';
-import { mapFormToBackend } from '../../utils/mappers';
 
 const PROPERTY_TYPES = [
   { value: '',          label: 'Select a type…' },
@@ -30,6 +29,7 @@ const EMPTY_FORM = {
   propertyType:        '',
   numRooms:            '',
   areaSqm:             '',
+  isAvailable:         true,
 };
 
 function FieldError({ message }) {
@@ -38,7 +38,7 @@ function FieldError({ message }) {
     <motion.p
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
-      className="text-red-500 text-sm mt-1"
+      className="text-red-700 text-sm mt-1"
     >
       {message}
     </motion.p>
@@ -75,14 +75,17 @@ function PropertyForm() {
         const p = result.data;
         setFormData({
           title:               p.title || '',
-          propertyDescription: p.propertyDescription || '',
-          pricePerMonth:       p.pricePerMonth?.toString() || '',
+          // getPropertyById returns the frontend-shaped object, where the mapper renames
+          // propertyDescription -> description and pricePerMonth -> price.
+          propertyDescription: p.description || '',
+          pricePerMonth:       p.price != null ? String(p.price) : '',
           city:                p.city || '',
           district:            p.district || '',
           address:             p.address || '',
           propertyType:        (p.propertyType || '').toUpperCase(),
           numRooms:            p.numRooms?.toString() || '',
           areaSqm:             p.areaSqm?.toString() || '',
+          isAvailable:         p.status !== 'rented',
         });
         if (p.images?.length) setImages(p.images);
       } else {
@@ -138,11 +141,9 @@ function PropertyForm() {
     }
 
     if (isEditMode) {
-      const payload = {
-        ...mapFormToBackend(formData),
-        coverPic: images[0] || null,
-      };
-      const result = await updateProperty(id, payload);
+      // PropertyContext maps the field names; UpdatePropertyRequest has no image fields, so the
+      // gallery is not part of an edit.
+      const result = await updateProperty(id, formData);
       if (result.success) {
         navigate('/admin/dashboard');
       } else {
@@ -164,7 +165,7 @@ function PropertyForm() {
     return (
       <AnimatedPage>
         <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-rentsphere-teal border-t-transparent" />
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-brand border-t-transparent" />
         </div>
       </AnimatedPage>
     );
@@ -172,7 +173,7 @@ function PropertyForm() {
 
   return (
     <AnimatedPage>
-      <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen pt-32 pb-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
 
           <motion.div
@@ -182,14 +183,14 @@ function PropertyForm() {
           >
             <Link
               to="/admin/dashboard"
-              className="inline-flex items-center gap-1 text-gray-500 hover:text-rentsphere-teal transition-colors text-sm mb-4"
+              className="inline-flex items-center gap-1 text-slate-500 hover:text-brand transition-colors text-sm mb-4"
             >
               ← Back to Dashboard
             </Link>
             <h1 className="text-4xl font-bold gradient-text">
               {isEditMode ? '✏️ Edit Property' : '🏠 Add New Property'}
             </h1>
-            <p className="text-gray-500 mt-1">
+            <p className="text-slate-500 mt-1">
               {isEditMode
                 ? 'Update your property details below.'
                 : 'Fill in the details to list your property.'}
@@ -200,7 +201,7 @@ function PropertyForm() {
             initial={{ scale: 0.97, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="glass-effect rounded-2xl p-8 shadow-2xl"
+            className="card rounded-2xl p-8 shadow-2xl"
           >
             <AnimatePresence>
               {submitError && (
@@ -218,8 +219,8 @@ function PropertyForm() {
             <form onSubmit={handleSubmit} className="space-y-6" noValidate>
 
               <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                  Property Title <span className="text-red-500">*</span>
+                <label htmlFor="title" className="block text-sm font-medium text-slate-700 mb-2">
+                  Property Title <span className="text-red-600">*</span>
                 </label>
                 <motion.input
                   whileFocus={{ scale: 1.01 }}
@@ -236,8 +237,8 @@ function PropertyForm() {
               </div>
 
               <div>
-                <label htmlFor="propertyDescription" className="block text-sm font-medium text-gray-700 mb-2">
-                  Description <span className="text-red-500">*</span>
+                <label htmlFor="propertyDescription" className="block text-sm font-medium text-slate-700 mb-2">
+                  Description <span className="text-red-600">*</span>
                 </label>
                 <textarea
                   id="propertyDescription"
@@ -253,11 +254,11 @@ function PropertyForm() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="pricePerMonth" className="block text-sm font-medium text-gray-700 mb-2">
-                    Monthly Rent (USD) <span className="text-red-500">*</span>
+                  <label htmlFor="pricePerMonth" className="block text-sm font-medium text-slate-700 mb-2">
+                    Monthly Rent (USD) <span className="text-red-600">*</span>
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 font-semibold">$</span>
                     <motion.input
                       whileFocus={{ scale: 1.01 }}
                       type="number"
@@ -274,8 +275,8 @@ function PropertyForm() {
                 </div>
 
                 <div>
-                  <label htmlFor="propertyType" className="block text-sm font-medium text-gray-700 mb-2">
-                    Property Type <span className="text-red-500">*</span>
+                  <label htmlFor="propertyType" className="block text-sm font-medium text-slate-700 mb-2">
+                    Property Type <span className="text-red-600">*</span>
                   </label>
                   <select
                     id="propertyType"
@@ -296,8 +297,8 @@ function PropertyForm() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="numRooms" className="block text-sm font-medium text-gray-700 mb-2">
-                    Number of Rooms <span className="text-red-500">*</span>
+                  <label htmlFor="numRooms" className="block text-sm font-medium text-slate-700 mb-2">
+                    Number of Rooms <span className="text-red-600">*</span>
                   </label>
                   <motion.input
                     whileFocus={{ scale: 1.01 }}
@@ -314,8 +315,8 @@ function PropertyForm() {
                 </div>
 
                 <div>
-                  <label htmlFor="areaSqm" className="block text-sm font-medium text-gray-700 mb-2">
-                    Area (m²) <span className="text-red-500">*</span>
+                  <label htmlFor="areaSqm" className="block text-sm font-medium text-slate-700 mb-2">
+                    Area (m²) <span className="text-red-600">*</span>
                   </label>
                   <motion.input
                     whileFocus={{ scale: 1.01 }}
@@ -335,8 +336,8 @@ function PropertyForm() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
-                    City <span className="text-red-500">*</span>
+                  <label htmlFor="city" className="block text-sm font-medium text-slate-700 mb-2">
+                    City <span className="text-red-600">*</span>
                   </label>
                   <motion.input
                     whileFocus={{ scale: 1.01 }}
@@ -352,8 +353,8 @@ function PropertyForm() {
                 </div>
 
                 <div>
-                  <label htmlFor="district" className="block text-sm font-medium text-gray-700 mb-2">
-                    District <span className="text-gray-400 text-xs">(optional)</span>
+                  <label htmlFor="district" className="block text-sm font-medium text-slate-700 mb-2">
+                    District <span className="text-slate-600 text-xs">(optional)</span>
                   </label>
                   <motion.input
                     whileFocus={{ scale: 1.01 }}
@@ -369,8 +370,8 @@ function PropertyForm() {
               </div>
 
               <div>
-                <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
-                  Street Address <span className="text-red-500">*</span>
+                <label htmlFor="address" className="block text-sm font-medium text-slate-700 mb-2">
+                  Street Address <span className="text-red-600">*</span>
                 </label>
                 <motion.input
                   whileFocus={{ scale: 1.01 }}

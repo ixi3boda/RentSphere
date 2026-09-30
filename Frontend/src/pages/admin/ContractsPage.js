@@ -17,20 +17,20 @@ function fmt(n) {
   return Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-/* ─── Status config ───────────────────────────────────────── */
+/* ─── Status config — exactly the four values chk_contract_status allows ─── */
 const STATUS_CFG = {
   ACTIVE:    { bg: 'bg-emerald-100 text-emerald-800 border border-emerald-200', dot: 'bg-emerald-500', label: 'Active' },
   COMPLETED: { bg: 'bg-sky-100 text-sky-800 border border-sky-200',           dot: 'bg-sky-500',     label: 'Completed' },
   CANCELLED: { bg: 'bg-red-100 text-red-800 border border-red-200',           dot: 'bg-red-500',     label: 'Cancelled' },
   PENDING:   { bg: 'bg-amber-100 text-amber-800 border border-amber-200',     dot: 'bg-amber-500',   label: 'Pending' },
-  EXPIRED:   { bg: 'bg-slate-100 text-slate-700 border border-slate-200',     dot: 'bg-slate-400',   label: 'Expired' },
-  TERMINATED:{ bg: 'bg-rose-100 text-rose-800 border border-rose-200',        dot: 'bg-rose-500',    label: 'Terminated' },
 };
 
+/* ─── Payment status — exactly the four values chk_payment_status allows ─── */
 const PAY_STATUS_CFG = {
   PAID:    { bg: 'bg-emerald-100 text-emerald-700', icon: '✓' },
   PENDING: { bg: 'bg-amber-100 text-amber-700',     icon: '⏳' },
   OVERDUE: { bg: 'bg-red-100 text-red-700',         icon: '!' },
+  WAIVED:  { bg: 'bg-slate-100 text-slate-700',     icon: '∅' },
 };
 
 /* ─── Payment Modal ───────────────────────────────────────── */
@@ -130,10 +130,10 @@ function PaymentModal({ contract, payments, onClose, onSuccess }) {
         {/* Header */}
         <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-5 flex items-center justify-between">
           <div>
-            <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest">Contract #{contract.contractId}</p>
+            <p className="text-slate-600 text-xs font-semibold uppercase tracking-widest">Contract #{contract.contractId}</p>
             <h2 className="text-white text-xl font-black mt-0.5">Make a Payment</h2>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors text-2xl leading-none font-light">×</button>
+          <button onClick={onClose} className="text-slate-600 hover:text-white transition-colors text-2xl leading-none font-light">×</button>
         </div>
 
         <div className="p-6 space-y-5">
@@ -243,7 +243,7 @@ function PaymentModal({ contract, payments, onClose, onSuccess }) {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 mb-1">
                     <button onClick={() => setMethod('')} className="text-slate-500 hover:text-slate-800 text-sm font-semibold">← Back</button>
-                    <span className="text-slate-400">|</span>
+                    <span className="text-slate-600">|</span>
                     <span className="text-sm font-bold text-slate-700">Pay via PayPal</span>
                   </div>
                   <div className="bg-[#f5f7fa] border border-[#d6e4f0] rounded-xl p-4 text-sm text-slate-700 leading-relaxed">
@@ -277,7 +277,7 @@ function PaymentModal({ contract, payments, onClose, onSuccess }) {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 mb-1">
                     <button onClick={() => setMethod('')} className="text-slate-500 hover:text-slate-800 text-sm font-semibold">← Back</button>
-                    <span className="text-slate-400">|</span>
+                    <span className="text-slate-600">|</span>
                     <span className="text-sm font-bold text-slate-700">Card Details</span>
                   </div>
 
@@ -343,7 +343,7 @@ function PaymentModal({ contract, payments, onClose, onSuccess }) {
                     )}
                   </AnimatePresence>
 
-                  <div className="flex items-center gap-2 text-[11px] text-slate-400 font-medium">
+                  <div className="flex items-center gap-2 text-[11px] text-slate-600 font-medium">
                     <span>🔒</span>
                     <span>Your card details are encrypted and never stored.</span>
                   </div>
@@ -356,7 +356,7 @@ function PaymentModal({ contract, payments, onClose, onSuccess }) {
                     <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                       onClick={handleCard} disabled={loading || !cardNumber || !cardHolder || !cvv}
                       id={`card-pay-contract-${contract.contractId}`}
-                      className="flex-[2] py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-sky-500/20">
+                      className="flex-[2] py-3 rounded-2xl bg-gradient-to-r from-sky-700 to-indigo-700 text-white font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-sky-500/20">
                       {loading ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : `💳 Pay $${fmt(selectedInstallment?.amountDue)}`}
                     </motion.button>
                   </div>
@@ -399,9 +399,10 @@ function ContractCard({ contract, onPay, index, role }) {
   const [payments, setPayments]           = useState([]);
   const [showPayments, setShowPayments]   = useState(false);
   const [loadingPayments, setLoadingPayments] = useState(false);
+  const [paymentsError, setPaymentsError] = useState('');
 
   const cfg       = STATUS_CFG[contract.contractStatus] || STATUS_CFG.PENDING;
-  const canPay    = role === 'tenant' && ['ACTIVE', 'PENDING_PAYMENT'].includes(contract.contractStatus);
+  const canPay    = role === 'tenant' && contract.contractStatus === 'ACTIVE';
 
   const paidCount    = payments.filter(p => p.paymentStatus === 'PAID').length;
   const pendingCount = payments.filter(p => p.paymentStatus === 'PENDING').length;
@@ -410,12 +411,13 @@ function ContractCard({ contract, onPay, index, role }) {
   const loadPayments = async () => {
     if (payments.length > 0) { setShowPayments(v => !v); return; }
     setLoadingPayments(true);
+    setPaymentsError('');
     try {
       const res = await rentApi.getContractPayments(contract.contractId);
-      setPayments(res.data || []);
+      setPayments(Array.isArray(res.data) ? res.data : []);
       setShowPayments(true);
     } catch (err) {
-      console.error('Failed to load payments', err);
+      setPaymentsError(err.response?.data?.message || 'Failed to load the installment schedule.');
     } finally {
       setLoadingPayments(false);
     }
@@ -521,7 +523,7 @@ function ContractCard({ contract, onPay, index, role }) {
               whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
               onClick={() => onPay(contract)}
               id={`pay-contract-${contract.contractId}`}
-              className="flex-[1.2] py-2.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-bold text-sm hover:shadow-lg hover:shadow-sky-500/20 transition-all"
+              className="flex-[1.2] py-2.5 rounded-2xl bg-gradient-to-r from-sky-700 to-indigo-700 text-white font-bold text-sm hover:shadow-lg hover:shadow-sky-500/20 transition-all"
             >
               Pay Now
             </motion.button>
@@ -529,6 +531,11 @@ function ContractCard({ contract, onPay, index, role }) {
         </div>
 
         {/* Installment schedule */}
+        {paymentsError && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm font-semibold">
+            {paymentsError}
+          </div>
+        )}
         <AnimatePresence>
           {showPayments && payments.length > 0 && (
             <motion.div
@@ -537,7 +544,7 @@ function ContractCard({ contract, onPay, index, role }) {
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden border-t border-slate-100 pt-2"
             >
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 pt-2">All Installments</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 mb-1 pt-2">All Installments</p>
               <div>
                 {payments.map((p, i) => (
                   <InstallmentRow key={p.paymentId} p={p} isLast={i === payments.length - 1} />
@@ -559,16 +566,19 @@ function ContractCard({ contract, onPay, index, role }) {
 function Detail({ label, value }) {
   return (
     <div>
-      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-0.5">{label}</p>
+      <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 mb-0.5">{label}</p>
       <p className="font-bold text-slate-700">{value}</p>
     </div>
   );
 }
 
 /* ─── Main Page ───────────────────────────────────────────── */
+const PAGE_SIZE = 12;
+
 function ContractsPage() {
   const { user }   = useAuth();
   const navigate   = useNavigate();
+  const isAdminUser = user?.role === 'admin';
 
   const [contracts,    setContracts]    = useState([]);
   const [loading,      setLoading]      = useState(true);
@@ -576,54 +586,83 @@ function ContractsPage() {
   const [payTarget,    setPayTarget]    = useState(null);
   const [payPayments,  setPayPayments]  = useState([]);
   const [filterStatus, setFilterStatus] = useState('ALL');
+  const [page,         setPage]         = useState(0);
+  const [total,        setTotal]        = useState(0);
+  const [summary,      setSummary]      = useState(null);
 
   useEffect(() => {
     if (!user) { navigate('/login'); return; }
     if (user.role !== 'admin' && user.role !== 'tenant') navigate('/');
   }, [user, navigate]);
 
+  // Admins see every lease in the system, so the page asks the backend for one slice plus a
+  // GROUP BY of the totals; a tenant only ever has a handful of their own contracts.
   const fetchContracts = useCallback(async () => {
     setLoading(true); setError('');
     try {
+      if (isAdminUser) {
+        const status = filterStatus === 'ALL' ? undefined : filterStatus;
+        const [listRes, summaryRes] = await Promise.all([
+          rentApi.getManagedContracts({ status, page, size: PAGE_SIZE }),
+          rentApi.getContractSummary(),
+        ]);
+        setContracts(Array.isArray(listRes.data?.items) ? listRes.data.items : []);
+        setTotal(Number(listRes.data?.total) || 0);
+        setSummary(summaryRes.data && typeof summaryRes.data === 'object' ? summaryRes.data : null);
+        return;
+      }
       const res  = await rentApi.getAllContracts();
       const list = Array.isArray(res.data) ? res.data : [];
       setContracts(list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      setTotal(list.length);
+      setSummary(null);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load contracts.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAdminUser, filterStatus, page]);
 
   useEffect(() => { fetchContracts(); }, [fetchContracts]);
 
   const openPayModal = async (contract) => {
+    setError('');
     try {
       const res = await rentApi.getContractPayments(contract.contractId);
-      setPayPayments(res.data || []);
-    } catch {
-      setPayPayments([]);
+      setPayPayments(Array.isArray(res.data) ? res.data : []);
+      setPayTarget(contract);
+    } catch (err) {
+      // Opening the modal with an empty list would render "All installments paid" for a failure.
+      setError(err.response?.data?.message || 'Failed to load the payment schedule for this contract.');
     }
-    setPayTarget(contract);
   };
 
-  const allStatuses = [...new Set(contracts.map(c => c.contractStatus))];
-  const filtered    = filterStatus === 'ALL' ? contracts : contracts.filter(c => c.contractStatus === filterStatus);
+  // The backend has already filtered the admin page, so only the tenant view filters locally.
+  const filtered    = isAdminUser ? contracts : (filterStatus === 'ALL' ? contracts : contracts.filter(c => c.contractStatus === filterStatus));
 
-  const counts = { ALL: contracts.length };
-  allStatuses.forEach(s => { counts[s] = contracts.filter(c => c.contractStatus === s).length; });
+  const counts = isAdminUser && summary
+    ? { ALL: summary.total ?? 0, ACTIVE: summary.ACTIVE ?? 0, COMPLETED: summary.COMPLETED ?? 0, CANCELLED: summary.CANCELLED ?? 0, PENDING: summary.PENDING ?? 0 }
+    : (() => {
+        const local = { ALL: contracts.length };
+        [...new Set(contracts.map(c => c.contractStatus))].forEach(s => {
+          local[s] = contracts.filter(c => c.contractStatus === s).length;
+        });
+        return local;
+      })();
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const statusFilters = [
     { key: 'ALL', label: 'All', icon: '📋' },
     { key: 'ACTIVE',    label: 'Active',    icon: '✅' },
     { key: 'COMPLETED', label: 'Completed', icon: '🏁' },
     { key: 'CANCELLED', label: 'Cancelled', icon: '🚫' },
-    { key: 'EXPIRED',   label: 'Expired',   icon: '⏰' },
+    { key: 'PENDING',   label: 'Pending',   icon: '⏳' },
   ];
 
   return (
     <AnimatedPage>
-      <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-slate-50 pt-32 pb-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
 
           {/* Header */}
@@ -634,7 +673,7 @@ function ContractsPage() {
             <div>
               <Link
                 to={user?.role === 'admin' ? '/admin/dashboard' : '/tenant/dashboard'}
-                className="inline-flex items-center gap-1.5 text-slate-500 hover:text-sky-600 transition-colors text-sm font-semibold mb-3"
+                className="inline-flex items-center gap-1.5 text-slate-500 hover:text-sky-700 transition-colors text-sm font-semibold mb-3"
               >
                 ← Back to Dashboard
               </Link>
@@ -666,15 +705,15 @@ function ContractsPage() {
             {statusFilters.filter(s => s.key === 'ALL' || counts[s.key] > 0).map(s => (
               <button
                 key={s.key}
-                onClick={() => setFilterStatus(s.key)}
+                onClick={() => { setPage(0); setFilterStatus(s.key); }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-2xl border-2 font-bold text-sm transition-all ${filterStatus === s.key
                   ? 'border-sky-500 bg-sky-50 text-sky-700'
                   : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'}`}
               >
                 <span>{s.icon}</span>
                 <span>{s.label}</span>
-                <span className={`text-xs font-black px-2 py-0.5 rounded-full ${filterStatus === s.key ? 'bg-sky-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
-                  {counts[s.key] || 0}
+                <span className={`text-xs font-black px-2 py-0.5 rounded-full tabular-nums ${filterStatus === s.key ? 'bg-sky-700 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                  {(counts[s.key] || 0).toLocaleString('en-US')}
                 </span>
               </button>
             ))}
@@ -707,7 +746,7 @@ function ContractsPage() {
                   : 'Try a different status filter above.'}
               </p>
               {filterStatus === 'ALL' && user?.role === 'admin' && (
-                <Link to="/admin/requests" className="inline-block py-3 px-8 rounded-2xl bg-sky-500 text-white font-bold hover:bg-sky-600 transition-all">
+                <Link to="/admin/requests" className="inline-block py-3 px-8 rounded-2xl bg-sky-700 text-white font-bold hover:bg-sky-800 transition-all">
                   📬 View Requests
                 </Link>
               )}
@@ -716,17 +755,45 @@ function ContractsPage() {
 
           {/* Contracts grid */}
           {filtered.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              {filtered.map((c, i) => (
-                <ContractCard
-                  key={c.contractId}
-                  contract={c}
-                  index={i}
-                  role={user?.role}
-                  onPay={openPayModal}
-                />
-              ))}
-            </div>
+            <>
+              {isAdminUser && (
+                <p className="mb-4 text-sm text-slate-500 font-medium">
+                  {`Showing ${page * PAGE_SIZE + 1}–${page * PAGE_SIZE + contracts.length} of ${total.toLocaleString('en-US')}${filterStatus !== 'ALL' ? ` ${filterStatus.toLowerCase()}` : ''} contracts`}
+                </p>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {filtered.map((c, i) => (
+                  <ContractCard
+                    key={c.contractId}
+                    contract={c}
+                    index={i}
+                    role={user?.role}
+                    onPay={openPayModal}
+                  />
+                ))}
+              </div>
+              {isAdminUser && (
+                <div className="mt-8 flex items-center justify-between gap-3">
+                  <button
+                    onClick={() => setPage((p) => Math.max(0, p - 1))}
+                    disabled={page === 0 || loading}
+                    className="py-2.5 px-5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-100 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    ← Previous
+                  </button>
+                  <span className="text-sm font-semibold text-slate-500">
+                    Page {page + 1} of {totalPages.toLocaleString('en-US')}
+                  </span>
+                  <button
+                    onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                    disabled={page + 1 >= totalPages || loading}
+                    className="py-2.5 px-5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-100 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
-import { authApi } from "../utils/api";
+import { authApi, setUnauthorizedHandler } from "../utils/api";
 import { mapUserToFrontend } from "../utils/mappers";
 
 export const AuthContext = createContext();
@@ -24,6 +24,20 @@ export function AuthProvider({ children }) {
       sessionStorage.setItem("user", JSON.stringify(mapped));
     }
   }, []);
+
+  const clearSession = useCallback(() => {
+    setUser(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+    document.cookie = 'rentsphere_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  }, []);
+
+  useEffect(() => {
+    setUnauthorizedHandler(clearSession);
+    return () => setUnauthorizedHandler(null);
+  }, [clearSession]);
 
   
   
@@ -78,24 +92,20 @@ export function AuthProvider({ children }) {
       localStorage.setItem('token', cookieToken);
       
       (async () => {
-        try {
-          const refreshed = await refreshUser();
-          if (refreshed.success && refreshed.data) {
-            localStorage.setItem('user', JSON.stringify(refreshed.data));
-          }
-        } catch (e) {
-          
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
-          document.cookie = 'rentsphere_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-        } finally {
-          setInitializing(false);
+        const refreshed = await refreshUser();
+        if (refreshed.success && refreshed.data) {
+          localStorage.setItem('user', JSON.stringify(refreshed.data));
+        } else {
+          // refreshUser resolves instead of throwing, so a rejected token has to be dropped here
+          // or it would stay in localStorage and be re-sent on every later request.
+          clearSession();
         }
+        setInitializing(false);
       })();
     } else {
       setInitializing(false);
     }
-  }, [refreshUser]);
+  }, [refreshUser, clearSession]);
 
   
   
@@ -142,8 +152,7 @@ export function AuthProvider({ children }) {
 
       return { success: true };
     } catch (error) {
-      localStorage.removeItem("token");
-      sessionStorage.removeItem("token");
+      clearSession();
       const msg =
         error.response?.data?.message ||
         error.message ||
@@ -188,8 +197,7 @@ export function AuthProvider({ children }) {
 
       return { success: true };
     } catch (error) {
-      localStorage.removeItem('token');
-      sessionStorage.removeItem('token');
+      clearSession();
       const msg =
         error.response?.data?.message ||
         error.message ||
@@ -207,14 +215,9 @@ export function AuthProvider({ children }) {
     try {
       await authApi.logout();
     } catch (_error) {
-      
+      // The local session is dropped either way.
     } finally {
-      setUser(null);
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      sessionStorage.removeItem("token");
-      sessionStorage.removeItem("user");
-      document.cookie = 'rentsphere_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      clearSession();
     }
   };
 

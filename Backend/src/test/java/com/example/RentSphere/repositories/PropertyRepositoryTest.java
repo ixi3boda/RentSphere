@@ -28,15 +28,6 @@ class PropertyRepositoryTest {
     private PropertyRepository propertyRepository;
 
     @Test
-    @DisplayName("findAll returns list of properties with images")
-    void findAll_returnsProperties() {
-        List<PropertyDetails> list = propertyRepository.findAll();
-        assertThat(list).isNotEmpty();
-        
-        assertThat(list.size()).isGreaterThanOrEqualTo(2);
-    }
-
-    @Test
     @DisplayName("findById returns property details when exists")
     void findById_returnsProperty() {
         Optional<PropertyDetails> opt = propertyRepository.findById(1L);
@@ -101,11 +92,15 @@ class PropertyRepositoryTest {
     }
 
     @Test
-    @DisplayName("searchByPrefix finds matching properties")
-    void searchByPrefix_findsMatches() {
-        List<PropertyDetails> results = propertyRepository.searchByPrefix("Test");
-        assertThat(results).isNotEmpty();
-        assertThat(results.get(0).getProperty().getTitle()).contains("Test");
+    @DisplayName("filterProperties search term matches against title, city or district")
+    void filterProperties_searchMatchesTitleSubstring() {
+        PropertyRepository.PropertyFilter filter = new PropertyRepository.PropertyFilter(
+                "apart", null, null, null, null, null, null, null);
+
+        List<PropertyDetails> results = propertyRepository.filterProperties(filter, "newest", 12, 0);
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getProperty().getTitle()).contains("Apartment");
     }
 
     @Test
@@ -125,5 +120,51 @@ class PropertyRepositoryTest {
         List<Favorite> favorites = propertyRepository.getAllFavorites(2);
 
         assertThat(favorites).isNotEmpty();
+    }
+
+    private PropertyRepository.PropertyFilter filterOf(String city, String type, Double maxPrice) {
+        return new PropertyRepository.PropertyFilter(null, city, null, type, null, maxPrice, null, null);
+    }
+
+    @Test
+    @DisplayName("filterProperties matches a lowercase type against the uppercased stored value")
+    void filterProperties_lowerCaseTypeMatches() {
+        List<PropertyDetails> results = propertyRepository.filterProperties(
+                filterOf(null, "apartment", null), "newest", 12, 0);
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getProperty().getTitle()).isEqualTo("Test Apartment");
+    }
+
+    @Test
+    @DisplayName("countFilterProperties agrees with the rows the same filter returns")
+    void countFilterProperties_matchesFilteredRows() {
+        PropertyRepository.PropertyFilter filter = filterOf("Riyadh", null, null);
+
+        assertThat(propertyRepository.countFilterProperties(filter))
+                .isEqualTo(propertyRepository.filterProperties(filter, "newest", 12, 0).size());
+    }
+
+    @Test
+    @DisplayName("filterProperties orders by price and honours limit/offset")
+    void filterProperties_priceAscendingPagination() {
+        List<PropertyDetails> firstPage = propertyRepository.filterProperties(
+                filterOf(null, null, null), "price_asc", 1, 0);
+        List<PropertyDetails> secondPage = propertyRepository.filterProperties(
+                filterOf(null, null, null), "price_asc", 1, 1);
+
+        assertThat(firstPage.get(0).getProperty().getTitle()).isEqualTo("Test Apartment");
+        assertThat(secondPage.get(0).getProperty().getTitle()).isEqualTo("Luxury Villa");
+    }
+
+    @Test
+    @DisplayName("filterProperties ignores an unknown sort key instead of failing")
+    void filterProperties_unknownSortKeyFallsBack() {
+        List<PropertyDetails> results = propertyRepository.filterProperties(
+                filterOf(null, null, null), "price_asc; DROP TABLE properties", 12, 0);
+
+        assertThat(results).hasSize(2);
+        // The injected fragment must never reach ORDER BY, so the rows are still there
+        assertThat(propertyRepository.countAll()).isEqualTo(2);
     }
 }

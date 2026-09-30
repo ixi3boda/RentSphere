@@ -1,7 +1,6 @@
 package com.example.RentSphere.Dto;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +18,8 @@ public class User {
 
     private String email;
 
+    // Accepted on the way in so the same DTO can carry a password, never written to a response.
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password_hash;
 
     private String username;

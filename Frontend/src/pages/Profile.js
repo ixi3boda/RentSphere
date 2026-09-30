@@ -217,16 +217,15 @@ function Profile() {
 
   return (
     <AnimatedPage>
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen pt-32 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          {}
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-8"
           >
             <h1 className="text-4xl font-bold gradient-text mb-2">My Profile</h1>
-            <p className="text-gray-600">Manage your personal information</p>
+            <p className="text-slate-600">Manage your personal information</p>
           </motion.div>
 
           {fetchLoading ? (
@@ -236,13 +235,12 @@ function Profile() {
               className="flex justify-center items-center py-20"
             >
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rentsphere-teal mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading your profile...</p>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand mx-auto mb-4"></div>
+                <p className="text-slate-600">Loading your profile...</p>
               </div>
             </motion.div>
           ) : (
             <>
-              {}
               {successMessage && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
@@ -253,17 +251,14 @@ function Profile() {
                 </motion.div>
               )}
 
-              {}
               <motion.div
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="glass-effect rounded-2xl overflow-hidden shadow-2xl"
+                className="card rounded-2xl overflow-hidden shadow-2xl"
               >
-            {}
-            <div className="relative h-32 bg-gradient-to-r from-rentsphere-teal to-rentsphere-orange">
+            <div className="relative h-32 bg-gradient-to-r from-brand to-accent">
               <div className="absolute -bottom-12 left-8">
-                {}
                 <motion.div 
                   className={`relative ${isEditing ? 'cursor-pointer group' : ''}`}
                   whileHover={isEditing ? { scale: 1.05 } : {}}
@@ -277,22 +272,19 @@ function Profile() {
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full rounded-full bg-gradient-to-r from-rentsphere-teal to-rentsphere-orange flex items-center justify-center">
+                      <div className="w-full h-full rounded-full bg-gradient-to-r from-brand to-sky-800 flex items-center justify-center">
                         <span className="text-3xl text-white font-bold">
                           {formData.name ? formData.name.charAt(0).toUpperCase() : 'U'}
                         </span>
                       </div>
                     )}
                   </div>
-                  {}
-                  <div className="absolute top-0 right-0 w-6 h-6 rounded-full border-2 border-white shadow-lg bg-green-500" title="Online" />
                   {isEditing && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                       <span className="text-white text-xs font-semibold">Change</span>
                     </div>
                   )}
                 </motion.div>
-                {}
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -303,15 +295,14 @@ function Profile() {
               </div>
             </div>
 
-            {}
             <div className="pt-16 pb-8 px-8">
               {!isEditing ? (
                 
                 <div>
                   <div className="flex justify-between items-start mb-6">
                     <div>
-                      <h2 className="text-2xl font-bold text-gray-800">{formData.name || 'Not set'}</h2>
-                      <p className="text-gray-500">{formData.email}</p>
+                      <h2 className="text-2xl font-bold text-slate-800">{formData.name || 'Not set'}</h2>
+                      <p className="text-slate-500">{formData.email}</p>
                     </div>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -326,41 +317,45 @@ function Profile() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
                     <div className="space-y-4">
                       <div>
-                        <label className="text-sm text-gray-500">Username</label>
-                        <p className="text-gray-800 font-medium">{formData.username || 'Not set'}</p>
+                        <label className="text-sm text-slate-500">Username</label>
+                        <p className="text-slate-800 font-medium">{formData.username || 'Not set'}</p>
                       </div>
                       <div>
-                        <label className="text-sm text-gray-500">Email Address</label>
-                        <p className="text-gray-800 font-medium">{formData.email || 'Not set'}</p>
+                        <label className="text-sm text-slate-500">Email Address</label>
+                        <p className="text-slate-800 font-medium">{formData.email || 'Not set'}</p>
                       </div>
                       <div>
-                        <label className="text-sm text-gray-500">Phone Number</label>
-                        <p className="text-gray-800 font-medium">{formData.phone || 'Not provided'}</p>
+                        <label className="text-sm text-slate-500">Phone Number</label>
+                        <p className="text-slate-800 font-medium">{formData.phone || 'Not provided'}</p>
                       </div>
                     </div>
                     <div className="space-y-4">
                       <div>
-                        <label className="text-sm text-gray-500">Member Since</label>
-                        <p className="text-gray-800 font-medium">
+                        <label className="text-sm text-slate-500">Member Since</label>
+                        <p className="text-slate-800 font-medium">
                           {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm text-gray-500">Last Updated</label>
-                        <p className="text-gray-800 font-medium">
+                        <label className="text-sm text-slate-500">Last Updated</label>
+                        <p className="text-slate-800 font-medium">
                           {user?.updatedAt ? new Date(user.updatedAt).toLocaleString() : 'N/A'}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm text-gray-500">Account Type</label>
-                        <p className="text-gray-800 font-medium capitalize">
+                        <label className="text-sm text-slate-500">Account Type</label>
+                        <p className="text-slate-800 font-medium capitalize">
                           {user?.role === 'admin' ? '🔑 Property Admin' : user?.role === 'tenant' ? '🏠 Tenant' : '👤 Visitor'}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm text-gray-500">Account Status</label>
-                        <p className="text-gray-800 font-medium">
-                          <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-green-500"></span>Online</span>
+                        <label className="text-sm text-slate-500">Account Status</label>
+                        <p className="text-slate-800 font-medium">
+                          {/* is_active is the only account-state column the backend keeps. */}
+                          <span className="inline-flex items-center gap-2">
+                            <span className={`w-3 h-3 rounded-full ${user?.active ? 'bg-green-500' : 'bg-slate-400'}`}></span>
+                            {user?.active ? 'Active' : 'Inactive'}
+                          </span>
                         </p>
                       </div>
                     </div>
@@ -371,7 +366,7 @@ function Profile() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
                         Full Name *
                       </label>
                       <input
@@ -385,7 +380,7 @@ function Profile() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
                         Username *
                       </label>
                       <input
@@ -399,7 +394,7 @@ function Profile() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
                         Email Address *
                       </label>
                       <input
@@ -407,14 +402,14 @@ function Profile() {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        className="input-field bg-gray-50"
+                        className="input-field bg-slate-50"
                         disabled
                       />
-                      <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                      <p className="text-xs text-slate-500 mt-1">Email cannot be changed</p>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
                         Phone Number
                       </label>
                       <input
@@ -428,7 +423,6 @@ function Profile() {
                     </div>
                   </div>
 
-                  {}
                   <div className="bg-blue-50 rounded-lg p-4">
                     <p className="text-sm text-blue-800">
                       💡 Tip: Click on your profile picture above to upload a new image. 
@@ -461,30 +455,6 @@ function Profile() {
                   </div>
                 </form>
               )}
-            </div>
-          </motion.div>
-
-          {}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"
-          >
-            <div className="glass-effect rounded-xl p-6 text-center card-hover">
-              <div className="text-3xl mb-2">📊</div>
-              <div className="text-2xl font-bold text-rentsphere-teal">0</div>
-              <div className="text-gray-600">Active Listings</div>
-            </div>
-            <div className="glass-effect rounded-xl p-6 text-center card-hover">
-              <div className="text-3xl mb-2">🤝</div>
-              <div className="text-2xl font-bold text-rentsphere-teal">0</div>
-              <div className="text-gray-600">Active Contracts</div>
-            </div>
-            <div className="glass-effect rounded-xl p-6 text-center card-hover">
-              <div className="text-3xl mb-2">⭐</div>
-              <div className="text-2xl font-bold text-rentsphere-teal">0</div>
-              <div className="text-gray-600">Reviews</div>
             </div>
           </motion.div>
             </>

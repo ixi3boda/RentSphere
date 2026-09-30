@@ -111,4 +111,17 @@ class UserRepositoryTest {
         User updated = userRepository.findByEmail("visitor@test.com").get();
         assertThat(updated.getRole_name()).isEqualTo("TENANT");
     }
+
+    @Test
+    @DisplayName("promoteVisitorToTenant — promotes a VISITOR but never demotes ADMIN or TENANT")
+    void promoteVisitorToTenant_onlyAffectsVisitors() {
+        int adminId = userRepository.findByEmail("admin@test.com").get().getUser_id();
+        assertThat(userRepository.promoteVisitorToTenant(adminId)).isZero();
+        assertThat(userRepository.findByEmail("admin@test.com").get().getRole_name()).isEqualTo("ADMIN");
+
+        int visitorId = userRepository.findByEmail("visitor@test.com").get().getUser_id();
+        userRepository.updateRole(visitorId, "VISITOR");
+        assertThat(userRepository.promoteVisitorToTenant(visitorId)).isEqualTo(1);
+        assertThat(userRepository.findByEmail("visitor@test.com").get().getRole_name()).isEqualTo("TENANT");
+    }
 }

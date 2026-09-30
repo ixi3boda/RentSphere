@@ -82,15 +82,15 @@ describe('TenantDashboard', () => {
     });
   });
 
-  test('renders stat labels: Favorites, Viewed, Contracts', async () => {
+  test('renders stat labels: Favorites, Viewed, Active Leases', async () => {
     renderWithProviders(<TenantDashboard />, {
       authValue: { user: mockTenant, isAuthenticated: true, initializing: false },
     });
     await waitFor(() => {
-      // StatBlock renders raw text — CSS makes it uppercase visually but DOM text is lowercase
+      // StatBlock gets its uppercase look from CSS, so the DOM text keeps the passed-in casing
       expect(screen.getByText('Favorites')).toBeInTheDocument();
       expect(screen.getByText('Viewed')).toBeInTheDocument();
-      expect(screen.getByText('Contracts')).toBeInTheDocument();
+      expect(screen.getByText('Active Leases')).toBeInTheDocument();
     });
   });
 

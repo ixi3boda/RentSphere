@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -25,9 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        boolean shouldSkip = path.equals("/api/user/register") || path.startsWith("/api/user/login");
-        System.out.println("Path: " + path + " | Should skip filter: " + shouldSkip);
-        return shouldSkip;
+        return path.equals("/api/user/register") || path.startsWith("/api/user/login");
     }
 
 
@@ -66,8 +66,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            
-            
+            // The request continues anonymously; protected endpoints still reject it downstream.
+            log.debug("Discarded invalid bearer token for {}", request.getRequestURI(), e);
         }
         filterChain.doFilter(request, response);
     }

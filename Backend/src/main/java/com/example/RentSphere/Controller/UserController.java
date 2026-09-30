@@ -9,6 +9,7 @@ import com.example.RentSphere.Service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.RentSphere.Dto.UpdateProfileRequest;
@@ -41,24 +42,24 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
         try {
             return ResponseEntity.ok(userService.register(request));
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            return buildErrorResponse("Failed to register user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to register user", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest request) {
         try {
             return ResponseEntity.ok(userService.login(request));
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            return buildErrorResponse("Failed to login: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to login", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -70,12 +71,12 @@ public class UserController {
         } catch (IllegalStateException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
-            return buildErrorResponse("Failed to retrieve user details: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to retrieve user details", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PutMapping("/me")
-    public ResponseEntity<?> updateCurrentUser(Principal principal, @RequestBody UpdateProfileRequest request) {
+    public ResponseEntity<?> updateCurrentUser(Principal principal, @RequestBody @Valid UpdateProfileRequest request) {
         try {
             String email = getPrincipalEmail(principal);
             UpdateProfileResponse response = userService.updateCurrentUser(email, request);
@@ -85,7 +86,7 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            return buildErrorResponse("Failed to update profile: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to update profile", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -98,7 +99,7 @@ public class UserController {
         } catch (IllegalStateException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
-            return buildErrorResponse("Failed to logout user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildErrorResponse("Failed to logout user", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

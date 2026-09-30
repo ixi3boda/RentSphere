@@ -36,6 +36,8 @@ class PropertyControllerTest {
         @MockBean
         private PropertyService propertyService;
         @MockBean
+        private com.example.RentSphere.Service.ContractService contractService;
+        @MockBean
         private UserService userService;
         @MockBean
         private JwtService jwtService;
@@ -52,23 +54,28 @@ class PropertyControllerTest {
         
 
         @Test
-        @DisplayName("GET /all — 200 public endpoint returns list")
-        void getAll_public_returns200() throws Exception {
-                when(propertyService.getAll()).thenReturn(List.of(buildPropertyDetails()));
+        @DisplayName("GET /stats — public marketplace counts")
+        void getStats_public_returns200() throws Exception {
+                when(propertyService.countListings()).thenReturn(100001);
+                when(propertyService.countAvailableListings()).thenReturn(80001);
+                when(contractService.countActiveContracts()).thenReturn(3751);
 
-                mockMvc.perform(get("/api/properties/all"))
+                mockMvc.perform(get("/api/properties/stats"))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$").isArray())
-                                .andExpect(jsonPath("$[0].property.title").value("Test Apartment"));
+                                .andExpect(jsonPath("$.totalListings").value(100001))
+                                .andExpect(jsonPath("$.availableListings").value(80001))
+                                .andExpect(jsonPath("$.activeLeases").value(3751));
         }
 
         @Test
-        @DisplayName("GET /all — 500 when service throws")
-        void getAll_serviceError_returns500() throws Exception {
-                when(propertyService.getAll()).thenThrow(new RuntimeException("DB error"));
+        @DisplayName("GET /my — scoped to the caller, 401 without a token")
+        void getMyProperties_authenticated_returnsOwnOnly() throws Exception {
+                when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());
+                when(propertyService.getByOwnerId(2)).thenReturn(List.of(buildPropertyDetails()));
 
-                mockMvc.perform(get("/api/properties/all"))
-                                .andExpect(status().isInternalServerError());
+                mockMvc.perform(get("/api/properties/my").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("tenant@test.com")))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].property.propertyId").value(1));
         }
 
         
@@ -92,29 +99,42 @@ class PropertyControllerTest {
                                 .andExpect(status().isNotFound());
         }
 
-        
-
         @Test
-        @DisplayName("GET /search — 200 with results (public)")
-        void search_public_returns200() throws Exception {
-                when(propertyService.searchByPrefix("villa")).thenReturn(List.of(buildPropertyDetails()));
-
-                mockMvc.perform(get("/api/properties/search").param("prefix", "villa"))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$").isArray());
+        @DisplayName("GET /{id} — 400 when the id is not a number")
+        void getById_nonNumericId_returns400() throws Exception {
+                mockMvc.perform(get("/api/properties/abc"))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.message").value("Invalid value for 'id'"));
         }
-
-        
 
         @Test
         @DisplayName("GET /filter — 200 for city=Riyadh (public)")
         void filter_byCity_returns200() throws Exception {
-                when(propertyService.filterProperties(eq("Riyadh"), any(), any(), any(), any(), any()))
+                when(propertyService.countFilterProperties(any())).thenReturn(1);
+                when(propertyService.filterProperties(any(), anyString(), anyInt(), anyInt()))
                                 .thenReturn(List.of(buildPropertyDetails()));
 
                 mockMvc.perform(get("/api/properties/filter").param("city", "Riyadh"))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$[0].property.city").value("Riyadh"));
+                                .andExpect(jsonPath("$.total").value(1))
+                                .andExpect(jsonPath("$.items[0].property.city").value("Riyadh"));
+        }
+
+        @Test
+        @DisplayName("GET /filter — page and size are clamped, offset derived from page")
+        void filter_clampsPageSize() throws Exception {
+                when(propertyService.countFilterProperties(any())).thenReturn(0);
+                when(propertyService.filterProperties(any(), anyString(), eq(0), eq(48)))
+                                .thenReturn(List.of());
+
+                mockMvc.perform(get("/api/properties/filter")
+                                .param("page", "-5")
+                                .param("size", "100000"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.size").value(48))
+                                .andExpect(jsonPath("$.page").value(0));
+
+                verify(propertyService).filterProperties(any(), anyString(), eq(0), eq(48));
         }
 
         
@@ -291,5 +311,14 @@ class PropertyControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(body))
                                 .andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("Unmapped path — 404 rather than a server fault")
+        @WithMockUser(username = "someone@test.com", roles = { "TENANT" })
+        void unmappedPath_returns404() throws Exception {
+                mockMvc.perform(get("/api/definitely-not-an-endpoint"))
+                                .andExpect(status().isNotFound())
+                                .andExpect(jsonPath("$.message").value("No endpoint for this request"));
         }
 }

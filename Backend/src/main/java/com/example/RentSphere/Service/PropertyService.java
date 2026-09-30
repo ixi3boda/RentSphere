@@ -4,6 +4,7 @@ import com.example.RentSphere.Dto.CreatePropertyRequest;
 import com.example.RentSphere.Dto.Favorite;
 import com.example.RentSphere.Dto.PropertyDetails;
 import com.example.RentSphere.Dto.UpdatePropertyRequest;
+import com.example.RentSphere.Exception.ResourceNotFoundException;
 import com.example.RentSphere.Repository.PropertyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,13 +21,25 @@ public class PropertyService {
         return propertyRepository.addProperty(request, userId);
     }
 
-    public List<PropertyDetails> getAll() {
-        return propertyRepository.findAll();
+    public List<PropertyDetails> getByOwnerId(int ownerId) {
+        return propertyRepository.findByOwnerId(ownerId);
+    }
+
+    public int countListings() {
+        return propertyRepository.countAll();
+    }
+
+    public int countAvailableListings() {
+        return propertyRepository.countAvailable();
+    }
+
+    public List<String> getCities() {
+        return propertyRepository.findDistinctCities();
     }
 
     public PropertyDetails getById(Long id) {
         return propertyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Property not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Property not found: " + id));
     }
 
     public void addImage(Long propertyId, String imageUrl, boolean isCover) {
@@ -87,25 +100,16 @@ public class PropertyService {
     }
 
     public List<PropertyDetails> filterProperties(
-            String city,
-            String district,
-            Double minPrice,
-            Double maxPrice,
-            Integer numRooms,
-            Boolean isAvailable
+            PropertyRepository.PropertyFilter filter,
+            String sortBy,
+            int page,
+            int size
     ) {
-        return propertyRepository.filterProperties(
-                city,
-                district,
-                minPrice,
-                maxPrice,
-                numRooms,
-                isAvailable
-        );
+        return propertyRepository.filterProperties(filter, sortBy, size, page * size);
     }
 
-    public List<PropertyDetails> searchByPrefix(String prefix) {
-        return propertyRepository.searchByPrefix(prefix.trim());
+    public int countFilterProperties(PropertyRepository.PropertyFilter filter) {
+        return propertyRepository.countFilterProperties(filter);
     }
 
     public Favorite favorite(int propertyId, int tenantId) {

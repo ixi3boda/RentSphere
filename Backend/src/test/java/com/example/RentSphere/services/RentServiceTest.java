@@ -3,6 +3,7 @@ package com.example.RentSphere.services;
 import com.example.RentSphere.Dto.*;
 import com.example.RentSphere.Repository.RentRepository;
 import com.example.RentSphere.Service.ContractService;
+import com.example.RentSphere.Service.NotificationService;
 import com.example.RentSphere.Service.PropertyService;
 import com.example.RentSphere.Service.RentService;
 import com.example.RentSphere.fixtures.TestFixtures;
@@ -27,6 +28,7 @@ class RentServiceTest {
     @Mock private RentRepository rentRepository;
     @Mock private PropertyService propertyService;
     @Mock private ContractService contractService;
+    @Mock private NotificationService notificationService;
 
     @InjectMocks private RentService rentService;
 
@@ -90,6 +92,21 @@ class RentServiceTest {
         RentalRequest result = rentService.createRentalRequest(req, 2);
         assertThat(result.getReqStatus()).isEqualTo("PENDING");
         verify(rentRepository).createRentalRequest(req, 2);
+    }
+
+    @Test
+    @DisplayName("createRentalRequest — notifies the property owner")
+    void createRentalRequest_notifiesOwner() {
+        CreateRentalRequest req = TestFixtures.validCreateRentalRequest();
+        when(rentRepository.createRentalRequest(req, 2)).thenReturn(TestFixtures.pendingRentalRequest());
+
+        PropertyDetails pd = new PropertyDetails();
+        pd.setProperty(TestFixtures.testProperty());
+        when(propertyService.getById(1L)).thenReturn(pd);
+
+        rentService.createRentalRequest(req, 2);
+
+        verify(notificationService).createNotification(eq(1), eq("NEW_REQUEST"), contains("request #1"), anyString());
     }
 
     @Test
@@ -184,6 +201,7 @@ class RentServiceTest {
         Contract result = rentService.acceptRequest(1L, 1); 
         assertThat(result.getContractStatus()).isEqualTo("ACTIVE");
         verify(contractService).createContractForApprovedRequest(req, pd);
+        verify(notificationService).createNotification(eq(2), eq("REQUEST_ACCEPTED"), anyString(), anyString());
     }
 
     
@@ -236,10 +254,21 @@ class RentServiceTest {
     
 
     @Test
-    @DisplayName("getAllRentalRequests — returns list from repository")
-    void getAllRentalRequests_returnsList() {
-        when(rentRepository.findAll()).thenReturn(List.of(TestFixtures.pendingRentalRequest()));
-        List<RentalRequest> result = rentService.getAllRentalRequests();
+    @DisplayName("getRentalRequests — passes the page window through to the repository")
+    void getRentalRequests_returnsPage() {
+        when(rentRepository.findAll("PENDING", 20, 40)).thenReturn(List.of(TestFixtures.pendingRentalRequest()));
+
+        List<RentalRequest> result = rentService.getRentalRequests("PENDING", 20, 40);
+
         assertThat(result).hasSize(1);
+        verify(rentRepository).findAll("PENDING", 20, 40);
+    }
+
+    @Test
+    @DisplayName("requestStatusCounts — returns the repository grouping")
+    void requestStatusCounts_returnsGrouping() {
+        when(rentRepository.countRequestsByStatus()).thenReturn(java.util.Map.of("PENDING", 3));
+
+        assertThat(rentService.requestStatusCounts()).containsEntry("PENDING", 3);
     }
 }

@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS users (
     role_name     VARCHAR(50) NOT NULL DEFAULT 'VISITOR',
     is_active     BOOLEAN NOT NULL DEFAULT TRUE,
     created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_role_name CHECK (role_name IN ('TENANT', 'ADMIN', 'VISITOR'))
 );
 
 CREATE TABLE IF NOT EXISTS properties (
@@ -37,6 +38,7 @@ CREATE TABLE IF NOT EXISTS properties (
     is_available        BOOLEAN NOT NULL DEFAULT TRUE,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_type CHECK (property_type IN ('APARTMENT', 'STUDIO', 'VILLA', 'DUPLEX', 'OFFICE', 'SHOP', 'WAREHOUSE')),
     FOREIGN KEY (owner_id) REFERENCES users(user_id)
 );
 
@@ -69,6 +71,7 @@ CREATE TABLE IF NOT EXISTS rental_requests (
     reviewed_at    TIMESTAMP,
     created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_status CHECK (req_status IN ('PENDING', 'ACCEPTED', 'REJECTED', 'CANCELLED')),
     FOREIGN KEY (property_id) REFERENCES properties(property_id),
     FOREIGN KEY (tenant_id)   REFERENCES users(user_id)
 );
@@ -79,7 +82,7 @@ CREATE TABLE IF NOT EXISTS contracts (
     property_id       INT NOT NULL,
     owner_id          INT NOT NULL,
     tenant_id         INT NOT NULL,
-    contract_status   VARCHAR(30) NOT NULL DEFAULT 'PENDING_PAYMENT',
+    contract_status   VARCHAR(30) NOT NULL DEFAULT 'PENDING',
     rent_amount       DECIMAL(10,2) NOT NULL,
     duration_months   INT NOT NULL,
     start_date        DATE,
@@ -88,6 +91,9 @@ CREATE TABLE IF NOT EXISTS contracts (
     notes             TEXT,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_contract_status CHECK (contract_status IN ('PENDING', 'ACTIVE', 'COMPLETED', 'CANCELLED')),
+    CONSTRAINT chk_contracts_dates CHECK (end_date > start_date),
+    CONSTRAINT uq_contracts_request UNIQUE (rental_request_id),
     FOREIGN KEY (rental_request_id) REFERENCES rental_requests(rental_req_id),
     FOREIGN KEY (property_id)       REFERENCES properties(property_id),
     FOREIGN KEY (owner_id)          REFERENCES users(user_id),
@@ -107,6 +113,8 @@ CREATE TABLE IF NOT EXISTS payments (
     notes           TEXT,
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_payment_status CHECK (payment_status IN ('PENDING', 'PAID', 'OVERDUE', 'WAIVED')),
+    CONSTRAINT uq_payments_contract_installment UNIQUE (contract_id, installment_no),
     FOREIGN KEY (contract_id) REFERENCES contracts(contract_id)
 );
 
@@ -118,5 +126,6 @@ CREATE TABLE IF NOT EXISTS notifications (
     body              TEXT,
     is_read           BOOLEAN NOT NULL DEFAULT FALSE,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_noti_type CHECK (notification_type IN ('NEW_REQUEST','REQUEST_ACCEPTED','REQUEST_REJECTED','REQUEST_CANCELLED','CONTRACT_CREATED','CONTRACT_COMPLETED','PAYMENT_REMINDER','PAYMENT_RECEIVED')),
     FOREIGN KEY (recipient_id) REFERENCES users(user_id)
 );

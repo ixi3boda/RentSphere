@@ -54,8 +54,9 @@ function ImageCarousel({ images = [], autoPlay = false }) {
 
   if (!count) {
     return (
-      <div className="w-full h-72 rounded-2xl bg-gradient-to-br from-rentsphere-teal/10 to-rentsphere-orange/10 flex items-center justify-center">
-        <span className="text-6xl opacity-30">🏠</span>
+      <div className="w-full h-72 rounded-2xl bg-gradient-to-br from-slate-100 via-sky-50 to-slate-100 flex flex-col items-center justify-center gap-2">
+        <span className="text-5xl opacity-60">🏠</span>
+        <span className="text-[11px] font-bold uppercase tracking-widest text-slate-600">No photo yet</span>
       </div>
     );
   }
@@ -68,7 +69,6 @@ function ImageCarousel({ images = [], autoPlay = false }) {
 
   return (
     <div className="relative w-full rounded-2xl overflow-hidden select-none" style={{ aspectRatio: '16/9' }}>
-      {}
       <AnimatePresence initial={false} custom={direction}>
         <motion.img
           key={current}
@@ -88,17 +88,15 @@ function ImageCarousel({ images = [], autoPlay = false }) {
         />
       </AnimatePresence>
 
-      {}
       <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
 
-      {}
       {count > 1 && (
         <>
           <button
             onClick={prev}
             id="carousel-prev"
             aria-label="Previous image"
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-lg text-gray-700 hover:bg-white transition-all hover:scale-110 active:scale-95 z-10"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-lg text-slate-700 hover:bg-white transition-all hover:scale-110 active:scale-95 z-10"
           >
             ‹
           </button>
@@ -106,14 +104,13 @@ function ImageCarousel({ images = [], autoPlay = false }) {
             onClick={next}
             id="carousel-next"
             aria-label="Next image"
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-lg text-gray-700 hover:bg-white transition-all hover:scale-110 active:scale-95 z-10"
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-lg text-slate-700 hover:bg-white transition-all hover:scale-110 active:scale-95 z-10"
           >
             ›
           </button>
         </>
       )}
 
-      {}
       {count > 1 && (
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
           {images.map((_, i) => (
@@ -130,7 +127,6 @@ function ImageCarousel({ images = [], autoPlay = false }) {
         </div>
       )}
 
-      {}
       {count > 1 && (
         <span className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full z-10">
           {current + 1} / {count}

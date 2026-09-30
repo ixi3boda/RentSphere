@@ -5,6 +5,7 @@ import com.example.RentSphere.Dto.RentalRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -14,7 +15,10 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -63,9 +67,38 @@ public class RentRepository {
                 .orElseThrow(() -> new RuntimeException("Failed to read new rental request"));
     }
 
-    public List<RentalRequest> findAll() {
-        String sql = "SELECT * FROM rental_requests ORDER BY created_at DESC";
-        return jdbcTemplate.query(sql, rentalRequestMapper);
+    public List<RentalRequest> findAll(String status, int limit, int offset) {
+        List<Object> params = new ArrayList<>();
+        String sql = "SELECT * FROM rental_requests";
+        if (status != null && !status.isBlank()) {
+            sql += " WHERE req_status = ?";
+            params.add(status.trim().toUpperCase());
+        }
+        sql += " ORDER BY created_at DESC, rental_req_id DESC LIMIT ? OFFSET ?";
+        params.add(limit);
+        params.add(offset);
+        return jdbcTemplate.query(sql, rentalRequestMapper, params.toArray());
+    }
+
+    public int countRequests(String status) {
+        List<Object> params = new ArrayList<>();
+        String sql = "SELECT COUNT(*) FROM rental_requests";
+        if (status != null && !status.isBlank()) {
+            sql += " WHERE req_status = ?";
+            params.add(status.trim().toUpperCase());
+        }
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, params.toArray());
+        return count == null ? 0 : count;
+    }
+
+    public Map<String, Integer> countRequestsByStatus() {
+        Map<String, Integer> counts = new HashMap<>();
+        // Explicit RowCallbackHandler: a bare lambda here would bind to ResultSetExtractor, whose
+        // cursor sits before the first row, and reading it throws "No data is available".
+        jdbcTemplate.query(
+                "SELECT req_status, COUNT(*) AS c FROM rental_requests GROUP BY req_status",
+                (RowCallbackHandler) rs -> counts.put(rs.getString("req_status"), rs.getInt("c")));
+        return counts;
     }
 
     public Optional<RentalRequest> findById(Long id) {

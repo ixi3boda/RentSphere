@@ -42,19 +42,6 @@ class PropertyServiceTest {
     
 
     @Test
-    @DisplayName("getAll — returns list from repository")
-    void getAll_returnsList() {
-        PropertyDetails pd = new PropertyDetails();
-        pd.setProperty(TestFixtures.testProperty());
-        when(propertyRepository.findAll()).thenReturn(List.of(pd));
-
-        List<PropertyDetails> result = propertyService.getAll();
-        assertThat(result).hasSize(1);
-    }
-
-    
-
-    @Test
     @DisplayName("getById — returns PropertyDetails when found")
     void getById_returnsWhenFound() {
         PropertyDetails pd = new PropertyDetails();
@@ -176,15 +163,5 @@ class PropertyServiceTest {
         assertThatThrownBy(() -> propertyService.addImageByOwner(1L, "img.jpg", false, 77))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("do not have permission");
-    }
-
-    
-
-    @Test
-    @DisplayName("searchByPrefix — trims whitespace before querying")
-    void searchByPrefix_trimsInput() {
-        when(propertyRepository.searchByPrefix("villa")).thenReturn(List.of());
-        propertyService.searchByPrefix("  villa  ");
-        verify(propertyRepository).searchByPrefix("villa");
     }
 }

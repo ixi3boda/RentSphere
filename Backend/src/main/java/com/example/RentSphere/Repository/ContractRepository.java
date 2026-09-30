@@ -18,8 +18,12 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import org.springframework.jdbc.core.RowCallbackHandler;
 
 @Repository
 @RequiredArgsConstructor
@@ -68,9 +72,37 @@ public class ContractRepository {
             .amountDue(rs.getBigDecimal("amount_due"))
             .build();
 
-    public List<Contract> findAll() {
-        String sql = "SELECT * FROM contracts ORDER BY created_at DESC";
-        return jdbcTemplate.query(sql, contractMapper);
+    public List<Contract> findAll(String status, int limit, int offset) {
+        List<Object> params = new ArrayList<>();
+        String sql = "SELECT * FROM contracts";
+        if (status != null && !status.isBlank()) {
+            sql += " WHERE contract_status = ?";
+            params.add(status.trim().toUpperCase());
+        }
+        sql += " ORDER BY created_at DESC, contract_id DESC LIMIT ? OFFSET ?";
+        params.add(limit);
+        params.add(offset);
+        return jdbcTemplate.query(sql, contractMapper, params.toArray());
+    }
+
+    public int countContracts(String status) {
+        if (status == null || status.isBlank()) {
+            Integer total = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM contracts", Integer.class);
+            return total == null ? 0 : total;
+        }
+        Integer total = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM contracts WHERE contract_status = ?",
+                new Object[]{status.trim().toUpperCase()}, Integer.class);
+        return total == null ? 0 : total;
+    }
+
+    public Map<String, Integer> countContractsByStatus() {
+        Map<String, Integer> counts = new HashMap<>();
+        // Explicit RowCallbackHandler: a bare lambda here would bind to ResultSetExtractor, whose
+        // cursor sits before the first row, and reading it throws "No data is available".
+        jdbcTemplate.query("SELECT contract_status, COUNT(*) AS c FROM contracts GROUP BY contract_status",
+                (RowCallbackHandler) rs -> counts.put(rs.getString("contract_status"), rs.getInt("c")));
+        return counts;
     }
 
     public List<Contract> findByTenantId(Long tenantId) {
@@ -105,7 +137,7 @@ public class ContractRepository {
     public List<Contract> findActiveContractsToComplete(LocalDate today) {
         String sql = "SELECT c.* FROM contracts c " +
                 "WHERE c.contract_status = 'ACTIVE' AND c.end_date < ? " +
-                "AND NOT EXISTS (SELECT 1 FROM payments p WHERE p.contract_id = c.contract_id AND p.payment_status = 'PENDING')";
+                "AND NOT EXISTS (SELECT 1 FROM payments p WHERE p.contract_id = c.contract_id AND p.payment_status IN ('PENDING', 'OVERDUE'))";
         return jdbcTemplate.query(sql, new Object[]{Date.valueOf(today)}, contractMapper);
     }
 
@@ -116,7 +148,9 @@ public class ContractRepository {
     }
 
     public int cancelContract(Long contractId) {
-        String sql = "UPDATE contracts SET contract_status = 'CANCELLED', updated_at = NOW() WHERE contract_id = ?";
+        // A COMPLETED or already CANCELLED contract must not be reopened by the overdue sweep.
+        String sql = "UPDATE contracts SET contract_status = 'CANCELLED', updated_at = NOW() " +
+                "WHERE contract_id = ? AND contract_status IN ('ACTIVE', 'PENDING')";
         return jdbcTemplate.update(sql, contractId);
     }
 
@@ -176,8 +210,9 @@ public class ContractRepository {
         }
     }
 
+    // Overdue installments stay payable, so both statuses count as outstanding.
     public Optional<PaymentDto> findNextPendingPayment(Long contractId) {
-        String sql = "SELECT * FROM payments WHERE contract_id = ? AND payment_status = 'PENDING' ORDER BY installment_no LIMIT 1";
+        String sql = "SELECT * FROM payments WHERE contract_id = ? AND payment_status IN ('PENDING', 'OVERDUE') ORDER BY installment_no LIMIT 1";
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new Object[]{contractId}, paymentMapper));
         } catch (EmptyResultDataAccessException e) {
@@ -186,7 +221,7 @@ public class ContractRepository {
     }
 
     public Optional<PaymentDto> findPendingPaymentByInstallmentNo(Long contractId, int installmentNo) {
-        String sql = "SELECT * FROM payments WHERE contract_id = ? AND installment_no = ? AND payment_status = 'PENDING'";
+        String sql = "SELECT * FROM payments WHERE contract_id = ? AND installment_no = ? AND payment_status IN ('PENDING', 'OVERDUE')";
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new Object[]{contractId, installmentNo}, paymentMapper));
         } catch (EmptyResultDataAccessException e) {
@@ -194,9 +229,10 @@ public class ContractRepository {
         }
     }
 
+    // Only an unsettled installment can be paid; never overwrite REFUNDED / WAIVED / PAID.
     public int markPaymentPaid(Long contractId, int installmentNo, BigDecimal amountPaid, String transactionRef) {
         String sql = "UPDATE payments SET payment_status = 'PAID', amount_paid = ?, transaction_ref = ?, paid_date = NOW(), updated_at = NOW() " +
-                "WHERE contract_id = ? AND installment_no = ?";
+                "WHERE contract_id = ? AND installment_no = ? AND payment_status IN ('PENDING', 'OVERDUE')";
         return jdbcTemplate.update(sql, amountPaid, transactionRef, contractId, installmentNo);
     }
 
@@ -205,8 +241,21 @@ public class ContractRepository {
         return jdbcTemplate.queryForObject(sql, new Object[]{contractId}, Integer.class);
     }
 
+    public int countContractsByStatus(String status) {
+        String sql = "SELECT COUNT(*) FROM contracts WHERE contract_status = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, new Object[]{status}, Integer.class);
+        return count == null ? 0 : count;
+    }
+
+    // A contract is only finished once nothing is still owed; OVERDUE rows count too.
+    public int countUnsettledPayments(Long contractId) {
+        String sql = "SELECT COUNT(*) FROM payments WHERE contract_id = ? AND payment_status IN ('PENDING', 'OVERDUE')";
+        return jdbcTemplate.queryForObject(sql, new Object[]{contractId}, Integer.class);
+    }
+
     public int completeContract(Long contractId) {
-        String sql = "UPDATE contracts SET contract_status = 'COMPLETED', updated_at = NOW() WHERE contract_id = ?";
+        String sql = "UPDATE contracts SET contract_status = 'COMPLETED', updated_at = NOW() " +
+                "WHERE contract_id = ? AND contract_status = 'ACTIVE'";
         return jdbcTemplate.update(sql, contractId);
     }
 

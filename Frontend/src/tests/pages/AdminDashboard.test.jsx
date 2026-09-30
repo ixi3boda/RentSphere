@@ -135,14 +135,15 @@ describe('AdminDashboard', () => {
     });
   });
 
-  test('Stats section renders Properties label', async () => {
+  test('Stats section renders My Listings label', async () => {
     renderWithProviders(<AdminDashboard />, {
       authValue: { user: mockAdmin, isAuthenticated: true },
       propertyValue: defaultPropertyCtx(),
     });
     await waitFor(() => {
-      // StatsCard renders label with uppercase tracking via CSS; DOM text is normal case
-      expect(screen.getByText('Properties')).toBeInTheDocument();
+      // The heading over the listings table shares the label, so assert on the stat card's value
+      const card = screen.getAllByText('My Listings')[0].closest('div');
+      expect(card).toHaveTextContent('0');
     });
   });
 });
