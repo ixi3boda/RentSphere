@@ -7,7 +7,7 @@
 import axios from "axios";
 
 // Empty in Docker/dev, where nginx or the CRA proxy serves /api on the same origin. Set at build
-// time when the SPA is hosted apart from the API (see render.yaml).
+// time when the SPA is hosted apart from the API (e.g. a separate static host).
 const BASE = process.env.REACT_APP_API_URL || "";
 
 
@@ -102,7 +102,7 @@ export const propertyApi = {
   getFavorites: () => apiClient.get("/api/properties/favorites/all"),
 
   
-  // Sends image as JSON body — base64 strings are too large for URL query params
+  // Sends image as JSON body - base64 strings are too large for URL query params
   addImage: (id, image_url, is_cover = false) =>
     apiClient.post(`/api/properties/${id}/images/add`, { image_url, is_cover }),
 };
