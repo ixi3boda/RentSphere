@@ -35,7 +35,7 @@ services:
         value: sandbox
       # Must equal the static site's URL below; change both if Render suffixes the names
       - key: RENTSPHERE_CORS_ALLOWED_ORIGINS
-        value: https://rentsphere.onrender.com
+        value: https://rentsphere-5jpa.onrender.com
 
   - type: web
     name: rentsphere

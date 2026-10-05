@@ -2,7 +2,8 @@
 
 A full-stack property rental platform connecting **landlords** and **tenants** with an end-to-end workflow for listing, filtering, booking, automated contract scheduling, and payment settlement.
 
-[![OpenAPI / Swagger](https://img.shields.io/badge/OpenAPI%203.0-Swagger%20UI-10b981?style=for-the-badge&logo=swagger)](http://localhost:8080/swagger-ui/index.html)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-rentsphere--5jpa.onrender.com-0284c7?style=for-the-badge&logo=render)](https://rentsphere-5jpa.onrender.com)
+[![OpenAPI / Swagger](https://img.shields.io/badge/OpenAPI%203.0-Swagger%20UI-10b981?style=for-the-badge&logo=swagger)](https://rentsphere-api.onrender.com/swagger-ui/index.html)
 [![Backend Tests](https://img.shields.io/badge/Backend%20Tests-207%20Passed-brightgreen?style=for-the-badge&logo=junit5)](Backend/)
 [![Frontend Tests](https://img.shields.io/badge/Frontend%20Tests-67%20Passed-brightgreen?style=for-the-badge&logo=jest)](Frontend/)
 [![Code Coverage](https://img.shields.io/badge/Coverage-JaCoCo%20%3E70%25-success?style=for-the-badge)](Backend/target/site/jacoco/index.html)
@@ -13,21 +14,20 @@ A full-stack property rental platform connecting **landlords** and **tenants** w
 
 ## Try it
 
-There is no always-on public instance right now: the AWS free-tier account this ran on has
-expired. Two ways to see it running:
+**Live demo: <https://rentsphere-5jpa.onrender.com>** — log in with one of the demo accounts
+below. It runs on free tiers (Render + Aiven MySQL), so the API sleeps after 15 idle minutes
+and the first request after a pause takes about a minute; after that it is fast.
 
-- **Locally, one command** — `docker compose up --build`, then load the sample data
-  ([Getting Started](#getting-started)). The whole stack is up in a few minutes.
-- **Hosted for free** — [`render.yaml`](render.yaml) deploys the API and the React build to
-  Render's free plan against a free Aiven MySQL instance
-  ([Free-tier deployment](#free-tier-deployment-render--aiven-mysql)).
+| Resource | Live | Local (Docker) |
+|---|---|---|
+| Web application | <https://rentsphere-5jpa.onrender.com> | `http://localhost` |
+| Swagger UI | <https://rentsphere-api.onrender.com/swagger-ui/index.html> | `http://localhost:8080/swagger-ui/index.html` |
+| OpenAPI 3.0 spec | <https://rentsphere-api.onrender.com/v3/api-docs> | `http://localhost:8080/v3/api-docs` |
+| Actuator health | <https://rentsphere-api.onrender.com/actuator/health> | `http://localhost:8080/actuator/health` |
 
-| Resource | Local (Docker) |
-|---|---|
-| Web application | `http://localhost` |
-| Swagger UI | `http://localhost:8080/swagger-ui/index.html` |
-| OpenAPI 3.0 spec | `http://localhost:8080/v3/api-docs` |
-| Actuator health | `http://localhost:8080/actuator/health` |
+It was first deployed on AWS EC2 ([runbook below](#aws-ec2-deployment-with-github-actions-cd));
+the live instance moved to free tiers when that account's free period ended. To run it yourself,
+`docker compose up --build` and load the sample data ([Getting Started](#getting-started)).
 
 ### Demo accounts
 Created by [`Database/seed-demo.sql`](Database/seed-demo.sql); all share the password
@@ -245,7 +245,8 @@ docker compose down -v
 
 ## Free-tier deployment (Render + Aiven MySQL)
 
-A zero-cost way to keep a public demo up. No card is needed for either service.
+How the live demo is hosted, at zero cost. Aiven needs no card; Render asks for one to verify
+the account but the services below stay on its free plan.
 
 | Piece | Where | Notes |
 |---|---|---|
@@ -267,7 +268,8 @@ trades them for a free host.
    ```
 
 2. **Services.** In Render choose **New → Blueprint**, pick this repository, and fill in the
-   values [`render.yaml`](render.yaml) asks for:
+   values [`render.yaml`](render.yaml) asks for (or create the web service and the static site
+   by hand with the same settings):
 
    | Variable | Value |
    |---|---|
