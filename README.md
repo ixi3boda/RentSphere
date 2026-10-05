@@ -81,8 +81,10 @@ Test plan, seed script, raw results and JMeter screenshots: [Performance/](Perfo
   (`MaxRAMPercentage`, `SerialGC`) and a smaller Hikari pool
 - **Local:** Docker Compose runs MySQL (with a health check), the API, the frontend and the
   Nginx proxy. Backend and frontend images are multi-stage builds
-- **VM:** `deploy/setup-ec2.sh` sets up a fresh Ubuntu server (Docker, swap, firewall,
-  generated secrets) and starts the stack, and the CI pipeline has an SSH deploy job for it
+- **AWS EC2 (first deploy):** before Render, the whole Compose stack ran on an EC2 instance.
+  `deploy/setup-ec2.sh` sets up a fresh Ubuntu server (Docker, swap, firewall, generated
+  secrets) and starts it, and the CI pipeline has an SSH deploy job for it. I moved to Render
+  when the AWS free tier ran out
 
 ## Tests and CI
 
