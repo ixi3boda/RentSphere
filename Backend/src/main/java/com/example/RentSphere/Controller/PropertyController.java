@@ -22,6 +22,23 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * REST controller for property listing operations.
+ *
+ * <p>All endpoints are mapped under {@code /api/properties}. Public endpoints
+ * (browse, filter, single-listing detail) require no authentication. Owner-level
+ * mutations (create, update, delete, add image) require the caller to be authenticated
+ * and — for update/delete — to be the property owner. Creating a listing is
+ * additionally restricted to users with the {@code ADMIN} role.
+ *
+ * <p>Ownership checks are delegated to the service layer; this controller is
+ * responsible only for HTTP mapping and error-to-status translation.
+ *
+ * <p>The browse/filter endpoint ({@code GET /filter}) caps the page size at
+ * {@value #MAX_PAGE_SIZE} to prevent unbounded responses on large datasets.
+ * Search is handled via MySQL {@code MATCH...AGAINST} on the {@code idx_properties_fulltext}
+ * index (defined in {@code Database/Schema.sql}) when the term is two or more characters.
+ */
 @RestController
 @RequestMapping("/api/properties")
 @RequiredArgsConstructor
@@ -184,6 +201,29 @@ public class PropertyController {
         }
     }
 
+    /**
+     * Returns a paginated, filtered view of the property catalogue.
+     *
+     * <p>All parameters are optional; omitting them returns all available properties,
+     * newest-first, paginated at the default size of 12. Sort order is validated against
+     * a whitelist in the repository to prevent SQL injection via the {@code ORDER BY} clause.
+     *
+     * <p>The response envelope includes {@code items}, {@code total}, {@code page}, and
+     * {@code size} so the UI can render accurate pagination without a separate count request.
+     *
+     * @param search       free-text term matched against title, city, district, and description
+     * @param city         exact city name filter
+     * @param district     exact district name filter
+     * @param propertyType one of the values in the {@code chk_type} CHECK constraint
+     * @param minPrice     minimum monthly rent (inclusive)
+     * @param maxPrice     maximum monthly rent (inclusive)
+     * @param numRooms     exact room count filter
+     * @param isAvailable  {@code true} to show only available listings
+     * @param sortBy       sort key — one of {@code newest}, {@code price_asc}, {@code price_desc}
+     * @param page         zero-based page number (defaults to 0)
+     * @param size         page size, clamped to [{@code 1}, {@value #MAX_PAGE_SIZE}] (defaults to 12)
+     * @return paginated result envelope
+     */
     @GetMapping("/filter")
     public ResponseEntity<?> filterProperties(
             @RequestParam(required = false) String search,

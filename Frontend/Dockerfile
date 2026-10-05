@@ -1,20 +1,17 @@
-# Use an official Node.js runtime as a parent image
-FROM node:18-alpine
-
-# Set the working directory in the container
+# Build the static bundle
+FROM node:20-alpine AS build
 WORKDIR /app
 
-# Copy package.json and package-lock.json
 COPY package*.json ./
+RUN npm ci
 
-# Install project dependencies
-RUN npm install
-
-# Copy the rest of the application code
 COPY . .
+RUN npm run build
 
-# Expose port 3000 to the outside world
+# Serve it with nginx; no Node process or dev server in the running image
+FROM nginx:alpine
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/build /usr/share/nginx/html
+
 EXPOSE 3000
-
-# Command to run the application in development mode
-CMD ["npm", "start"]

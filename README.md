@@ -1,8 +1,65 @@
 # RentSphere — Property Rental Platform
 
-A full-stack property rental platform connecting **landlords** and **tenants** with a seamless experience for listing, browsing, booking, and managing rental properties.
+A full-stack property rental platform connecting **landlords** and **tenants** with an end-to-end workflow for listing, filtering, booking, automated contract scheduling, and payment settlement.
 
-> **Stack:** Spring Boot · React.js · MySQL · JWT · Docker Compose
+[![OpenAPI / Swagger](https://img.shields.io/badge/OpenAPI%203.0-Swagger%20UI-10b981?style=for-the-badge&logo=swagger)](http://localhost:8080/swagger-ui/index.html)
+[![Backend Tests](https://img.shields.io/badge/Backend%20Tests-207%20Passed-brightgreen?style=for-the-badge&logo=junit5)](Backend/)
+[![Frontend Tests](https://img.shields.io/badge/Frontend%20Tests-67%20Passed-brightgreen?style=for-the-badge&logo=jest)](Frontend/)
+[![Code Coverage](https://img.shields.io/badge/Coverage-JaCoCo%20%3E70%25-success?style=for-the-badge)](Backend/target/site/jacoco/index.html)
+
+> **Core Stack:** Java 17 · Spring Boot 3.4.3 · Spring JDBC (`JdbcTemplate`) · MySQL 8.0 · React.js · Tailwind CSS · Nginx · Docker Compose
+
+---
+
+## Try it
+
+There is no always-on public instance right now: the AWS free-tier account this ran on has
+expired. Two ways to see it running:
+
+- **Locally, one command** — `docker compose up --build`, then load the sample data
+  ([Getting Started](#getting-started)). The whole stack is up in a few minutes.
+- **Hosted for free** — [`render.yaml`](render.yaml) deploys the API and the React build to
+  Render's free plan against a free Aiven MySQL instance
+  ([Free-tier deployment](#free-tier-deployment-render--aiven-mysql)).
+
+| Resource | Local (Docker) |
+|---|---|
+| Web application | `http://localhost` |
+| Swagger UI | `http://localhost:8080/swagger-ui/index.html` |
+| OpenAPI 3.0 spec | `http://localhost:8080/v3/api-docs` |
+| Actuator health | `http://localhost:8080/actuator/health` |
+
+### Demo accounts
+Created by [`Database/seed-demo.sql`](Database/seed-demo.sql); all share the password
+`RentSphereDemo2026` (public on purpose — it only exists in a database seeded from that file).
+
+| Role | Email | What it shows |
+|---|---|---|
+| Owner (`ADMIN`) | `nour.elsayed@nilenest.demo` | Admin console, nine listings, incoming request queue, lease management |
+| Tenant | `youssef.farouk@mail.demo` | An active lease with paid and pending instalments, saved listings, one pending and one rejected request |
+| Tenant | `salma.abdelnabi@mail.demo` | An active lease, two pending requests |
+
+The full list is in [`docs/SAMPLE-DATA.md`](docs/SAMPLE-DATA.md).
+
+---
+
+## 💡 Why I Built This & Engineering Takeaways
+
+Most full-stack tutorials stop at simple CRUD with high-level ORM abstractions that hide query execution costs. I built RentSphere to dive deep into production-grade backend engineering: eliminating query amplification under load, architecting normalized relational schemas with strict data integrity, building stateless JWT security with RBAC, implementing distributed correlation tracing, and tuning database performance with real Apache JMeter load tests.
+
+### Key Engineering Takeaways:
+1. **Eliminating N+1 Query Cascades (80× Latency Drop):**
+   - *Problem:* Fetching property cards alongside multiple images initially triggered separate image lookups per listing — resulting in over **28,500 queries** during free-text browse benchmarks.
+   - *Solution:* Replaced single-record loops with chunked batch hydration (`WHERE property_id IN (...)` in [`PropertyRepository.java`](Backend/src/main/java/com/example/RentSphere/Repository/PropertyRepository.java)), reducing database round trips to constant time and slashing browse latency from **1,808 ms to 22 ms**.
+2. **Paging the search path, then indexing it:**
+   - *Problem:* The free-text search returned every match (14,286 rows for `office`) and cost **8,036 ms** per request at 50 users.
+   - *Solution:* `LIMIT ? OFFSET ?` with a capped page size brought the measured mean to **82 ms**. The remaining cost was an unanchored `LIKE '%term%'`, which `EXPLAIN` showed as a full scan, so the query now uses `MATCH(...) AGAINST(... IN BOOLEAN MODE)` over a `FULLTEXT` index in [`Database/Schema.sql`](Database/Schema.sql), with a `LIKE` fallback for the H2 test database. The full-text change has not been load-tested yet, so the 82 ms figure is the paging result only.
+3. **Centralized exception handling:**
+   - A single [`GlobalExceptionHandler`](Backend/src/main/java/com/example/RentSphere/Exception/GlobalExceptionHandler.java) (`@RestControllerAdvice`) returns one [`ErrorResponse`](Backend/src/main/java/com/example/RentSphere/Dto/ErrorResponse.java) JSON shape across all 31 endpoints. Internal SQL exceptions, class names, and stack traces are suppressed from callers and safely logged at WARN/ERROR.
+4. **End-to-End Request Tracing (MDC Correlation IDs):**
+   - [`MdcLoggingFilter`](Backend/src/main/java/com/example/RentSphere/SecurityConfig/MdcLoggingFilter.java) runs at `HIGHEST_PRECEDENCE` and stamps every inbound HTTP request with a unique `X-Correlation-ID` header into SLF4J MDC. Coupled with Logstash JSON logging ([`logback-spring.xml`](Backend/src/main/resources/logback-spring.xml)), logs can be aggregated in ELK, Datadog, or CloudWatch with single-query trace reconstruction.
+5. **Edge Rate Limiting with Nginx:**
+   - Configured an Nginx reverse-proxy edge with token-bucket rate limiting (`10 r/s` with a burst of `20 nodelay`) on `/api/` to absorb burst traffic, protect authentication endpoints from credential-stuffing, and defend database connection pools against exhaustion.
 
 ---
 
@@ -86,7 +143,7 @@ A lease with its monthly instalment schedule and the pay action.
 | Database   | MySQL 8.0                           |
 | Auth       | JWT (JSON Web Tokens)               |
 | Payments   | PayPal REST + mock card settlement  |
-| DevOps     | Docker, Docker Compose              |
+| DevOps     | Docker, Docker Compose, Nginx, GitHub Actions; AWS EC2 and Render deployment paths |
 | Performance | Apache JMeter 5.6.3, MySQL `EXPLAIN` |
 | Build Tool | Maven                               |
 
@@ -120,12 +177,14 @@ RentSphere/
 │   ├── rentsphere-load-test.jmx
 │   ├── db-benchmark.sql
 │   └── proof/                  # JMeter GUI screenshots + session log
+├── deploy/setup-ec2.sh         # EC2 provisioning script
+├── render.yaml                 # Free-tier deployment blueprint (Render + Aiven MySQL)
 └── docker-compose.yml          # Full stack orchestration
 ```
 
 ---
 
-##  Getting Started
+## Getting Started
 
 ### Prerequisites
 - [Docker](https://www.docker.com/) & Docker Compose
@@ -184,6 +243,118 @@ docker compose down -v
 
 ---
 
+## Free-tier deployment (Render + Aiven MySQL)
+
+A zero-cost way to keep a public demo up. No card is needed for either service.
+
+| Piece | Where | Notes |
+|---|---|---|
+| Spring Boot API | Render free web service, built from [`Backend/Dockerfile`](Backend/Dockerfile) | 512 MB / 0.1 CPU; sleeps after 15 idle minutes, so the first request after a pause takes about a minute |
+| React build | Render static site | Calls the API through `REACT_APP_API_URL`; CORS is opened for that one origin |
+| MySQL 8 | Aiven free plan | Real MySQL, so the `FULLTEXT` index and `CHECK` constraints behave as they do locally |
+
+The Nginx edge and its rate limit are part of the Compose and EC2 topology only; this path
+trades them for a free host.
+
+1. **Database.** Create a free MySQL service at [aiven.io](https://aiven.io), then load the
+   schema and sample data with the host, port and `avnadmin` password from its overview page:
+
+   ```bash
+   docker run --rm -i mysql:8.0 mysql -h <HOST> -P <PORT> -u avnadmin -p<PASSWORD> \
+     --ssl-mode=REQUIRED defaultdb < Database/Schema.sql
+   docker run --rm -i mysql:8.0 mysql -h <HOST> -P <PORT> -u avnadmin -p<PASSWORD> \
+     --ssl-mode=REQUIRED defaultdb < Database/seed-demo.sql
+   ```
+
+2. **Services.** In Render choose **New → Blueprint**, pick this repository, and fill in the
+   values [`render.yaml`](render.yaml) asks for:
+
+   | Variable | Value |
+   |---|---|
+   | `SPRING_DATASOURCE_URL` | `jdbc:mysql://<HOST>:<PORT>/defaultdb?sslMode=REQUIRED` |
+   | `SPRING_DATASOURCE_USERNAME` / `_PASSWORD` | `avnadmin` and its password |
+   | `PAYPAL_CLIENT_ID` / `_SECRET` | PayPal sandbox app credentials |
+
+3. **URLs.** If Render had to add a suffix to either service name, update
+   `REACT_APP_API_URL` on the static site and `RENTSPHERE_CORS_ALLOWED_ORIGINS` on the API to
+   the real URLs and redeploy both.
+
+---
+
+## AWS EC2 deployment (with GitHub Actions CD)
+
+The single-host topology: the whole Compose stack on one EC2 instance, redeployed over SSH by
+the `deploy-to-ec2` job in [`ci.yml`](.github/workflows/ci.yml). The job is a no-op until the
+three repository secrets in step 3 exist.
+
+### Architecture on AWS
+- **Host:** AWS EC2 instance running Ubuntu 24.04 / 22.04 LTS (e.g., `t3.small` or `t2.micro` free tier).
+- **Edge Proxy:** Nginx edge container listening on port `80`, routing `/api/`, `/actuator/`, and `/swagger-ui/` to Spring Boot (`:8080`), and all other requests to the nginx container serving the React build (`:3000`).
+- **Database:** MySQL 8.0 container on an internal Docker bridge network with data persisted to a Docker volume.
+- **CI/CD:** GitHub Actions triggers on every push to `main` — running 207 backend JUnit tests, 67 React Jest tests, Docker build verification, and automated SSH deployment to EC2.
+
+---
+
+### Step 1: Launch an AWS EC2 Instance
+
+1. In the **AWS Management Console**, navigate to **EC2** → **Launch Instance**.
+2. **Name:** `RentSphere-Production`
+3. **OS Image (AMI):** Ubuntu Server 24.04 LTS or 22.04 LTS (64-bit x86).
+4. **Instance Type:** `t3.small` (2 vCPU, 2GB RAM — recommended) or `t2.micro` (1 vCPU, 1GB RAM — free tier eligible).
+5. **Key Pair:** Select or create a new key pair (e.g. `rentsphere-ec2.pem`). Download and keep this file safe.
+6. **Network Settings (Security Group):**
+   - Allow **SSH** (Port 22) from your IP or `0.0.0.0/0`.
+   - Allow **HTTP** (Port 80) from `0.0.0.0/0`.
+   - Allow **HTTPS** (Port 443) from `0.0.0.0/0`.
+7. **Storage:** 20 GiB gp3.
+8. Click **Launch Instance**.
+
+---
+
+### Step 2: One-Command Automated Provisioning
+
+Once your instance is running, connect via SSH from your local machine:
+
+```bash
+chmod 400 rentsphere-ec2.pem
+ssh -i rentsphere-ec2.pem ubuntu@<YOUR-EC2-PUBLIC-IP>
+```
+
+Run the automated provisioning script:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/ixi3boda/RentSphere/main/deploy/setup-ec2.sh | bash
+```
+
+**What the script does automatically:**
+- Sets up a **2GB swapfile** if RAM < 3GB (prevents out-of-memory errors on `t2.micro` during container builds).
+- Installs Docker CE, Docker Compose plugin, and Git.
+- Configures the UFW firewall (ports 22, 80, 443).
+- Clones `RentSphere`, creates a production `.env` with strong random secrets (`openssl rand -hex 32`).
+- Builds and starts the Docker Compose stack.
+- Waits for the MySQL health check and loads [`Database/seed-demo.sql`](Database/seed-demo.sql).
+
+The application is then served at `http://<YOUR-EC2-PUBLIC-IP>/`.
+
+---
+
+### Step 3: Setup Automated Continuous Deployment (GitHub Actions)
+
+To automatically deploy new code whenever you push to `main`:
+
+1. On GitHub, go to your repository: **Settings** → **Secrets and variables** → **Actions**.
+2. Click **New repository secret** and add the following 3 secrets:
+
+| Secret Name | Value | Example |
+|---|---|---|
+| `EC2_HOST` | Your EC2 instance public IPv4 address or Elastic IP | `54.210.123.45` |
+| `EC2_USER` | The default SSH username for your AMI | `ubuntu` |
+| `EC2_SSH_KEY` | Entire content of your `.pem` private key file | `-----BEGIN RSA PRIVATE KEY----- ...` |
+
+3. Push any commit to `main`. The [`deploy-to-ec2`](.github/workflows/ci.yml) workflow will automatically build, test, and deploy the update to your live EC2 instance with zero manual intervention.
+
+---
+
 ##  Local Configuration
 
 All credentials come from a gitignored `.env` at the repo root — nothing secret is committed, and
@@ -206,11 +377,17 @@ cp .env.example .env
 
 ---
 
-##  API Overview
+## 📡 API Architecture & OpenAPI Documentation
 
-31 operations over 30 paths. The full OpenAPI document is served at
-[`/v3/api-docs`](http://localhost:8080/v3/api-docs) and browsable at
-[`/swagger-ui/index.html`](http://localhost:8080/swagger-ui/index.html).
+RentSphere exposes **31 REST operations over 30 paths**, structured with strict DTO separation and Spring Security method-level authorization.
+
+- **Interactive Swagger UI:** [`http://localhost:8080/swagger-ui/index.html`](http://localhost:8080/swagger-ui/index.html) *(or via edge proxy at `/swagger-ui/index.html`)*
+- **OpenAPI 3.0 Raw JSON Spec:** [`http://localhost:8080/v3/api-docs`](http://localhost:8080/v3/api-docs)
+
+> **Testing Protected Endpoints in Swagger UI:**
+> 1. Call `POST /api/user/login` with `{"email": "nour.elsayed@nilenest.demo", "password_hash": "RentSphereDemo2026"}`.
+> 2. Copy the `token` string from the JSON response.
+> 3. Click the **Authorize 🔓** button at the top right of Swagger UI, paste the token into the value field, and click **Authorize**. All subsequent requests will automatically include the `Authorization: Bearer <token>` header.
 
 ### Auth and profile
 
@@ -330,14 +507,118 @@ apart — not a stale baseline.
    which is what protects the un-paged `findByOwnerId`.
 3. **Index prune.** `EXPLAIN` against the real query shapes showed 6 of 18 indexes were unused
    by the read path, so they were dropped — smaller write amplification, same reads.
-
-The measurements are separated in [`Performance/README.md`](Performance/README.md), including the
-run that isolates paging from batching. What is left is documented there too: the free-text
-search is an unanchored `LIKE '%term%'`, which `EXPLAIN` reports as a full scan of ~98,821 rows
-plus a filesort — no index fixes that, and the next step is a `FULLTEXT` index.
+4. **Full-text index (added after the run above, not yet re-measured).** With paging in place
+   the search still ran an unanchored `LIKE '%term%'`, which `EXPLAIN` reports as a full scan of
+   ~98,821 rows plus a filesort. It now runs `MATCH(...) AGAINST(? IN BOOLEAN MODE)` over
+   `FULLTEXT idx_properties_fulltext (title, city, district, property_description)`, with a
+   dialect check so the H2 tests keep using `LIKE`. The table above predates this change.
 
 Reproduce it in about ten minutes with the runbook in
 [`Performance/README.md`](Performance/README.md).
+
+---
+
+## 🛡️ Edge Rate Limiting & Nginx Architecture
+
+RentSphere deploys an Nginx reverse proxy edge container ([`Nginx/nginx.conf`](Nginx/nginx.conf)) sitting in front of both the Spring Boot API and the React SPA.
+
+### Rate Limiting Strategy
+To protect the backend database connection pools and mitigate denial-of-service or brute-force credential attacks, Nginx enforces a leaky/token-bucket rate-limiting zone on all API routes:
+
+```nginx
+# Zone allocated with 10MB of state (~160,000 unique IP tracking addresses)
+limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
+
+location /api/ {
+    limit_req zone=api_limit burst=20 nodelay;
+    proxy_pass http://backend_service;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+- **Sustained rate:** `10 requests/second` per IP address.
+- **Burst capacity:** Up to `20 requests` processed with `nodelay` to gracefully absorb legitimate UI spikes (e.g. concurrent dashboard card fetches).
+- **Security Headers:** Every response is stamped with `X-Frame-Options SAMEORIGIN`, `X-Content-Type-Options nosniff`, `X-XSS-Protection "1; mode=block"`, and `Referrer-Policy no-referrer-when-downgrade`.
+
+---
+
+## ⚠️ Centralized Exception Handling & Standard Error Schema
+
+All exceptions thrown across controllers, services, repositories, or Spring Security filters are intercepted by [`GlobalExceptionHandler`](Backend/src/main/java/com/example/RentSphere/Exception/GlobalExceptionHandler.java) (`@RestControllerAdvice`).
+
+### Standardized RFC-Compliant Error Response
+Clients receive a uniform, predictable JSON error contract ([`ErrorResponse`](Backend/src/main/java/com/example/RentSphere/Dto/ErrorResponse.java)):
+
+```json
+{
+  "message": "Validation failed for input fields",
+  "status": 400,
+  "error": "Bad Request",
+  "timestamp": "2026-10-01T14:30:00",
+  "errors": {
+    "pricePerMonth": "must be greater than 0",
+    "propertyType": "propertyType cannot be blank"
+  }
+}
+```
+
+### Exception Mapping Hierarchy
+| Exception Class | HTTP Status | Response Description | Security / Operational Behavior |
+|---|---|---|---|
+| `MethodArgumentNotValidException` | `400 Bad Request` | Validation failed for input fields | Extracts all field-level constraint violations into the `errors` map |
+| `BadRequestException` | `400 Bad Request` | Semantic validation message | Raised when business invariants are violated |
+| `PaymentProcessingException` | `400 Bad Request` | Payment gateway error | Handles PayPal failures or amount mismatches |
+| `IllegalArgumentException` | `400 Bad Request` | Argument error message | Service-level guard validation |
+| `MethodArgumentTypeMismatchException` | `400 Bad Request` | `Invalid value for '<param>'` | Catches malformed path variables (e.g. `/api/properties/abc`) |
+| `DataIntegrityViolationException` | `400 Bad Request` | `The request conflicts with a data constraint` | Logs raw SQL constraint error at `WARN`; suppresses DB internals from caller |
+| `HttpMessageNotReadableException` | `400 Bad Request` | `Request body could not be read` | Suppresses Jackson internals and deserialization details |
+| `UnauthorizedAccessException`, `IllegalStateException` | `401 Unauthorized` | Caller authentication required | Unauthenticated or missing principal |
+| `AccessDeniedException` | `403 Forbidden` | `Access denied: <reason>` | Caller lacks the necessary role (e.g. `VISITOR` calling owner endpoints) |
+| `ResourceNotFoundException`, `NoResourceFoundException` | `404 Not Found` | Entity / endpoint not found | Returned when an ID or route does not exist |
+| `DuplicateResourceException` | `409 Conflict` | Conflict description | Returned when an email or unique constraint already exists |
+| `HttpRequestMethodNotSupportedException` | `405 Method Not Allowed` | `Unsupported method for this endpoint` | HTTP verb mismatch on an existing path |
+| `Exception` (catch-all) | `500 Internal Server Error` | `An unexpected server error occurred` | Logs full stack trace at `ERROR`; zero internal details leaked |
+
+---
+
+## 📊 Structured Logging & Observability (MDC & Actuator)
+
+Production observability requires single-pane distributed request correlation and machine-readable log streams.
+
+1. **MDC Correlation IDs (`X-Correlation-ID`):**
+   - [`MdcLoggingFilter`](Backend/src/main/java/com/example/RentSphere/SecurityConfig/MdcLoggingFilter.java) executes at `Ordered.HIGHEST_PRECEDENCE` on every request.
+   - If an upstream gateway (Nginx / API Gateway) provides an `X-Correlation-ID`, it is preserved; otherwise, a new `UUID` is generated.
+   - The ID is stored in SLF4J `MDC` under `correlationId` and echoed back in the response headers.
+   - The `finally` block guarantees `MDC.remove()` cleanup, preventing ID pollution across thread-pool reuse.
+
+2. **Structured JSON Logging:**
+   - [`logback-spring.xml`](Backend/src/main/resources/logback-spring.xml) configures Logstash Logback Encoder (`net.logstash.logback.encoder.LogstashEncoder`).
+   - In production profile (`spring.profiles.active=prod`), logs are output as single-line JSON objects with ISO-8601 timestamps, severity, logger name, thread, and top-level `correlationId`, ready for direct ingestion by ELK, Datadog, Grafana Loki, or AWS CloudWatch.
+
+3. **Spring Boot Actuator Health & Metrics:**
+   - Active health check at [`/actuator/health`](http://localhost:8080/actuator/health) (validating DB connectivity and disk space).
+   - Application metrics available at [`/actuator/metrics`](http://localhost:8080/actuator/metrics).
+
+---
+
+## 📚 Backend Javadoc Documentation
+
+Every backend module is documented with Java Standard Edition compliant Javadocs, explaining architectural responsibilities, method preconditions, lifecycle flows, and database constraint couplings.
+
+- **Controllers:** Endpoint HTTP mappings, query parameter rules, role authorization levels, and response semantics.
+- **Services:** Lifecycle transitions (e.g., rental request approval generating monthly instalment schedules), payment verification guards, and notification deduplication.
+- **Repositories:** SQL queries, parameterized statements, batching strategies (`buildPropertyDetailsBatch`), and pagination clauses.
+- **Security & Filters:** Stateless JWT lifecycle, CORS policy headers, MDC request tracing, and exception interceptors.
+
+### Generate the Javadoc Site:
+```bash
+cd Backend
+./mvnw javadoc:javadoc
+# Open target/reports/apidocs/index.html in your browser
+```
 
 ---
 

@@ -6,7 +6,9 @@
 
 import axios from "axios";
 
-const BASE = "";
+// Empty in Docker/dev, where nginx or the CRA proxy serves /api on the same origin. Set at build
+// time when the SPA is hosted apart from the API (see render.yaml).
+const BASE = process.env.REACT_APP_API_URL || "";
 
 
 

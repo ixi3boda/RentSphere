@@ -98,3 +98,47 @@ jobs:
         run: |
           docker compose config
           docker compose build
+
+  deploy-to-ec2:
+    name: Continuous Deployment to AWS EC2
+    needs: [backend-test-build, frontend-test-build, docker-build]
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to AWS EC2 via SSH
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          if [ -z "$EC2_HOST" ] || [ -z "$EC2_SSH_KEY" ]; then
+            echo "::notice ::AWS EC2 secrets (EC2_HOST, EC2_SSH_KEY) not configured in GitHub Secrets. Skipping automated deploy step."
+            exit 0
+          fi
+
+          SSH_USER="${EC2_USER:-ubuntu}"
+          mkdir -p ~/.ssh
+          echo "$EC2_SSH_KEY" > ~/.ssh/ec2_key.pem
+          chmod 600 ~/.ssh/ec2_key.pem
+          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
+
+          ssh -i ~/.ssh/ec2_key.pem -o StrictHostKeyChecking=no "${SSH_USER}@${EC2_HOST}" << 'EOF'
+            set -e
+            PROJECT_DIR="$HOME/RentSphere"
+            if [ ! -d "$PROJECT_DIR" ]; then
+              git clone https://github.com/ixi3boda/RentSphere.git "$PROJECT_DIR"
+              cd "$PROJECT_DIR"
+              chmod +x deploy/setup-ec2.sh
+              ./deploy/setup-ec2.sh
+            else
+              cd "$PROJECT_DIR"
+              git fetch origin main
+              git reset --hard origin/main
+              docker compose build --parallel
+              docker compose up -d --remove-orphans
+              docker system prune -f
+            fi
+            sleep 5
+            curl -fsSL http://localhost/actuator/health || true
+          EOF

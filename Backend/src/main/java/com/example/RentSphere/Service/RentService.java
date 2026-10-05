@@ -14,6 +14,23 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Business-logic layer for rental request management.
+ *
+ * <p>A rental request is a tenant's expression of interest in a listing. The lifecycle
+ * is: {@code PENDING} → {@code ACCEPTED} or {@code REJECTED} (by the property owner),
+ * with the scheduler able to move PENDING requests to {@code CANCELLED} on overdue
+ * payments after a contract is created.
+ *
+ * <p>On acceptance, this service delegates to {@link ContractService} to create the
+ * contract and the monthly payment schedule in the same transaction, and to
+ * {@link NotificationService} to inform the tenant. All notifications are deduplicated
+ * by {@code (recipient, type, title)} so re-running the same flow is safe.
+ *
+ * <p>Ownership rules: only the property owner may accept or reject a request, and only
+ * while the request is still {@code PENDING}. These checks are enforced here rather
+ * than in the controller to keep HTTP concerns out of the business layer.
+ */
 @Service
 @RequiredArgsConstructor
 public class RentService {

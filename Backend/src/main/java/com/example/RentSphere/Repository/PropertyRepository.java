@@ -19,6 +19,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * JDBC data access repository for {@code properties}, {@code property_images}, and {@code favorites}.
+ *
+ * <p>Key architectural optimizations:
+ * <ul>
+ *   <li>Batched image retrieval ({@link #buildPropertyDetailsBatch}) resolving N+1 query amplification</li>
+ *   <li>Dynamic indexed SQL filtering with limit/offset pagination</li>
+ *   <li>MySQL {@code FULLTEXT} boolean search integration with graceful test dialect fallback</li>
+ * </ul>
+ */
 @Repository
 @RequiredArgsConstructor
 public class PropertyRepository {
@@ -327,15 +337,48 @@ public class PropertyRepository {
             "price_desc", "price_per_month DESC, property_id DESC"
     );
 
+    private volatile Boolean fullTextSupported = null;
+
+    private boolean isFullTextSupported() {
+        if (fullTextSupported == null) {
+            synchronized (this) {
+                if (fullTextSupported == null) {
+                    try {
+                        if (jdbcTemplate.getDataSource() != null) {
+                            try (var conn = jdbcTemplate.getDataSource().getConnection()) {
+                                String dbName = conn.getMetaData().getDatabaseProductName();
+                                fullTextSupported = dbName != null && (dbName.toLowerCase().contains("mysql") || dbName.toLowerCase().contains("mariadb"));
+                            }
+                        } else {
+                            fullTextSupported = false;
+                        }
+                    } catch (Exception e) {
+                        fullTextSupported = false;
+                    }
+                }
+            }
+        }
+        return fullTextSupported;
+    }
+
     private String buildFilterWhere(PropertyFilter filter, List<Object> params) {
         StringBuilder sql = new StringBuilder(" WHERE 1=1 ");
 
         if (filter.search() != null && !filter.search().isBlank()) {
-            sql.append(" AND (LOWER(title) LIKE ? OR LOWER(city) LIKE ? OR LOWER(district) LIKE ?) ");
-            String like = "%" + filter.search().trim().toLowerCase() + "%";
-            params.add(like);
-            params.add(like);
-            params.add(like);
+            String term = filter.search().trim();
+            // FULLTEXT MATCH..AGAINST uses idx_properties_fulltext and avoids the full-table scan
+            // that LIKE '%term%' caused. MySQL's minimum token length is 2 chars by default; for
+            // single-character inputs or test environments (e.g. H2) we fall back to LIKE so short queries still work.
+            if (isFullTextSupported() && term.length() >= 2) {
+                sql.append(" AND MATCH(title, city, district, property_description) AGAINST (? IN BOOLEAN MODE) ");
+                params.add("+" + term + "*");
+            } else {
+                sql.append(" AND (LOWER(title) LIKE ? OR LOWER(city) LIKE ? OR LOWER(district) LIKE ?) ");
+                String like = "%" + term.toLowerCase() + "%";
+                params.add(like);
+                params.add(like);
+                params.add(like);
+            }
         }
 
         if (filter.city() != null && !filter.city().isBlank()) {

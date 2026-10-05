@@ -10,12 +10,34 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Servlet filter that authenticates inbound requests using JWT bearer tokens.
+ *
+ * <p>On every request that carries an {@code Authorization: Bearer <token>} header:
+ * <ol>
+ *   <li>The token is parsed and the subject (email) is extracted via {@link JwtService}.</li>
+ *   <li>The email is used to load the {@link UserDetails} from the database.</li>
+ *   <li>If the token is valid (signature correct and not expired), a
+ *       {@link UsernamePasswordAuthenticationToken} is placed in the
+ *       {@link SecurityContextHolder} for the duration of the request.</li>
+ * </ol>
+ *
+ * <p>If the token is absent, malformed, or expired the filter does NOT reject the request
+ * outright — it simply leaves the {@code SecurityContext} empty and lets the
+ * downstream {@link SecurityFilterChain} decide whether the anonymous request is
+ * allowed. This means public endpoints continue to work without any token.
+ *
+ * <p>The register and login paths are excluded from filtering via
+ * {@link #shouldNotFilter} to avoid unnecessary database lookups for unauthenticated
+ * requests.
+ */
 @Component
 @Slf4j
 @RequiredArgsConstructor

@@ -9,6 +9,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Data transfer object representing a rental contract row in the {@code contracts} table.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

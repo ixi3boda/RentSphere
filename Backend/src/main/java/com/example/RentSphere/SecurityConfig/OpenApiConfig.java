@@ -10,9 +10,20 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration for OpenAPI 3 / Swagger documentation generation via Springdoc.
+ *
+ * <p>Registers the API metadata and sets up the global HTTP Bearer JWT security scheme
+ * so requests can be authorized directly inside the Swagger UI interface.
+ */
 @Configuration
 public class OpenApiConfig {
 
+    /**
+     * Creates and configures the {@link OpenAPI} metadata and security components.
+     *
+     * @return the configured {@link OpenAPI} model bean
+     */
     @Bean
     public OpenAPI rentSphereOpenAPI() {
         final String securitySchemeName = "bearerAuth";
