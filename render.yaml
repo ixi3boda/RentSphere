@@ -1,0 +1,54 @@
+# Render Blueprint: free-tier demo deployment.
+#   rentsphere-api  Spring Boot container built from Backend/Dockerfile
+#   rentsphere      React build served from Render's CDN
+# MySQL is external (Aiven free plan) because Render has no managed MySQL.
+# Walkthrough: README.md, "Free-tier deployment".
+services:
+  - type: web
+    name: rentsphere-api
+    runtime: docker
+    plan: free
+    rootDir: Backend
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SERVER_PORT
+        value: 10000
+      # 512 MB instance: cap the heap and use the low-footprint collector
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=65 -XX:+UseSerialGC -Xss512k
+      - key: SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+        value: 5
+      # jdbc:mysql://<host>:<port>/defaultdb?sslMode=REQUIRED
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: PAYPAL_MODE
+        value: sandbox
+      # Must equal the static site's URL below; change both if Render suffixes the names
+      - key: RENTSPHERE_CORS_ALLOWED_ORIGINS
+        value: https://rentsphere-5jpa.onrender.com
+
+  - type: web
+    name: rentsphere
+    runtime: static
+    rootDir: Frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: REACT_APP_API_URL
+        value: https://rentsphere-api.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

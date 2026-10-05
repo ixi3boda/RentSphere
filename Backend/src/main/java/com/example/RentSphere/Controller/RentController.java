@@ -21,6 +21,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,6 +30,27 @@ import java.util.Map;
 import com.example.RentSphere.Dto.CreditCardPaymentRequest;
 import com.example.RentSphere.Dto.CreditCardPaymentResponse;
 
+/**
+ * REST controller for the full rental lifecycle: requests, contracts, and payments.
+ *
+ * <p>All endpoints are mapped under {@code /api/rent}. Access rules are enforced in
+ * two tiers:
+ * <ol>
+ *   <li><strong>Role tier</strong> - some endpoints are restricted to {@code ADMIN} via
+ *       {@code @PreAuthorize}; public read endpoints like the property browse list live
+ *       in {@link PropertyController} and are open.
+ *   <li><strong>Ownership tier</strong> - accept/reject requires the caller to be the
+ *       property owner; payment requires the caller to be the contract tenant (or an admin).
+ *       These checks are enforced in the service layer rather than here.
+ * </ol>
+ *
+ * <p>Payment endpoints support both PayPal (two-step: {@code POST /paypal} → redirect →
+ * {@code POST /paypal/execute}) and a mock credit-card path ({@code POST /card-payment})
+ * for testing without a live PayPal account.
+ *
+ * <p>All paged list responses follow the same envelope shape:
+ * {@code { items, total, page, size }}.
+ */
 @RestController
 @RequestMapping("/api/rent")
 @RequiredArgsConstructor

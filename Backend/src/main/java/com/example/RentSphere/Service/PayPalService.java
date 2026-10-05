@@ -13,6 +13,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Adapter for the PayPal REST API v1 payments API.
+ *
+ * <p>PayPal's approval-redirect flow is two steps:
+ * <ol>
+ *   <li>{@link #createPayment} - creates a {@code sale} intent payment and returns an
+ *       approval URL. The client redirects the user to this URL to log in to PayPal and
+ *       approve the payment.</li>
+ *   <li>{@link #executePayment} - called after PayPal redirects back to the success URL
+ *       with {@code paymentId} and {@code PayerID} query parameters. This captures the
+ *       money and moves the payment to {@code approved} state.</li>
+ * </ol>
+ *
+ * <p>The {@code paypal.mode} property controls whether calls go to the PayPal sandbox
+ * ({@code sandbox}) or live environment ({@code live}). All credentials are injected
+ * from the environment and never hard-coded.
+ *
+ * <p>Note: this service creates a new {@link com.paypal.base.rest.APIContext} per call
+ * because the PayPal SDK's context is not thread-safe.
+ */
 @Service
 @RequiredArgsConstructor
 public class PayPalService {

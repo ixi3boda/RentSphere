@@ -13,6 +13,20 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * REST controller for the in-app notification system.
+ *
+ * <p>Exposes two endpoints under {@code /api/notifications}:
+ * <ul>
+ *   <li>{@code GET /my} - returns all notifications for the authenticated user,
+ *       ordered newest-first.</li>
+ *   <li>{@code PUT /{id}/read} - marks a single notification as read; the
+ *       recipient ownership check is enforced in the repository layer.</li>
+ * </ul>
+ *
+ * <p>Notifications are created exclusively by service-layer methods (never by controllers
+ * or the client), so there are no creation endpoints here.
+ */
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
