@@ -19,16 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * JDBC data access repository for {@code properties}, {@code property_images}, and {@code favorites}.
- *
- * <p>Key architectural optimizations:
- * <ul>
- *   <li>Batched image retrieval ({@link #buildPropertyDetailsBatch}) resolving N+1 query amplification</li>
- *   <li>Dynamic indexed SQL filtering with limit/offset pagination</li>
- *   <li>MySQL {@code FULLTEXT} boolean search integration with graceful test dialect fallback</li>
- * </ul>
- */
 @Repository
 @RequiredArgsConstructor
 public class PropertyRepository {

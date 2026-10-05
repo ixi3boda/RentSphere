@@ -113,7 +113,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("promoteVisitorToTenant — promotes a VISITOR but never demotes ADMIN or TENANT")
+    @DisplayName("promoteVisitorToTenant - promotes a VISITOR but never demotes ADMIN or TENANT")
     void promoteVisitorToTenant_onlyAffectsVisitors() {
         int adminId = userRepository.findByEmail("admin@test.com").get().getUser_id();
         assertThat(userRepository.promoteVisitorToTenant(adminId)).isZero();

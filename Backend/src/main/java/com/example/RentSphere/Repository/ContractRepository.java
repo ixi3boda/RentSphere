@@ -25,12 +25,6 @@ import java.util.Map;
 import java.util.Optional;
 import org.springframework.jdbc.core.RowCallbackHandler;
 
-/**
- * JDBC data access repository for the {@code contracts} and {@code payments} tables.
- *
- * <p>Handles contract creation upon request approval, installment generation, payment settlement,
- * schedule queries, and scheduled lifecycle sweeps (e.g. overdue cancellation and completion).
- */
 @Repository
 @RequiredArgsConstructor
 public class ContractRepository {

@@ -28,7 +28,7 @@ class PropertyServiceTest {
     
 
     @Test
-    @DisplayName("addProperty — delegates to repository")
+    @DisplayName("addProperty - delegates to repository")
     void addProperty_delegatesToRepository() {
         CreatePropertyRequest req = TestFixtures.validCreatePropertyRequest();
         PropertyDetails expected = new PropertyDetails();
@@ -42,7 +42,7 @@ class PropertyServiceTest {
     
 
     @Test
-    @DisplayName("getById — returns PropertyDetails when found")
+    @DisplayName("getById - returns PropertyDetails when found")
     void getById_returnsWhenFound() {
         PropertyDetails pd = new PropertyDetails();
         pd.setProperty(TestFixtures.testProperty());
@@ -53,7 +53,7 @@ class PropertyServiceTest {
     }
 
     @Test
-    @DisplayName("getById — throws RuntimeException when not found")
+    @DisplayName("getById - throws RuntimeException when not found")
     void getById_throwsWhenNotFound() {
         when(propertyRepository.findById(999L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> propertyService.getById(999L))
@@ -64,7 +64,7 @@ class PropertyServiceTest {
     
 
     @Test
-    @DisplayName("updateByOwner — succeeds when caller is the owner")
+    @DisplayName("updateByOwner - succeeds when caller is the owner")
     void updateByOwner_succeeds_whenCallerIsOwner() {
         Property prop = TestFixtures.testProperty(); 
         PropertyDetails pd = new PropertyDetails();
@@ -79,7 +79,7 @@ class PropertyServiceTest {
     }
 
     @Test
-    @DisplayName("updateByOwner — throws when caller is not the owner")
+    @DisplayName("updateByOwner - throws when caller is not the owner")
     void updateByOwner_throws_whenNotOwner() {
         Property prop = TestFixtures.testProperty(); 
         PropertyDetails pd = new PropertyDetails();
@@ -93,7 +93,7 @@ class PropertyServiceTest {
     }
 
     @Test
-    @DisplayName("update — throws when null payload")
+    @DisplayName("update - throws when null payload")
     void update_throws_whenNullPayload() {
         assertThatThrownBy(() -> propertyService.update(1L, null))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -101,7 +101,7 @@ class PropertyServiceTest {
     }
 
     @Test
-    @DisplayName("update — throws RuntimeException when no rows updated (not found)")
+    @DisplayName("update - throws RuntimeException when no rows updated (not found)")
     void update_throws_whenNotFound() {
         when(propertyRepository.update(eq(999L), any())).thenReturn(0);
         UpdatePropertyRequest req = UpdatePropertyRequest.builder().title("X").build();
@@ -113,7 +113,7 @@ class PropertyServiceTest {
     
 
     @Test
-    @DisplayName("deleteByOwner — succeeds when caller is the owner")
+    @DisplayName("deleteByOwner - succeeds when caller is the owner")
     void deleteByOwner_succeeds_whenCallerIsOwner() {
         Property prop = TestFixtures.testProperty(); 
         PropertyDetails pd = new PropertyDetails();
@@ -126,7 +126,7 @@ class PropertyServiceTest {
     }
 
     @Test
-    @DisplayName("deleteByOwner — throws when caller is not the owner")
+    @DisplayName("deleteByOwner - throws when caller is not the owner")
     void deleteByOwner_throws_whenNotOwner() {
         Property prop = TestFixtures.testProperty(); 
         PropertyDetails pd = new PropertyDetails();
@@ -141,7 +141,7 @@ class PropertyServiceTest {
     
 
     @Test
-    @DisplayName("addImageByOwner — allows owner to add image")
+    @DisplayName("addImageByOwner - allows owner to add image")
     void addImageByOwner_allowsOwner() {
         Property prop = TestFixtures.testProperty(); 
         PropertyDetails pd = new PropertyDetails();
@@ -153,7 +153,7 @@ class PropertyServiceTest {
     }
 
     @Test
-    @DisplayName("addImageByOwner — throws when non-owner tries")
+    @DisplayName("addImageByOwner - throws when non-owner tries")
     void addImageByOwner_throwsWhenNotOwner() {
         Property prop = TestFixtures.testProperty(); 
         PropertyDetails pd = new PropertyDetails();

@@ -18,7 +18,7 @@ function Home() {
               From Browsing To A Paid <span className="gradient-text">Instalment</span>
             </h2>
             <p className="text-slate-600 font-medium text-lg">
-              Every feature below maps to an endpoint and a table in this system — nothing here is aspirational.
+              Search, request, sign and pay, all in one place.
             </p>
           </div>
 

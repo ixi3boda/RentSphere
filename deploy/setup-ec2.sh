@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# RentSphere — Automated AWS EC2 Provisioning & Bootstrap Script
-# Tested on: Ubuntu 22.04 LTS / 24.04 LTS (x86_64 & arm64)
-# ==============================================================================
+# Sets up a fresh Ubuntu 22.04/24.04 EC2 box and starts RentSphere with Docker Compose.
 
 set -euo pipefail
 
@@ -22,9 +19,9 @@ if [ -z "${BASH_VERSION:-}" ]; then
     error "This script must be run with bash."
 fi
 
-log "Starting RentSphere AWS EC2 automated deployment..."
+log "Starting setup..."
 
-# 1. Check or Configure Swap (Critical for t2.micro / t3.micro with 1GB RAM)
+# 1. Check or Configure Swap (t2.micro only has 1GB, builds run out of memory without it)
 TOTAL_RAM_KB=$(grep MemTotal /proc/meminfo | awk '{print $2}')
 TOTAL_RAM_MB=$((TOTAL_RAM_KB / 1024))
 log "Detected Physical RAM: ${TOTAL_RAM_MB}MB"

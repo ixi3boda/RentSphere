@@ -21,12 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * JDBC data access repository for the {@code rental_requests} table.
- *
- * <p>Manages tenant rental applications, status transitions (PENDING to ACCEPTED/REJECTED),
- * and owner/admin review queues.
- */
 @Repository
 @RequiredArgsConstructor
 public class RentRepository {

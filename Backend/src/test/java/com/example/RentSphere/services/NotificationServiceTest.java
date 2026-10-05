@@ -26,7 +26,7 @@ class NotificationServiceTest {
     private NotificationService notificationService;
 
     @Test
-    @DisplayName("createNotification — saves new notification when no duplicate exists")
+    @DisplayName("createNotification - saves new notification when no duplicate exists")
     void createNotification_new_saves() {
 
         int recipientId = 1;
@@ -49,7 +49,7 @@ class NotificationServiceTest {
     }
 
     @Test
-    @DisplayName("createNotification — skips saving when duplicate exists")
+    @DisplayName("createNotification - skips saving when duplicate exists")
     void createNotification_duplicate_skips() {
 
         int recipientId = 1;

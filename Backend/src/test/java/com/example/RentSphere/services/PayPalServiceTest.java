@@ -18,7 +18,7 @@ class PayPalServiceTest {
     private PayPalService payPalService;
 
     @Test
-    @DisplayName("createPayment — throws exception when request is null")
+    @DisplayName("createPayment - throws exception when request is null")
     void createPayment_nullRequest_throws() {
         assertThatThrownBy(() -> payPalService.createPayment(null))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -26,7 +26,7 @@ class PayPalServiceTest {
     }
 
     @Test
-    @DisplayName("createPayment — throws exception when amount is zero or negative")
+    @DisplayName("createPayment - throws exception when amount is zero or negative")
     void createPayment_invalidAmount_throws() {
         PayPalPaymentRequest req = new PayPalPaymentRequest();
         req.setAmount(0.0);
@@ -41,7 +41,7 @@ class PayPalServiceTest {
     }
 
     @Test
-    @DisplayName("createPayment — throws exception when currency is missing")
+    @DisplayName("createPayment - throws exception when currency is missing")
     void createPayment_missingCurrency_throws() {
         PayPalPaymentRequest req = new PayPalPaymentRequest();
         req.setAmount(100.0);
@@ -52,7 +52,7 @@ class PayPalServiceTest {
     }
 
     @Test
-    @DisplayName("executePayment — throws exception when IDs are missing")
+    @DisplayName("executePayment - throws exception when IDs are missing")
     void executePayment_missingIds_throws() {
         assertThatThrownBy(() -> payPalService.executePayment("", "payer123"))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -64,7 +64,7 @@ class PayPalServiceTest {
     }
 
     @Test
-    @DisplayName("getPaymentDetails — throws exception when paymentId is missing")
+    @DisplayName("getPaymentDetails - throws exception when paymentId is missing")
     void getPaymentDetails_missingId_throws() {
         assertThatThrownBy(() -> payPalService.getPaymentDetails(null))
                 .isInstanceOf(IllegalArgumentException.class)

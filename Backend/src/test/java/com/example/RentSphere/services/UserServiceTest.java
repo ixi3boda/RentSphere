@@ -44,7 +44,7 @@ class UserServiceTest {
     
 
     @Test
-    @DisplayName("register — success returns AuthResponse with token")
+    @DisplayName("register - success returns AuthResponse with token")
     void register_success_returnsToken() {
         RegisterRequest req = TestFixtures.validRegisterRequest();
         when(userRepository.existsByEmail(req.getEmail().trim().toLowerCase())).thenReturn(false);
@@ -58,7 +58,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("register — assigns VISITOR role by default")
+    @DisplayName("register - assigns VISITOR role by default")
     void register_assignsVisitorRole() {
         RegisterRequest req = TestFixtures.validRegisterRequest();
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
@@ -73,7 +73,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("register — null request throws IllegalArgumentException")
+    @DisplayName("register - null request throws IllegalArgumentException")
     void register_nullRequest_throwsIllegalArgument() {
         assertThatThrownBy(() -> userService.register(null))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -81,7 +81,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("register — missing email throws IllegalArgumentException")
+    @DisplayName("register - missing email throws IllegalArgumentException")
     void register_missingEmail_throwsIllegalArgument() {
         RegisterRequest req = TestFixtures.validRegisterRequest();
         req.setEmail(null);
@@ -91,7 +91,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("register — blank email throws IllegalArgumentException")
+    @DisplayName("register - blank email throws IllegalArgumentException")
     void register_blankEmail_throwsIllegalArgument() {
         RegisterRequest req = TestFixtures.validRegisterRequest();
         req.setEmail("  ");
@@ -100,7 +100,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("register — missing password throws IllegalArgumentException")
+    @DisplayName("register - missing password throws IllegalArgumentException")
     void register_missingPassword_throwsIllegalArgument() {
         RegisterRequest req = TestFixtures.validRegisterRequest();
         req.setPassword_hash(null);
@@ -110,7 +110,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("register — missing username throws IllegalArgumentException")
+    @DisplayName("register - missing username throws IllegalArgumentException")
     void register_missingUsername_throwsIllegalArgument() {
         RegisterRequest req = TestFixtures.validRegisterRequest();
         req.setUsername(null);
@@ -120,7 +120,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("register — duplicate email throws IllegalArgumentException")
+    @DisplayName("register - duplicate email throws IllegalArgumentException")
     void register_duplicateEmail_throwsIllegalArgument() {
         RegisterRequest req = TestFixtures.validRegisterRequest();
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
@@ -130,7 +130,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("register — duplicate username throws IllegalArgumentException")
+    @DisplayName("register - duplicate username throws IllegalArgumentException")
     void register_duplicateUsername_throwsIllegalArgument() {
         RegisterRequest req = TestFixtures.validRegisterRequest();
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
@@ -141,7 +141,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("register — email is normalized to lowercase")
+    @DisplayName("register - email is normalized to lowercase")
     void register_normalizesEmailToLowercase() {
         RegisterRequest req = TestFixtures.validRegisterRequest();
         req.setEmail("UPPER@Test.COM");
@@ -159,7 +159,7 @@ class UserServiceTest {
     
 
     @Test
-    @DisplayName("login — valid credentials returns token")
+    @DisplayName("login - valid credentials returns token")
     void login_validCredentials_returnsToken() {
         LoginRequest req = TestFixtures.validTenantLoginRequest();
         User user = TestFixtures.tenantUser();
@@ -172,7 +172,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("login — sets user active on success")
+    @DisplayName("login - sets user active on success")
     void login_setsUserActive() {
         LoginRequest req = TestFixtures.validTenantLoginRequest();
         User user = TestFixtures.tenantUser();
@@ -184,14 +184,14 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("login — null request throws IllegalArgumentException")
+    @DisplayName("login - null request throws IllegalArgumentException")
     void login_nullRequest_throws() {
         assertThatThrownBy(() -> userService.login(null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    @DisplayName("login — wrong credentials (auth fails) throws IllegalArgumentException")
+    @DisplayName("login - wrong credentials (auth fails) throws IllegalArgumentException")
     void login_wrongCredentials_throwsIllegalArgument() {
         LoginRequest req = TestFixtures.invalidLoginRequest();
         doThrow(BadCredentialsException.class)
@@ -205,7 +205,7 @@ class UserServiceTest {
     
 
     @Test
-    @DisplayName("getCurrentUser — returns user by email")
+    @DisplayName("getCurrentUser - returns user by email")
     void getCurrentUser_returnsUser() {
         User user = TestFixtures.adminUser();
         when(userRepository.findByEmail("admin@test.com")).thenReturn(Optional.of(user));
@@ -215,7 +215,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("getCurrentUser — unknown email throws RuntimeException")
+    @DisplayName("getCurrentUser - unknown email throws RuntimeException")
     void getCurrentUser_unknownEmail_throws() {
         when(userRepository.findByEmail("ghost@test.com")).thenReturn(Optional.empty());
         assertThatThrownBy(() -> userService.getCurrentUser("ghost@test.com"))
@@ -226,7 +226,7 @@ class UserServiceTest {
     
 
     @Test
-    @DisplayName("updateCurrentUser — null request throws IllegalArgumentException")
+    @DisplayName("updateCurrentUser - null request throws IllegalArgumentException")
     void updateCurrentUser_nullRequest_throws() {
         assertThatThrownBy(() -> userService.updateCurrentUser("admin@test.com", null))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -234,7 +234,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("updateCurrentUser — duplicate username throws IllegalArgumentException")
+    @DisplayName("updateCurrentUser - duplicate username throws IllegalArgumentException")
     void updateCurrentUser_duplicateUsername_throws() {
         User user = TestFixtures.adminUser();
         when(userRepository.findByEmail("admin@test.com")).thenReturn(Optional.of(user));
@@ -247,7 +247,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("updateCurrentUser — blank username throws IllegalArgumentException")
+    @DisplayName("updateCurrentUser - blank username throws IllegalArgumentException")
     void updateCurrentUser_blankUsername_throws() {
         User user = TestFixtures.adminUser();
         when(userRepository.findByEmail("admin@test.com")).thenReturn(Optional.of(user));
@@ -259,7 +259,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("updateCurrentUser — success returns new token")
+    @DisplayName("updateCurrentUser - success returns new token")
     void updateCurrentUser_success_returnsNewToken() {
         User user = TestFixtures.adminUser();
         when(userRepository.findByEmail("admin@test.com")).thenReturn(Optional.of(user));
@@ -274,7 +274,7 @@ class UserServiceTest {
     
 
     @Test
-    @DisplayName("logout — sets user inactive")
+    @DisplayName("logout - sets user inactive")
     void logout_setsUserInactive() {
         User user = TestFixtures.tenantUser();
         when(userRepository.findByEmail("tenant@test.com")).thenReturn(Optional.of(user));

@@ -7,25 +7,11 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
-
 import java.util.Arrays;
 
-/**
- * Cross-Origin Resource Sharing (CORS) filter configuration.
- *
- * <p>Configures allowed HTTP origins, methods, and headers for browser clients.
- * Reads allowed origins from {@code rentsphere.cors.allowed-origins}, defaulting
- * to {@code http://localhost:3000}.
- */
 @Configuration
 public class CorsConfig {
 
-    /**
-     * Defines the application-wide CORS filter.
-     *
-     * @param allowedOrigins comma-delimited string of permitted origins
-     * @return configured {@link CorsFilter}
-     */
     @Bean
     public CorsFilter corsFilter(@Value("${rentsphere.cors.allowed-origins:http://localhost:3000}") String allowedOrigins) {
         CorsConfiguration config = new CorsConfiguration();

@@ -33,7 +33,7 @@ class ContractSchedulerServiceTest {
         private ContractSchedulerService schedulerService;
 
         @Test
-        @DisplayName("processContractEvents — handles reminders, cancellations, and completions")
+        @DisplayName("processContractEvents - handles reminders, cancellations, and completions")
         void processContractEvents_runsAllTasks() {
 
                 LocalDate today = LocalDate.now();

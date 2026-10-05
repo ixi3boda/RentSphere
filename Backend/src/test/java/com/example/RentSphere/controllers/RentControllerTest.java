@@ -41,7 +41,7 @@ class RentControllerTest {
     
 
     @Test
-    @DisplayName("POST /request — 201 for authenticated user")
+    @DisplayName("POST /request - 201 for authenticated user")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void rentRequest_authenticated_returns201() throws Exception {
         CreateRentalRequest req = TestFixtures.validCreateRentalRequest();
@@ -57,7 +57,7 @@ class RentControllerTest {
     }
 
     @Test
-    @DisplayName("POST /request — 401 for unauthenticated")
+    @DisplayName("POST /request - 401 for unauthenticated")
     void rentRequest_unauthenticated_returns401() throws Exception {
         CreateRentalRequest req = TestFixtures.validCreateRentalRequest();
         mockMvc.perform(post("/api/rent/request")
@@ -68,7 +68,7 @@ class RentControllerTest {
     }
 
     @Test
-    @DisplayName("POST /request — 400 for invalid payload (null propertyId)")
+    @DisplayName("POST /request - 400 for invalid payload (null propertyId)")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void rentRequest_invalidPayload_returns400() throws Exception {
         CreateRentalRequest req = TestFixtures.validCreateRentalRequest();
@@ -83,7 +83,7 @@ class RentControllerTest {
     }
 
     @Test
-    @DisplayName("POST /request — 400 when desiredStart is in the past")
+    @DisplayName("POST /request - 400 when desiredStart is in the past")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void rentRequest_pastStartDate_returns400() throws Exception {
         CreateRentalRequest req = TestFixtures.validCreateRentalRequest();
@@ -100,7 +100,7 @@ class RentControllerTest {
     
 
     @Test
-    @DisplayName("GET /requests/all — 200 for ADMIN, paged envelope")
+    @DisplayName("GET /requests/all - 200 for ADMIN, paged envelope")
     @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
     void getAllRequests_asAdmin_returns200() throws Exception {
         when(rentService.getRentalRequests(null, 20, 0)).thenReturn(List.of(TestFixtures.pendingRentalRequest()));
@@ -113,7 +113,7 @@ class RentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /requests/all — size is clamped and page drives the offset")
+    @DisplayName("GET /requests/all - size is clamped and page drives the offset")
     @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
     void getAllRequests_clampsPage() throws Exception {
         when(rentService.getRentalRequests(any(), anyInt(), anyInt())).thenReturn(List.of());
@@ -127,7 +127,7 @@ class RentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /requests/summary — every status key present, unknown ones zero")
+    @DisplayName("GET /requests/summary - every status key present, unknown ones zero")
     @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
     void requestSummary_returnsEveryStatus() throws Exception {
         when(rentService.requestStatusCounts())
@@ -143,7 +143,7 @@ class RentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /requests/all — 403 for TENANT (ADMIN only)")
+    @DisplayName("GET /requests/all - 403 for TENANT (ADMIN only)")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void getAllRequests_asTenant_returns403() throws Exception {
         mockMvc.perform(get("/api/rent/requests/all"))
@@ -151,7 +151,7 @@ class RentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /requests/all — 401 for unauthenticated")
+    @DisplayName("GET /requests/all - 401 for unauthenticated")
     void getAllRequests_unauthenticated_returns401() throws Exception {
         mockMvc.perform(get("/api/rent/requests/all"))
                 .andExpect(status().isForbidden());
@@ -160,7 +160,7 @@ class RentControllerTest {
     
 
     @Test
-    @DisplayName("GET /requests/{id} — 200 when found")
+    @DisplayName("GET /requests/{id} - 200 when found")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void getRequestById_found_returns200() throws Exception {
         when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());
@@ -172,7 +172,7 @@ class RentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /requests/{id} — 404 when not found")
+    @DisplayName("GET /requests/{id} - 404 when not found")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void getRequestById_notFound_returns404() throws Exception {
         when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());
@@ -185,7 +185,7 @@ class RentControllerTest {
     
 
     @Test
-    @DisplayName("PUT /requests/{id}/accept — 200 for authenticated owner")
+    @DisplayName("PUT /requests/{id}/accept - 200 for authenticated owner")
     @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
     void acceptRequest_asOwner_returns200() throws Exception {
         when(userService.getCurrentUser("admin@test.com")).thenReturn(TestFixtures.adminUser());
@@ -199,7 +199,7 @@ class RentControllerTest {
     
 
     @Test
-    @DisplayName("PUT /requests/{id}/reject — 200 for authenticated owner")
+    @DisplayName("PUT /requests/{id}/reject - 200 for authenticated owner")
     @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
     void rejectRequest_asOwner_returns200() throws Exception {
         RentalRequest rejected = TestFixtures.pendingRentalRequest();
@@ -213,7 +213,7 @@ class RentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /contracts/all — 200 for ADMIN role returning owner contracts")
+    @DisplayName("GET /contracts/all - 200 for ADMIN role returning owner contracts")
     @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
     void getAllContracts_asAdmin_returns200() throws Exception {
         User admin = TestFixtures.adminUser();
@@ -229,7 +229,7 @@ class RentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /contracts/manage — returns the paged envelope")
+    @DisplayName("GET /contracts/manage - returns the paged envelope")
     @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
     void manageContracts_returnsEnvelope() throws Exception {
         when(contractService.getContracts("ACTIVE", 12, 12))
@@ -247,7 +247,7 @@ class RentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /contracts/manage — size is clamped to the server maximum")
+    @DisplayName("GET /contracts/manage - size is clamped to the server maximum")
     @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
     void manageContracts_clampsSize() throws Exception {
         when(contractService.getContracts(null, 100, 300)).thenReturn(List.of());
@@ -261,7 +261,7 @@ class RentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /contracts/manage — rejected for a tenant")
+    @DisplayName("GET /contracts/manage - rejected for a tenant")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void manageContracts_asTenant_returns403() throws Exception {
         mockMvc.perform(get("/api/rent/contracts/manage"))
@@ -269,7 +269,7 @@ class RentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /contracts/manage/summary — statuses missing from the grouping report zero")
+    @DisplayName("GET /contracts/manage/summary - statuses missing from the grouping report zero")
     @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
     void contractSummary_zeroFillsMissingStatuses() throws Exception {
         java.util.Map<String, Integer> byStatus = new java.util.HashMap<>();
@@ -287,7 +287,7 @@ class RentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /contracts/all — 200 for TENANT role returning tenant contracts")
+    @DisplayName("GET /contracts/all - 200 for TENANT role returning tenant contracts")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void getAllContracts_asTenant_returns200() throws Exception {
         User tenant = TestFixtures.tenantUser();
@@ -301,7 +301,7 @@ class RentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /contracts/{contractId}/payments — 200 returning payments list")
+    @DisplayName("GET /contracts/{contractId}/payments - 200 returning payments list")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void getContractPayments_returns200() throws Exception {
         when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());
@@ -313,7 +313,7 @@ class RentControllerTest {
     }
 
     @Test
-    @DisplayName("POST /contracts/{contractId}/paypal — 200 for valid payment creation")
+    @DisplayName("POST /contracts/{contractId}/paypal - 200 for valid payment creation")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void createContractPayPalPayment_returns200() throws Exception {
         when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());
@@ -334,7 +334,7 @@ class RentControllerTest {
     }
 
     @Test
-    @DisplayName("POST /contracts/{contractId}/paypal/execute — 200 for valid payment execution")
+    @DisplayName("POST /contracts/{contractId}/paypal/execute - 200 for valid payment execution")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void executeContractPayPalPayment_returns200() throws Exception {
         when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());

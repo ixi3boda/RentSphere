@@ -54,7 +54,7 @@ class PropertyControllerTest {
         
 
         @Test
-        @DisplayName("GET /stats — public marketplace counts")
+        @DisplayName("GET /stats - public marketplace counts")
         void getStats_public_returns200() throws Exception {
                 when(propertyService.countListings()).thenReturn(100001);
                 when(propertyService.countAvailableListings()).thenReturn(80001);
@@ -68,7 +68,7 @@ class PropertyControllerTest {
         }
 
         @Test
-        @DisplayName("GET /my — scoped to the caller, 401 without a token")
+        @DisplayName("GET /my - scoped to the caller, 401 without a token")
         void getMyProperties_authenticated_returnsOwnOnly() throws Exception {
                 when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());
                 when(propertyService.getByOwnerId(2)).thenReturn(List.of(buildPropertyDetails()));
@@ -81,7 +81,7 @@ class PropertyControllerTest {
         
 
         @Test
-        @DisplayName("GET /{id} — 200 for existing property (public)")
+        @DisplayName("GET /{id} - 200 for existing property (public)")
         void getById_existing_returns200() throws Exception {
                 when(propertyService.getById(1L)).thenReturn(buildPropertyDetails());
 
@@ -91,7 +91,7 @@ class PropertyControllerTest {
         }
 
         @Test
-        @DisplayName("GET /{id} — 404 for non-existent property")
+        @DisplayName("GET /{id} - 404 for non-existent property")
         void getById_notFound_returns404() throws Exception {
                 when(propertyService.getById(999L)).thenThrow(new RuntimeException("Property not found"));
 
@@ -100,7 +100,7 @@ class PropertyControllerTest {
         }
 
         @Test
-        @DisplayName("GET /{id} — 400 when the id is not a number")
+        @DisplayName("GET /{id} - 400 when the id is not a number")
         void getById_nonNumericId_returns400() throws Exception {
                 mockMvc.perform(get("/api/properties/abc"))
                                 .andExpect(status().isBadRequest())
@@ -108,7 +108,7 @@ class PropertyControllerTest {
         }
 
         @Test
-        @DisplayName("GET /filter — 200 for city=Riyadh (public)")
+        @DisplayName("GET /filter - 200 for city=Riyadh (public)")
         void filter_byCity_returns200() throws Exception {
                 when(propertyService.countFilterProperties(any())).thenReturn(1);
                 when(propertyService.filterProperties(any(), anyString(), anyInt(), anyInt()))
@@ -121,7 +121,7 @@ class PropertyControllerTest {
         }
 
         @Test
-        @DisplayName("GET /filter — page and size are clamped, offset derived from page")
+        @DisplayName("GET /filter - page and size are clamped, offset derived from page")
         void filter_clampsPageSize() throws Exception {
                 when(propertyService.countFilterProperties(any())).thenReturn(0);
                 when(propertyService.filterProperties(any(), anyString(), eq(0), eq(48)))
@@ -140,7 +140,7 @@ class PropertyControllerTest {
         
 
         @Test
-        @DisplayName("POST /add — 201 for ADMIN user")
+        @DisplayName("POST /add - 201 for ADMIN user")
         @WithMockUser(username = "admin@test.com", roles = { "ADMIN" })
         void addProperty_asAdmin_returns201() throws Exception {
                 CreatePropertyRequest req = TestFixtures.validCreatePropertyRequest();
@@ -155,7 +155,7 @@ class PropertyControllerTest {
         }
 
         @Test
-        @DisplayName("POST /add — 403 for TENANT user (missing @PreAuthorize)")
+        @DisplayName("POST /add - 403 for TENANT user (missing @PreAuthorize)")
         @WithMockUser(username = "tenant@test.com", roles = { "TENANT" })
         void addProperty_asTenant_returns403() throws Exception {
                 CreatePropertyRequest req = TestFixtures.validCreatePropertyRequest();
@@ -168,7 +168,7 @@ class PropertyControllerTest {
         }
 
         @Test
-        @DisplayName("POST /add — 401 for unauthenticated")
+        @DisplayName("POST /add - 401 for unauthenticated")
         void addProperty_unauthenticated_returns401() throws Exception {
                 CreatePropertyRequest req = TestFixtures.validCreatePropertyRequest();
 
@@ -182,7 +182,7 @@ class PropertyControllerTest {
         
 
         @Test
-        @DisplayName("PUT /{id}/update — 200 for authenticated owner")
+        @DisplayName("PUT /{id}/update - 200 for authenticated owner")
         @WithMockUser(username = "admin@test.com", roles = { "ADMIN" })
         void updateProperty_asOwner_returns200() throws Exception {
                 UpdatePropertyRequest req = UpdatePropertyRequest.builder().title("Updated").build();
@@ -197,7 +197,7 @@ class PropertyControllerTest {
         }
 
         @Test
-        @DisplayName("PUT /{id}/update — 403 when not owner")
+        @DisplayName("PUT /{id}/update - 403 when not owner")
         @WithMockUser(username = "admin@test.com", roles = { "ADMIN" })
         void updateProperty_notOwner_returns403() throws Exception {
                 UpdatePropertyRequest req = UpdatePropertyRequest.builder().title("Hijack").build();
@@ -215,7 +215,7 @@ class PropertyControllerTest {
         
 
         @Test
-        @DisplayName("DELETE /{id}/delete — 200 for authenticated owner")
+        @DisplayName("DELETE /{id}/delete - 200 for authenticated owner")
         @WithMockUser(username = "admin@test.com", roles = { "ADMIN" })
         void deleteProperty_asOwner_returns200() throws Exception {
                 when(userService.getCurrentUser("admin@test.com")).thenReturn(TestFixtures.adminUser());
@@ -228,7 +228,7 @@ class PropertyControllerTest {
         
 
         @Test
-        @DisplayName("POST /{propertyId}/favorite — 200 for authenticated user")
+        @DisplayName("POST /{propertyId}/favorite - 200 for authenticated user")
         @WithMockUser(username = "tenant@test.com", roles = { "TENANT" })
         void favorite_authenticated_returns200() throws Exception {
                 when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());
@@ -243,7 +243,7 @@ class PropertyControllerTest {
         }
 
         @Test
-        @DisplayName("POST /{propertyId}/favorite — 401 for unauthenticated")
+        @DisplayName("POST /{propertyId}/favorite - 401 for unauthenticated")
         void favorite_unauthenticated_returns401() throws Exception {
                 mockMvc.perform(post("/api/properties/1/favorite").with(csrf()))
                                 .andExpect(status().isForbidden());
@@ -252,7 +252,7 @@ class PropertyControllerTest {
         
 
         @Test
-        @DisplayName("GET /favorites/all — 200 for authenticated user")
+        @DisplayName("GET /favorites/all - 200 for authenticated user")
         @WithMockUser(username = "tenant@test.com", roles = { "TENANT" })
         void getAllFavorites_authenticated_returns200() throws Exception {
                 when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());
@@ -264,7 +264,7 @@ class PropertyControllerTest {
         }
 
         @Test
-        @DisplayName("POST /{id}/images/add — 200 for authenticated owner")
+        @DisplayName("POST /{id}/images/add - 200 for authenticated owner")
         @WithMockUser(username = "admin@test.com", roles = { "ADMIN" })
         void addPropertyImage_asOwner_returns200() throws Exception {
                 when(userService.getCurrentUser("admin@test.com")).thenReturn(TestFixtures.adminUser());
@@ -280,7 +280,7 @@ class PropertyControllerTest {
         }
 
         @Test
-        @DisplayName("POST /{id}/images/add — 403 when not owner")
+        @DisplayName("POST /{id}/images/add - 403 when not owner")
         @WithMockUser(username = "admin@test.com", roles = { "ADMIN" })
         void addPropertyImage_notOwner_returns403() throws Exception {
                 when(userService.getCurrentUser("admin@test.com")).thenReturn(TestFixtures.adminUser());
@@ -297,7 +297,7 @@ class PropertyControllerTest {
         }
 
         @Test
-        @DisplayName("POST /{id}/images/add — 404 when property not found")
+        @DisplayName("POST /{id}/images/add - 404 when property not found")
         @WithMockUser(username = "admin@test.com", roles = { "ADMIN" })
         void addPropertyImage_notFound_returns404() throws Exception {
                 when(userService.getCurrentUser("admin@test.com")).thenReturn(TestFixtures.adminUser());
@@ -314,7 +314,7 @@ class PropertyControllerTest {
         }
 
         @Test
-        @DisplayName("Unmapped path — 404 rather than a server fault")
+        @DisplayName("Unmapped path - 404 rather than a server fault")
         @WithMockUser(username = "someone@test.com", roles = { "TENANT" })
         void unmappedPath_returns404() throws Exception {
                 mockMvc.perform(get("/api/definitely-not-an-endpoint"))

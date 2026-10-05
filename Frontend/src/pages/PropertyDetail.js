@@ -87,7 +87,7 @@ function PropertyDetail() {
         const isSaved = list.some((item) => String(item?.propertyDetails?.property?.propertyId) === String(id));
         if (!cancelled) setFavorited(isSaved);
       } catch (err) {
-        // Unknown, not "not saved" — a wrong guess would let a click remove a real favorite.
+        // Unknown, not "not saved" - a wrong guess would let a click remove a real favorite.
         if (!cancelled) setFavorited(null);
       }
     };

@@ -7,13 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-/**
- * JDBC data access repository for the {@code users} table.
- *
- * <p>Provides raw SQL queries via {@link JdbcTemplate} with parameterized statements
- * to prevent SQL injection. Manages user registration, profile retrieval, updates,
- * and role transitions.
- */
 @Repository
 public class UserRepository {
 
@@ -23,12 +16,6 @@ public class UserRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    /**
-     * Looks up a user account by email address.
-     *
-     * @param email unique email address
-     * @return {@link Optional} containing the user if found, or empty if no matching record exists
-     */
     public Optional<User> findByEmail(String email) {
         String sql = "SELECT * FROM users WHERE email = ?";
         try {
@@ -70,7 +57,6 @@ public class UserRepository {
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, username);
         return count != null && count > 0;
     }
-
 
     public void save(User user) {
 

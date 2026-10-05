@@ -38,7 +38,7 @@ class UserControllerTest {
     
 
     @Test
-    @DisplayName("POST /register — 200 with valid payload")
+    @DisplayName("POST /register - 200 with valid payload")
     void register_validPayload_returns200() throws Exception {
         RegisterRequest req = TestFixtures.validRegisterRequest();
         AuthResponse response = AuthResponse.builder().token("mock.token").build();
@@ -53,7 +53,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("POST /register — 400 when email is duplicate")
+    @DisplayName("POST /register - 400 when email is duplicate")
     void register_duplicateEmail_returns400() throws Exception {
         RegisterRequest req = TestFixtures.validRegisterRequest();
         when(userService.register(any())).thenThrow(new IllegalArgumentException("Email is already in use"));
@@ -69,7 +69,7 @@ class UserControllerTest {
     
 
     @Test
-    @DisplayName("POST /login — 200 with valid credentials")
+    @DisplayName("POST /login - 200 with valid credentials")
     void login_validCredentials_returns200() throws Exception {
         LoginRequest req = TestFixtures.validTenantLoginRequest();
         AuthResponse response = AuthResponse.builder().token("tenant.token").build();
@@ -84,7 +84,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("POST /login — 400 for invalid credentials")
+    @DisplayName("POST /login - 400 for invalid credentials")
     void login_invalidCredentials_returns400() throws Exception {
         LoginRequest req = TestFixtures.invalidLoginRequest();
         when(userService.login(any())).thenThrow(new IllegalArgumentException("Invalid email or password"));
@@ -100,7 +100,7 @@ class UserControllerTest {
     
 
     @Test
-    @DisplayName("GET /me — 200 for authenticated user")
+    @DisplayName("GET /me - 200 for authenticated user")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void getMe_authenticated_returns200() throws Exception {
         User user = TestFixtures.tenantUser();
@@ -112,7 +112,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("GET /me — 401 for unauthenticated request")
+    @DisplayName("GET /me - 401 for unauthenticated request")
     void getMe_unauthenticated_returns401() throws Exception {
         mockMvc.perform(get("/api/user/me"))
                 .andExpect(status().isForbidden());
@@ -121,7 +121,7 @@ class UserControllerTest {
     
 
     @Test
-    @DisplayName("PUT /me — 200 for authenticated user with valid payload")
+    @DisplayName("PUT /me - 200 for authenticated user with valid payload")
     @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
     void updateMe_authenticated_returns200() throws Exception {
         UpdateProfileRequest req = UpdateProfileRequest.builder().full_name("New Name").build();
@@ -140,7 +140,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("PUT /me — 400 when username already in use")
+    @DisplayName("PUT /me - 400 when username already in use")
     @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
     void updateMe_duplicateUsername_returns400() throws Exception {
         UpdateProfileRequest req = UpdateProfileRequest.builder().username("taken").build();
@@ -158,7 +158,7 @@ class UserControllerTest {
     
 
     @Test
-    @DisplayName("POST /logout — 200 for authenticated user")
+    @DisplayName("POST /logout - 200 for authenticated user")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void logout_authenticated_returns200() throws Exception {
         doNothing().when(userService).logout("tenant@test.com");
@@ -169,7 +169,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("POST /register — 500 when unexpected error occurs")
+    @DisplayName("POST /register - 500 when unexpected error occurs")
     void register_unexpectedError_returns500() throws Exception {
         RegisterRequest req = TestFixtures.validRegisterRequest();
         when(userService.register(any())).thenThrow(new RuntimeException("DB crash"));
@@ -182,7 +182,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("POST /login — 500 when unexpected error occurs")
+    @DisplayName("POST /login - 500 when unexpected error occurs")
     void login_unexpectedError_returns500() throws Exception {
         LoginRequest req = TestFixtures.validTenantLoginRequest();
         when(userService.login(any())).thenThrow(new RuntimeException("System error"));
@@ -195,7 +195,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("GET /me — 500 when unexpected error occurs")
+    @DisplayName("GET /me - 500 when unexpected error occurs")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void getMe_unexpectedError_returns500() throws Exception {
         when(userService.getCurrentUser("tenant@test.com")).thenThrow(new RuntimeException("DB fail"));
@@ -205,7 +205,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("PUT /me — 500 when unexpected error occurs")
+    @DisplayName("PUT /me - 500 when unexpected error occurs")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void updateMe_unexpectedError_returns500() throws Exception {
         UpdateProfileRequest req = UpdateProfileRequest.builder().full_name("Test").build();
@@ -219,7 +219,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("POST /logout — 500 when unexpected error occurs")
+    @DisplayName("POST /logout - 500 when unexpected error occurs")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void logout_unexpectedError_returns500() throws Exception {
         doThrow(new RuntimeException("Logout error")).when(userService).logout(anyString());

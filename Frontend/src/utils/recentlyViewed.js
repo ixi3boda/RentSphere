@@ -9,7 +9,7 @@ function safeParse(json, fallback) {
   }
 }
 
-// Strip base64 image data before saving — images are the primary cause of
+// Strip base64 image data before saving - images are the primary cause of
 // QuotaExceededError since each base64 string can be 100-500 KB.
 // We keep only lightweight metadata; images will simply show a placeholder
 // when re-loaded from recently viewed.
@@ -47,7 +47,7 @@ export function setRecentlyViewed(properties) {
           JSON.stringify(properties.slice(0, 2))
         );
       } catch {
-        // Give up gracefully — recently viewed is non-critical
+        // Give up gracefully - recently viewed is non-critical
       }
     }
   }

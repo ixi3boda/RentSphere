@@ -11,7 +11,7 @@ function formatImageUrl(url) {
   ) {
     return url;
   }
-  // Bare filename — prefix with /uploads/
+  // Bare filename - prefix with /uploads/
   return `/uploads/${url}`;
 }
 

@@ -70,7 +70,7 @@ describe('Navbar', () => {
     });
     // Open modal
     fireEvent.click(screen.getByText('Logout'));
-    // The modal renders a second "Logout" button — getAllByText returns both;
+    // The modal renders a second "Logout" button - getAllByText returns both;
     // the last one is the modal confirm button
     const logoutBtns = screen.getAllByText('Logout');
     fireEvent.click(logoutBtns[logoutBtns.length - 1]);

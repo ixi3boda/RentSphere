@@ -36,7 +36,7 @@ class LoginWorkflowTest {
     @MockBean private org.springframework.security.core.userdetails.UserDetailsService myUserDetailsService;
 
     @Test
-    @DisplayName("POST /login — returns JWT token for valid admin credentials")
+    @DisplayName("POST /login - returns JWT token for valid admin credentials")
     void login_validAdminCredentials_returnsToken() throws Exception {
         LoginRequest req = TestFixtures.validAdminLoginRequest();
         AuthResponse response = AuthResponse.builder().token("admin.mock.token").build();
@@ -51,7 +51,7 @@ class LoginWorkflowTest {
     }
 
     @Test
-    @DisplayName("POST /login — returns 400 for wrong credentials")
+    @DisplayName("POST /login - returns 400 for wrong credentials")
     void login_wrongCredentials_returns400() throws Exception {
         LoginRequest req = TestFixtures.invalidLoginRequest();
         when(userService.login(any())).thenThrow(new IllegalArgumentException("Invalid email or password"));
@@ -65,7 +65,7 @@ class LoginWorkflowTest {
     }
 
     @Test
-    @DisplayName("POST /register — returns token after successful registration")
+    @DisplayName("POST /register - returns token after successful registration")
     void register_validPayload_returnsToken() throws Exception {
         RegisterRequest req = TestFixtures.validRegisterRequest();
         AuthResponse response = AuthResponse.builder().token("new.user.token").build();
@@ -80,7 +80,7 @@ class LoginWorkflowTest {
     }
 
     @Test
-    @DisplayName("POST /register — 400 for duplicate email")
+    @DisplayName("POST /register - 400 for duplicate email")
     void register_duplicateEmail_returns400() throws Exception {
         RegisterRequest req = TestFixtures.validRegisterRequest();
         when(userService.register(any())).thenThrow(new IllegalArgumentException("Email is already in use"));

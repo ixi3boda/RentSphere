@@ -25,38 +25,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * Business-logic layer for contract and payment operations.
- *
- * <p>A contract is auto-created when a property owner accepts a rental request
- * ({@link #createContractForApprovedRequest}). The method also writes one
- * {@code payments} row per contract month so that the installment schedule is
- * fully materialised at creation time.
- *
- * <p>Two payment paths are supported:
- * <ul>
- *   <li><strong>PayPal</strong> — two-step: {@link #createPayPalPaymentForContract}
- *       returns an approval URL; after the user approves in PayPal,
- *       {@link #executePayPalPaymentForContract} captures the money, verifies the
- *       captured amount matches the installment due, and marks the row PAID.</li>
- *   <li><strong>Credit card (mock)</strong> — one-step:
- *       {@link #processCreditCardPaymentForContract} validates card details and records
- *       a synthetic transaction reference. No real card network is contacted.</li>
- * </ul>
- *
- * <p>When the last outstanding installment is settled, the contract is automatically
- * moved to {@code COMPLETED} by {@link #settleIfFullyPaid}.
- *
- * <p>The {@code PAYMENT_RECEIVED} notification type is the only value allowed by the
- * {@code chk_noti_type} database CHECK constraint for payment events. Using any other
- * string would roll back the payment transaction at the JDBC layer.
- */
 @Service
 @RequiredArgsConstructor
 public class ContractService {
 
     // chk_noti_type in Database/Schema.sql rejects anything outside its enum, and the check runs
-    // inside the payment transaction — an unknown type rolls the paid installment back.
+    // inside the payment transaction - an unknown type rolls the paid installment back.
     private static final String PAYMENT_NOTIFICATION_TYPE = "PAYMENT_RECEIVED";
 
     private final ContractRepository contractRepository;
@@ -198,10 +172,6 @@ public class ContractService {
                 .build();
     }
 
-    /**
-     * Only the tenant on the contract (or an administrator) may move money on it, and a
-     * cancelled or completed contract must never accept a payment.
-     */
     private Contract requirePayableContract(Long contractId, Long actorUserId, boolean actorIsAdmin) {
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new ResourceNotFoundException("Contract not found: " + contractId));
@@ -225,10 +195,6 @@ public class ContractService {
                 .orElseThrow(() -> new BadRequestException("No outstanding installment on contract #" + contractId));
     }
 
-    /**
-     * The client names the installment at execute time, so the only thing tying the money that
-     * actually arrived to the row we mark paid is this comparison.
-     */
     private void requireCapturedAmountMatchesDue(Payment payment, PaymentDto targetPayment, Long contractId) {
         if (payment.getTransactions() == null || payment.getTransactions().isEmpty()
                 || payment.getTransactions().get(0).getAmount() == null
@@ -269,10 +235,6 @@ public class ContractService {
         return contractRepository.findByOwnerId(ownerId);
     }
 
-    /**
-     * The payment schedule is visible to the tenant who owes it, the landlord whose rent it is,
-     * and administrators.
-     */
     public java.util.List<PaymentDto> getPaymentsByContractId(Long contractId, Long actorUserId, boolean actorIsAdmin) {
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new ResourceNotFoundException("Contract not found: " + contractId));

@@ -8,9 +8,6 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/**
- * Data transfer object representing a property listing row in the {@code properties} table.
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

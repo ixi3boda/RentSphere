@@ -35,7 +35,7 @@ class NotificationControllerTest {
     @MockBean private org.springframework.security.core.userdetails.UserDetailsService myUserDetailsService;
 
     @Test
-    @DisplayName("GET /my — 200 for authenticated user")
+    @DisplayName("GET /my - 200 for authenticated user")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void getMyNotifications_authenticated_returns200() throws Exception {
         when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());
@@ -57,7 +57,7 @@ class NotificationControllerTest {
     }
 
     @Test
-    @DisplayName("PUT /{id}/read — 200 for authenticated user")
+    @DisplayName("PUT /{id}/read - 200 for authenticated user")
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void markAsRead_authenticated_returns200() throws Exception {
         when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());

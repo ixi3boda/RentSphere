@@ -36,28 +36,28 @@ class SecurityIntegrationTest {
     
 
     @Test
-    @DisplayName("GET /api/properties/filter — accessible without token (public)")
+    @DisplayName("GET /api/properties/filter - accessible without token (public)")
     void propertiesFilter_publicAccess() throws Exception {
         mockMvc.perform(get("/api/properties/filter"))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("GET /api/properties/stats — accessible without token (public)")
+    @DisplayName("GET /api/properties/stats - accessible without token (public)")
     void propertiesStats_publicAccess() throws Exception {
         mockMvc.perform(get("/api/properties/stats"))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("GET /api/properties/my — blocked without token even though /api/properties/* is public")
+    @DisplayName("GET /api/properties/my - blocked without token even though /api/properties/* is public")
     void propertiesMy_requiresToken() throws Exception {
         mockMvc.perform(get("/api/properties/my"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    @DisplayName("POST /api/user/register — accessible without token (public)")
+    @DisplayName("POST /api/user/register - accessible without token (public)")
     void register_publicAccess() throws Exception {
         mockMvc.perform(post("/api/user/register")
                         .contentType("application/json")
@@ -68,14 +68,14 @@ class SecurityIntegrationTest {
     
 
     @Test
-    @DisplayName("GET /api/user/me — 401 without token")
+    @DisplayName("GET /api/user/me - 401 without token")
     void getMe_noToken_returns401() throws Exception {
         mockMvc.perform(get("/api/user/me"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    @DisplayName("POST /api/rent/request — 401 without token")
+    @DisplayName("POST /api/rent/request - 401 without token")
     void rentRequest_noToken_returns401() throws Exception {
         mockMvc.perform(post("/api/rent/request")
                         .contentType("application/json")
@@ -84,7 +84,7 @@ class SecurityIntegrationTest {
     }
 
     @Test
-    @DisplayName("GET /api/rent/requests/all — 401 without token")
+    @DisplayName("GET /api/rent/requests/all - 401 without token")
     void getAllRequests_noToken_returns401() throws Exception {
         mockMvc.perform(get("/api/rent/requests/all"))
                 .andExpect(status().isForbidden());
@@ -93,7 +93,7 @@ class SecurityIntegrationTest {
     
 
     @Test
-    @DisplayName("GET /api/user/me — 200 with valid TENANT token")
+    @DisplayName("GET /api/user/me - 200 with valid TENANT token")
     void getMe_withValidToken_returns200OrBetter() throws Exception {
         String token = jwtService.generateToken("tenant@test.com", "TENANT");
 
@@ -115,7 +115,7 @@ class SecurityIntegrationTest {
     
 
     @Test
-    @DisplayName("GET /api/user/me — 401 with malformed Bearer token")
+    @DisplayName("GET /api/user/me - 401 with malformed Bearer token")
     void getMe_malformedToken_returns401() throws Exception {
         mockMvc.perform(get("/api/user/me")
                         .header("Authorization", "Bearer this.is.not.valid"))
@@ -123,7 +123,7 @@ class SecurityIntegrationTest {
     }
 
     @Test
-    @DisplayName("GET /api/user/me — 401 with missing Bearer prefix")
+    @DisplayName("GET /api/user/me - 401 with missing Bearer prefix")
     void getMe_missingBearer_returns401() throws Exception {
         String token = jwtService.generateToken("user@test.com", "TENANT");
         mockMvc.perform(get("/api/user/me")
@@ -134,7 +134,7 @@ class SecurityIntegrationTest {
     
 
     @Test
-    @DisplayName("GET /api/rent/requests/all — 403 with TENANT token (ADMIN only)")
+    @DisplayName("GET /api/rent/requests/all - 403 with TENANT token (ADMIN only)")
     void getAllRequests_tenantToken_returns403() throws Exception {
         String token = jwtService.generateToken("tenant@test.com", "TENANT");
 

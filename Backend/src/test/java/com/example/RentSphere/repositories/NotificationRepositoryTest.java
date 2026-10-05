@@ -23,7 +23,7 @@ class NotificationRepositoryTest {
     private NotificationRepository notificationRepository;
 
     @Test
-    @DisplayName("save and findById — persists and retrieves notification")
+    @DisplayName("save and findById - persists and retrieves notification")
     void saveAndFindById_success() {
 
         Notification notification = Notification.builder()
@@ -41,7 +41,7 @@ class NotificationRepositoryTest {
     }
 
     @Test
-    @DisplayName("existsByRecipientTypeAndTitle — returns true when exists, false otherwise")
+    @DisplayName("existsByRecipientTypeAndTitle - returns true when exists, false otherwise")
     void existsByRecipientTypeAndTitle_check() {
 
         Notification notification = Notification.builder()

@@ -30,7 +30,7 @@ export function PropertyProvider({ children }) {
     }
   }, []);
 
-  // Always fetch fresh from API — avoids returning stale blob-URL cache
+  // Always fetch fresh from API - avoids returning stale blob-URL cache
   const getPropertyById = useCallback(async (id) => {
     try {
       const res = await propertyApi.getById(id);

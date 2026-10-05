@@ -17,7 +17,7 @@ function fmt(n) {
   return Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-/* ─── Status config — exactly the four values chk_contract_status allows ─── */
+/* ─── Status config - exactly the four values chk_contract_status allows ─── */
 const STATUS_CFG = {
   ACTIVE:    { bg: 'bg-emerald-100 text-emerald-800 border border-emerald-200', dot: 'bg-emerald-500', label: 'Active' },
   COMPLETED: { bg: 'bg-sky-100 text-sky-800 border border-sky-200',           dot: 'bg-sky-500',     label: 'Completed' },
@@ -25,7 +25,7 @@ const STATUS_CFG = {
   PENDING:   { bg: 'bg-amber-100 text-amber-800 border border-amber-200',     dot: 'bg-amber-500',   label: 'Pending' },
 };
 
-/* ─── Payment status — exactly the four values chk_payment_status allows ─── */
+/* ─── Payment status - exactly the four values chk_payment_status allows ─── */
 const PAY_STATUS_CFG = {
   PAID:    { bg: 'bg-emerald-100 text-emerald-700', icon: '✓' },
   PENDING: { bg: 'bg-amber-100 text-amber-700',     icon: '⏳' },

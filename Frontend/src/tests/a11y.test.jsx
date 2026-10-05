@@ -1,8 +1,4 @@
-// src/tests/a11y.test.jsx
-// Automated a11y checks for the pieces that carry the most interactive labels.
-// jest-axe runs in jsdom, which has no CSS cascade, so it can only judge structure
-// (names, roles, headings, landmarks). Colour contrast is measured for real in the
-// browser by scripts/contrast-audit.js and is disabled here to avoid false green.
+// jest-axe runs in jsdom with no CSS, so colour contrast is turned off here.
 import React from 'react';
 import { screen, waitFor, act } from '@testing-library/react';
 import { axe, toHaveNoViolations } from 'jest-axe';

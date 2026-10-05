@@ -30,7 +30,7 @@ class MyUserDetailsServiceTest {
     private MyUserDetailsService userDetailsService;
 
     @Test
-    @DisplayName("loadUserByUsername — returns UserDetails when user exists")
+    @DisplayName("loadUserByUsername - returns UserDetails when user exists")
     void loadUserByUsername_success() {
 
         User userDto = TestFixtures.tenantUser();
@@ -48,7 +48,7 @@ class MyUserDetailsServiceTest {
     }
 
     @Test
-    @DisplayName("loadUserByUsername — throws UsernameNotFoundException when user not found")
+    @DisplayName("loadUserByUsername - throws UsernameNotFoundException when user not found")
     void loadUserByUsername_notFound_throws() {
 
         when(userRepository.findByEmail("missing@example.com")).thenReturn(Optional.empty());

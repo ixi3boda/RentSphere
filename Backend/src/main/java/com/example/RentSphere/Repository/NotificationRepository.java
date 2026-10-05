@@ -11,12 +11,6 @@ import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-/**
- * JDBC data access repository for the {@code notifications} table.
- *
- * <p>Handles persistence, existence checks (for deduplication), recipient-scoped queries,
- * and read-status updates.
- */
 @Repository
 @RequiredArgsConstructor
 public class NotificationRepository {

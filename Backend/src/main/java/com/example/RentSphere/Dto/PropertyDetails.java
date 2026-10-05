@@ -7,9 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * Composite view model combining a {@link Property} record with its associated image URLs and cover photo.
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

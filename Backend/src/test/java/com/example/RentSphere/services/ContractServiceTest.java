@@ -47,7 +47,7 @@ class ContractServiceTest {
     private ContractService contractService;
 
     @Test
-    @DisplayName("createContractForApprovedRequest — throws when request is null")
+    @DisplayName("createContractForApprovedRequest - throws when request is null")
     void createContract_nullRequest_throws() {
         assertThatThrownBy(() -> contractService.createContractForApprovedRequest(null, new PropertyDetails()))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -55,7 +55,7 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("createContractForApprovedRequest — throws when propertyDetails is null")
+    @DisplayName("createContractForApprovedRequest - throws when propertyDetails is null")
     void createContract_nullPropertyDetails_throws() {
         assertThatThrownBy(() -> contractService.createContractForApprovedRequest(new RentalRequest(), null))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -63,7 +63,7 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("createContractForApprovedRequest — succeeds and delegates correctly")
+    @DisplayName("createContractForApprovedRequest - succeeds and delegates correctly")
     void createContract_succeeds() {
         RentalRequest req = TestFixtures.pendingRentalRequest();
         req.setDesiredMonths(12);
@@ -84,7 +84,7 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("createPayPalPaymentForContract — throws when contract not found")
+    @DisplayName("createPayPalPaymentForContract - throws when contract not found")
     void createPayPalPayment_contractNotFound_throws() {
         when(contractRepository.findById(999L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> contractService.createPayPalPaymentForContract(999L, new PayPalPaymentRequest(), TENANT_ID, false))
@@ -93,7 +93,7 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("createPayPalPaymentForContract — throws when no outstanding payments")
+    @DisplayName("createPayPalPaymentForContract - throws when no outstanding payments")
     void createPayPalPayment_noPendingPayments_throws() {
         when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
         when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.empty());
@@ -104,7 +104,7 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("createPayPalPaymentForContract — succeeds and delegates to PayPalService")
+    @DisplayName("createPayPalPaymentForContract - succeeds and delegates to PayPalService")
     void createPayPalPayment_succeeds() throws Exception {
         when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
 
@@ -125,7 +125,7 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("payments — a user who is not the tenant is refused before anything is charged")
+    @DisplayName("payments - a user who is not the tenant is refused before anything is charged")
     void payments_foreignActor_denied() {
         when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
         CreditCardPaymentRequest cardReq = validCardRequest().build();
@@ -138,7 +138,7 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("payments — a cancelled contract cannot accept money")
+    @DisplayName("payments - a cancelled contract cannot accept money")
     void payments_cancelledContract_denied() {
         Contract cancelled = TestFixtures.activeContract();
         cancelled.setContractStatus("CANCELLED");
@@ -150,7 +150,7 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("getPaymentsByContractId — the landlord on the contract may read it")
+    @DisplayName("getPaymentsByContractId - the landlord on the contract may read it")
     void payments_visibleToOwner() {
         when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
         when(contractRepository.findPaymentsByContractId(1L)).thenReturn(java.util.List.of());
@@ -159,7 +159,7 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("getPaymentsByContractId — an unrelated user is refused")
+    @DisplayName("getPaymentsByContractId - an unrelated user is refused")
     void payments_hiddenFromStranger() {
         when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
 
@@ -168,7 +168,7 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("executePayPalPaymentForContract — throws when payment fails")
+    @DisplayName("executePayPalPaymentForContract - throws when payment fails")
     void executePayPalPayment_paymentFails_throws() throws Exception {
         when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
         when(payPalService.executePayment(anyString(), anyString())).thenReturn(null);
@@ -179,7 +179,7 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("executePayPalPaymentForContract — updates DB when approved and amount matches")
+    @DisplayName("executePayPalPaymentForContract - updates DB when approved and amount matches")
     void executePayPalPayment_approved_updatesDB() throws Exception {
         when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
         when(payPalService.executePayment("payId", "payerId"))
@@ -202,7 +202,7 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("executePayPalPaymentForContract — refuses to mark paid when less was captured")
+    @DisplayName("executePayPalPaymentForContract - refuses to mark paid when less was captured")
     void executePayPalPayment_amountMismatch_throws() throws Exception {
         when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
         when(payPalService.executePayment("payId", "payerId"))
@@ -221,7 +221,7 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("processCreditCardPaymentForContract — succeeds and updates payment status")
+    @DisplayName("processCreditCardPaymentForContract - succeeds and updates payment status")
     void processCreditCardPayment_succeeds() {
         when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
 

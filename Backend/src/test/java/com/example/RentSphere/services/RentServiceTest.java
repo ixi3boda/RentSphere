@@ -35,7 +35,7 @@ class RentServiceTest {
     
 
     @Test
-    @DisplayName("createRentalRequest — null payload throws IllegalArgumentException")
+    @DisplayName("createRentalRequest - null payload throws IllegalArgumentException")
     void createRentalRequest_nullPayload_throws() {
         assertThatThrownBy(() -> rentService.createRentalRequest(null, 2))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -43,7 +43,7 @@ class RentServiceTest {
     }
 
     @Test
-    @DisplayName("createRentalRequest — null propertyId throws")
+    @DisplayName("createRentalRequest - null propertyId throws")
     void createRentalRequest_nullPropertyId_throws() {
         CreateRentalRequest req = TestFixtures.validCreateRentalRequest();
         req.setPropertyId(null);
@@ -53,7 +53,7 @@ class RentServiceTest {
     }
 
     @Test
-    @DisplayName("createRentalRequest — null desiredStart throws")
+    @DisplayName("createRentalRequest - null desiredStart throws")
     void createRentalRequest_nullDesiredStart_throws() {
         CreateRentalRequest req = TestFixtures.validCreateRentalRequest();
         req.setDesiredStart(null);
@@ -63,7 +63,7 @@ class RentServiceTest {
     }
 
     @Test
-    @DisplayName("createRentalRequest — 0 months throws (invalid duration)")
+    @DisplayName("createRentalRequest - 0 months throws (invalid duration)")
     void createRentalRequest_zeroMonths_throws() {
         CreateRentalRequest req = TestFixtures.validCreateRentalRequest();
         req.setDesiredMonths(0);
@@ -73,7 +73,7 @@ class RentServiceTest {
     }
 
     @Test
-    @DisplayName("createRentalRequest — 25 months throws (invalid duration)")
+    @DisplayName("createRentalRequest - 25 months throws (invalid duration)")
     void createRentalRequest_25Months_throws() {
         CreateRentalRequest req = TestFixtures.validCreateRentalRequest();
         req.setDesiredMonths(25);
@@ -83,7 +83,7 @@ class RentServiceTest {
     }
 
     @Test
-    @DisplayName("createRentalRequest — valid request delegates to repository")
+    @DisplayName("createRentalRequest - valid request delegates to repository")
     void createRentalRequest_valid_delegatesToRepository() {
         CreateRentalRequest req = TestFixtures.validCreateRentalRequest();
         RentalRequest expected = TestFixtures.pendingRentalRequest();
@@ -95,7 +95,7 @@ class RentServiceTest {
     }
 
     @Test
-    @DisplayName("createRentalRequest — notifies the property owner")
+    @DisplayName("createRentalRequest - notifies the property owner")
     void createRentalRequest_notifiesOwner() {
         CreateRentalRequest req = TestFixtures.validCreateRentalRequest();
         when(rentRepository.createRentalRequest(req, 2)).thenReturn(TestFixtures.pendingRentalRequest());
@@ -110,7 +110,7 @@ class RentServiceTest {
     }
 
     @Test
-    @DisplayName("createRentalRequest — exactly 1 month is valid")
+    @DisplayName("createRentalRequest - exactly 1 month is valid")
     void createRentalRequest_1Month_valid() {
         CreateRentalRequest req = TestFixtures.validCreateRentalRequest();
         req.setDesiredMonths(1);
@@ -121,7 +121,7 @@ class RentServiceTest {
     }
 
     @Test
-    @DisplayName("createRentalRequest — exactly 24 months is valid")
+    @DisplayName("createRentalRequest - exactly 24 months is valid")
     void createRentalRequest_24Months_valid() {
         CreateRentalRequest req = TestFixtures.validCreateRentalRequest();
         req.setDesiredMonths(24);
@@ -134,7 +134,7 @@ class RentServiceTest {
     
 
     @Test
-    @DisplayName("getById — throws RuntimeException when not found")
+    @DisplayName("getById - throws RuntimeException when not found")
     void getById_throws_whenNotFound() {
         when(rentRepository.findById(999L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> rentService.getById(999L))
@@ -143,7 +143,7 @@ class RentServiceTest {
     }
 
     @Test
-    @DisplayName("getById — returns request when found")
+    @DisplayName("getById - returns request when found")
     void getById_returnsRequest_whenFound() {
         RentalRequest req = TestFixtures.pendingRentalRequest();
         when(rentRepository.findById(1L)).thenReturn(Optional.of(req));
@@ -155,7 +155,7 @@ class RentServiceTest {
     
 
     @Test
-    @DisplayName("acceptRequest — throws when request not PENDING")
+    @DisplayName("acceptRequest - throws when request not PENDING")
     void acceptRequest_throws_whenNotPending() {
         RentalRequest req = TestFixtures.pendingRentalRequest();
         req.setReqStatus("ACCEPTED");
@@ -167,7 +167,7 @@ class RentServiceTest {
     }
 
     @Test
-    @DisplayName("acceptRequest — throws when caller is not the property owner")
+    @DisplayName("acceptRequest - throws when caller is not the property owner")
     void acceptRequest_throws_whenNotOwner() {
         RentalRequest req = TestFixtures.pendingRentalRequest(); 
         when(rentRepository.findById(1L)).thenReturn(Optional.of(req));
@@ -184,7 +184,7 @@ class RentServiceTest {
     }
 
     @Test
-    @DisplayName("acceptRequest — creates contract for valid accept")
+    @DisplayName("acceptRequest - creates contract for valid accept")
     void acceptRequest_createsContract() {
         RentalRequest req = TestFixtures.pendingRentalRequest(); 
         when(rentRepository.findById(1L)).thenReturn(Optional.of(req));
@@ -207,7 +207,7 @@ class RentServiceTest {
     
 
     @Test
-    @DisplayName("rejectRequest — throws when request not PENDING")
+    @DisplayName("rejectRequest - throws when request not PENDING")
     void rejectRequest_throws_whenNotPending() {
         RentalRequest req = TestFixtures.pendingRentalRequest();
         req.setReqStatus("REJECTED");
@@ -219,7 +219,7 @@ class RentServiceTest {
     }
 
     @Test
-    @DisplayName("rejectRequest — throws when caller is not the property owner")
+    @DisplayName("rejectRequest - throws when caller is not the property owner")
     void rejectRequest_throws_whenNotOwner() {
         RentalRequest req = TestFixtures.pendingRentalRequest();
         when(rentRepository.findById(1L)).thenReturn(Optional.of(req));
@@ -235,7 +235,7 @@ class RentServiceTest {
     }
 
     @Test
-    @DisplayName("rejectRequest — throws RuntimeException when updateStatus returns 0")
+    @DisplayName("rejectRequest - throws RuntimeException when updateStatus returns 0")
     void rejectRequest_throws_whenUpdateFails() {
         RentalRequest req = TestFixtures.pendingRentalRequest();
         when(rentRepository.findById(1L)).thenReturn(Optional.of(req));
@@ -254,7 +254,7 @@ class RentServiceTest {
     
 
     @Test
-    @DisplayName("getRentalRequests — passes the page window through to the repository")
+    @DisplayName("getRentalRequests - passes the page window through to the repository")
     void getRentalRequests_returnsPage() {
         when(rentRepository.findAll("PENDING", 20, 40)).thenReturn(List.of(TestFixtures.pendingRentalRequest()));
 
@@ -265,7 +265,7 @@ class RentServiceTest {
     }
 
     @Test
-    @DisplayName("requestStatusCounts — returns the repository grouping")
+    @DisplayName("requestStatusCounts - returns the repository grouping")
     void requestStatusCounts_returnsGrouping() {
         when(rentRepository.countRequestsByStatus()).thenReturn(java.util.Map.of("PENDING", 3));
 

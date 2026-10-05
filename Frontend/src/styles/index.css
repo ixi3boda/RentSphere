@@ -46,7 +46,7 @@
     @apply bg-gradient-to-r from-sky-300 to-sky-200 bg-clip-text text-transparent;
   }
 
-  /* Primary button — sky-700 (#0369a1) holds white text at 5.9:1; sky-600 only reaches 4.1:1. */
+  /* Primary button - sky-700 (#0369a1) holds white text at 5.9:1; sky-600 only reaches 4.1:1. */
   .btn-primary {
     @apply bg-sky-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200
            hover:bg-sky-800 hover:shadow-lg hover:shadow-sky-700/25 active:scale-95
