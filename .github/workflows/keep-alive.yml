@@ -1,0 +1,29 @@
+name: Keep the live demo awake
+
+# Render's free plan stops the API after 15 idle minutes and the next visitor then waits
+# about a minute for it to boot. Pinging the health check keeps it warm.
+# GitHub pauses scheduled workflows after 60 days without a commit; re-enable it from the
+# Actions tab if that happens.
+on:
+  schedule:
+    - cron: '2-59/5 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: keep-alive
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    name: Ping the API health check
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Request /actuator/health
+        run: |
+          # A cold start takes about a minute, so allow a few slow attempts before failing.
+          curl --fail --silent --show-error --output /dev/null \
+            --retry 4 --retry-delay 15 --retry-all-errors --max-time 90 \
+            https://rentsphere-api.onrender.com/actuator/health
