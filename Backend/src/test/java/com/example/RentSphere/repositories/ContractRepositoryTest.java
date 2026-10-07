@@ -30,7 +30,7 @@ class ContractRepositoryTest {
     @Test
     @DisplayName("findAll returns one page of contracts")
     void findAll_returnsContractsPage() {
-        List<Contract> list = contractRepository.findAll(null, 12, 0);
+        List<Contract> list = contractRepository.findAllForOwner(1L, null, 12, 0);
         assertThat(list).isNotNull();
         assertThat(list).hasSizeLessThanOrEqualTo(12);
     }
@@ -38,17 +38,17 @@ class ContractRepositoryTest {
     @Test
     @DisplayName("findAll filters by status, case-insensitively")
     void findAll_filtersByStatus() {
-        List<Contract> page = contractRepository.findAll("active", 10, 0);
+        List<Contract> page = contractRepository.findAllForOwner(1L, "active", 10, 0);
         assertThat(page).allSatisfy(c -> assertThat(c.getContractStatus()).isEqualTo("ACTIVE"));
-        assertThat(contractRepository.countContracts("ACTIVE")).isGreaterThanOrEqualTo(page.size());
+        assertThat(contractRepository.countContractsForOwner(1L, "ACTIVE")).isGreaterThanOrEqualTo(page.size());
     }
 
     @Test
     @DisplayName("countContractsByStatus covers every contract exactly once")
     void countContractsByStatus_totalsEveryRow() {
-        Map<String, Integer> counts = contractRepository.countContractsByStatus();
+        Map<String, Integer> counts = contractRepository.countContractsByStatusForOwner(1L);
         int grouped = counts.values().stream().mapToInt(Integer::intValue).sum();
-        assertThat(grouped).isEqualTo(contractRepository.countContracts(null));
+        assertThat(grouped).isEqualTo(contractRepository.countContractsForOwner(1L, null));
     }
 
     @Test

@@ -16,7 +16,7 @@ class JwtServiceTest {
 
     @BeforeEach
     void setUp() {
-        jwtService = new JwtService("unit-test-jwt-secret-key-at-least-32-bytes-long-0123456789");
+        jwtService = new JwtService("unit-test-jwt-secret-key-at-least-32-bytes-long-0123456789", 86_400_000L);
     }
 
     

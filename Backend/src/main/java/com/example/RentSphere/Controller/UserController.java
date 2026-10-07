@@ -9,6 +9,7 @@ import com.example.RentSphere.Service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -125,6 +126,8 @@ public class UserController {
             return ResponseEntity.ok(response);
         } catch (IllegalStateException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch (AccessDeniedException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {

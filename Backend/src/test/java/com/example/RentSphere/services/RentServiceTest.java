@@ -88,10 +88,76 @@ class RentServiceTest {
         CreateRentalRequest req = TestFixtures.validCreateRentalRequest();
         RentalRequest expected = TestFixtures.pendingRentalRequest();
         when(rentRepository.createRentalRequest(req, 2)).thenReturn(expected);
+        when(propertyService.getById(1L)).thenReturn(availableProperty());
 
         RentalRequest result = rentService.createRentalRequest(req, 2);
         assertThat(result.getReqStatus()).isEqualTo("PENDING");
         verify(rentRepository).createRentalRequest(req, 2);
+    }
+
+    private static PropertyDetails availableProperty() {
+        PropertyDetails pd = new PropertyDetails();
+        pd.setProperty(TestFixtures.testProperty());
+        return pd;
+    }
+
+    @Test
+    @DisplayName("createRentalRequest - an owner cannot request their own listing")
+    void createRentalRequest_ownProperty_throws() {
+        when(propertyService.getById(1L)).thenReturn(availableProperty());
+
+        assertThatThrownBy(() -> rentService.createRentalRequest(TestFixtures.validCreateRentalRequest(), 1))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("your own property");
+        verify(rentRepository, never()).createRentalRequest(any(), anyInt());
+    }
+
+    @Test
+    @DisplayName("createRentalRequest - a leased listing cannot be requested")
+    void createRentalRequest_unavailableProperty_throws() {
+        PropertyDetails pd = availableProperty();
+        pd.getProperty().setIsAvailable(false);
+        when(propertyService.getById(1L)).thenReturn(pd);
+
+        assertThatThrownBy(() -> rentService.createRentalRequest(TestFixtures.validCreateRentalRequest(), 2))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("not available");
+    }
+
+    @Test
+    @DisplayName("createRentalRequest - a second pending request for the same listing is refused")
+    void createRentalRequest_duplicatePending_throws() {
+        when(propertyService.getById(1L)).thenReturn(availableProperty());
+        when(rentRepository.existsPendingByTenantAndProperty(2, 1L)).thenReturn(true);
+
+        assertThatThrownBy(() -> rentService.createRentalRequest(TestFixtures.validCreateRentalRequest(), 2))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("already have a pending request");
+    }
+
+    @Test
+    @DisplayName("createRentalRequest - a start date years away is refused")
+    void createRentalRequest_farFutureStart_throws() {
+        CreateRentalRequest req = TestFixtures.validCreateRentalRequest();
+        req.setDesiredStart(java.time.LocalDate.now().plusYears(5));
+
+        assertThatThrownBy(() -> rentService.createRentalRequest(req, 2))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("within the next 12 months");
+    }
+
+    @Test
+    @DisplayName("acceptRequest - a listing that is already leased cannot be let twice")
+    void acceptRequest_alreadyLeased_throws() {
+        when(rentRepository.findById(1L)).thenReturn(java.util.Optional.of(TestFixtures.pendingRentalRequest()));
+        PropertyDetails pd = availableProperty();
+        pd.getProperty().setIsAvailable(false);
+        when(propertyService.getById(1L)).thenReturn(pd);
+
+        assertThatThrownBy(() -> rentService.acceptRequest(1L, 1))
+                .isInstanceOf(com.example.RentSphere.Exception.BadRequestException.class)
+                .hasMessageContaining("already leased");
+        verify(rentRepository, never()).updateStatus(anyLong(), anyString());
     }
 
     @Test
@@ -116,6 +182,7 @@ class RentServiceTest {
         req.setDesiredMonths(1);
         RentalRequest expected = TestFixtures.pendingRentalRequest();
         when(rentRepository.createRentalRequest(req, 2)).thenReturn(expected);
+        when(propertyService.getById(1L)).thenReturn(availableProperty());
 
         assertThatNoException().isThrownBy(() -> rentService.createRentalRequest(req, 2));
     }
@@ -127,6 +194,7 @@ class RentServiceTest {
         req.setDesiredMonths(24);
         RentalRequest expected = TestFixtures.pendingRentalRequest();
         when(rentRepository.createRentalRequest(req, 2)).thenReturn(expected);
+        when(propertyService.getById(1L)).thenReturn(availableProperty());
 
         assertThatNoException().isThrownBy(() -> rentService.createRentalRequest(req, 2));
     }
@@ -256,19 +324,19 @@ class RentServiceTest {
     @Test
     @DisplayName("getRentalRequests - passes the page window through to the repository")
     void getRentalRequests_returnsPage() {
-        when(rentRepository.findAll("PENDING", 20, 40)).thenReturn(List.of(TestFixtures.pendingRentalRequest()));
+        when(rentRepository.findAllForOwner(1, "PENDING", 20, 40)).thenReturn(List.of(TestFixtures.pendingRentalRequest()));
 
-        List<RentalRequest> result = rentService.getRentalRequests("PENDING", 20, 40);
+        List<RentalRequest> result = rentService.getRentalRequests(1, "PENDING", 20, 40);
 
         assertThat(result).hasSize(1);
-        verify(rentRepository).findAll("PENDING", 20, 40);
+        verify(rentRepository).findAllForOwner(1, "PENDING", 20, 40);
     }
 
     @Test
     @DisplayName("requestStatusCounts - returns the repository grouping")
     void requestStatusCounts_returnsGrouping() {
-        when(rentRepository.countRequestsByStatus()).thenReturn(java.util.Map.of("PENDING", 3));
+        when(rentRepository.countRequestsByStatusForOwner(1)).thenReturn(java.util.Map.of("PENDING", 3));
 
-        assertThat(rentService.requestStatusCounts()).containsEntry("PENDING", 3);
+        assertThat(rentService.requestStatusCounts(1)).containsEntry("PENDING", 3);
     }
 }

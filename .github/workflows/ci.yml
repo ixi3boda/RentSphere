@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main, master ]
 
+# The jobs only read the repository; deploy credentials come from secrets
+permissions:
+  contents: read
+
 jobs:
   backend-test-build:
     name: Backend Build & Test (Spring Boot + JUnit 5 + JaCoCo)

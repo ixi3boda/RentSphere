@@ -52,8 +52,10 @@ public class MdcLoggingFilter extends OncePerRequestFilter {
 
         // Honour an ID forwarded by an upstream gateway (e.g., Nginx, API gateway);
         // generate a new one if none was provided.
+        // The value is client-controlled and ends up in every log line, so anything that is not
+        // a short plain token is replaced rather than trusted.
         String correlationId = request.getHeader(CORRELATION_ID_HEADER);
-        if (correlationId == null || correlationId.isBlank()) {
+        if (correlationId == null || !correlationId.matches("[A-Za-z0-9._-]{1,64}")) {
             correlationId = UUID.randomUUID().toString();
         }
 

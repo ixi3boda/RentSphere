@@ -36,6 +36,16 @@ services:
       # Must equal the static site's URL below; change both if Render suffixes the names
       - key: RENTSPHERE_CORS_ALLOWED_ORIGINS
         value: https://rentsphere-5jpa.onrender.com
+      # Render's edge sets these to the real visitor address; the rate limiter keys on it
+      - key: RENTSPHERE_RATELIMIT_CLIENT_IP_HEADERS
+        value: CF-Connecting-IP,True-Client-IP
+      # The published demo logins: their profiles are read-only so nobody can lock others out
+      - key: RENTSPHERE_DEMO_ACCOUNTS
+        value: nour.elsayed@nilenest.demo,youssef.farouk@mail.demo,salma.abdelnabi@mail.demo,mariam.elhosseiny@mail.demo
+      # Reloads db/seed-demo.sql on every start and daily at 03:00 UTC. This EMPTIES EVERY
+      # TABLE, which is the point on a demo anyone can write to. Remove it for real data.
+      - key: RENTSPHERE_DEMO_RESET_ENABLED
+        value: "true"
 
   - type: web
     name: rentsphere
@@ -48,6 +58,25 @@ services:
         value: 20
       - key: REACT_APP_API_URL
         value: https://rentsphere-api.onrender.com
+      # No inline script in index.html, so the CSP below can forbid inline scripts outright
+      - key: INLINE_RUNTIME_CHUNK
+        value: "false"
+    headers:
+      - path: /*
+        name: Content-Security-Policy
+        value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://rentsphere-api.onrender.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /*
+        name: Permissions-Policy
+        value: camera=(), microphone=(), geolocation=(), payment=()
     routes:
       - type: rewrite
         source: /*

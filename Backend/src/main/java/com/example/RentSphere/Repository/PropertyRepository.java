@@ -6,6 +6,8 @@ import com.example.RentSphere.Dto.Property;
 import com.example.RentSphere.Dto.PropertyDetails;
 import com.example.RentSphere.Dto.UpdatePropertyRequest;
 import com.example.RentSphere.Dto.User;
+import com.example.RentSphere.Exception.BadRequestException;
+import com.example.RentSphere.Exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -305,7 +307,7 @@ public class PropertyRepository {
         }
 
         if (params.isEmpty()) {
-            throw new RuntimeException("No fields to update");
+            throw new BadRequestException("No fields to update");
         }
 
         sql.setLength(sql.length() - 2);
@@ -313,6 +315,12 @@ public class PropertyRepository {
         params.add(property_id);
 
         return jdbcTemplate.update(sql.toString(), params.toArray());
+    }
+
+    public int updateAvailability(Long propertyId, boolean available) {
+        return jdbcTemplate.update(
+                "UPDATE properties SET is_available = ?, updated_at = CURRENT_TIMESTAMP WHERE property_id = ?",
+                available, propertyId);
     }
 
     public int delete(Long id) {
@@ -361,6 +369,18 @@ public class PropertyRepository {
         return fullTextSupported;
     }
 
+    // BOOLEAN MODE gives + - < > ( ) ~ * " @ a meaning of their own, and an unbalanced one is a
+    // syntax error. Only the letters and digits of the search are kept, every word required.
+    static String toBooleanQuery(String term) {
+        StringBuilder query = new StringBuilder();
+        for (String word : term.split("[^\\p{L}\\p{N}]+")) {
+            if (!word.isEmpty()) {
+                query.append(query.length() == 0 ? "" : " ").append('+').append(word).append('*');
+            }
+        }
+        return query.toString();
+    }
+
     private String buildFilterWhere(PropertyFilter filter, List<Object> params) {
         StringBuilder sql = new StringBuilder(" WHERE 1=1 ");
 
@@ -369,9 +389,10 @@ public class PropertyRepository {
             // FULLTEXT MATCH..AGAINST uses idx_properties_fulltext and avoids the full-table scan
             // that LIKE '%term%' caused. MySQL's minimum token length is 2 chars by default; for
             // single-character inputs or test environments (e.g. H2) we fall back to LIKE so short queries still work.
-            if (isFullTextSupported() && term.length() >= 2) {
+            String booleanQuery = toBooleanQuery(term);
+            if (isFullTextSupported() && term.length() >= 2 && !booleanQuery.isEmpty()) {
                 sql.append(" AND MATCH(title, city, district, property_description) AGAINST (? IN BOOLEAN MODE) ");
-                params.add("+" + term + "*");
+                params.add(booleanQuery);
             } else {
                 sql.append(" AND (LOWER(title) LIKE ? OR LOWER(city) LIKE ? OR LOWER(district) LIKE ?) ");
                 String like = "%" + term.toLowerCase() + "%";
@@ -439,6 +460,10 @@ public class PropertyRepository {
     }
 
     public Favorite favorite(int propertyId, int tenantId) {
+
+        if (findById((long) propertyId).isEmpty()) {
+            throw new ResourceNotFoundException("Property not found: " + propertyId);
+        }
         
         String checkSql = "SELECT COUNT(*) FROM favorites WHERE tenant_id = ? AND property_id = ?";
         Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class, tenantId, propertyId);

@@ -46,7 +46,8 @@ numbers above don't include it.
 
 ```bash
 cp .env.example .env && set -a && source .env && set +a
-docker compose up -d mysql backend
+# the API throttles each client IP, which a single-machine load test would hit at once
+RENTSPHERE_RATELIMIT_ENABLED=false docker compose up -d mysql backend
 
 # seed 100k listings (takes a few minutes)
 docker compose exec -T mysql mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" \

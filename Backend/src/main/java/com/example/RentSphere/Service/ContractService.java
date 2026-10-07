@@ -17,12 +17,15 @@ import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -58,6 +61,14 @@ public class ContractService {
     // chk_noti_type in Database/Schema.sql rejects anything outside its enum, and the check runs
     // inside the payment transaction - an unknown type rolls the paid installment back.
     private static final String PAYMENT_NOTIFICATION_TYPE = "PAYMENT_RECEIVED";
+
+    // Rent is priced in one currency. Letting the client pick it would let a tenant settle a
+    // 1,000 USD installment with 1,000 of something cheaper.
+    private static final String CURRENCY = "USD";
+
+    // PayPal sends the payer back to these URLs, so they may only point at our own frontend.
+    @Value("${rentsphere.cors.allowed-origins:http://localhost:3000}")
+    private String allowedOrigins = "http://localhost:3000";
 
     private final ContractRepository contractRepository;
     private final UserRepository userRepository;
@@ -96,16 +107,21 @@ public class ContractService {
     }
 
     public PayPalPaymentResponse createPayPalPaymentForContract(Long contractId, PayPalPaymentRequest request,
-                                                                Long actorUserId, boolean actorIsAdmin) throws PayPalRESTException {
-        Contract contract = requirePayableContract(contractId, actorUserId, actorIsAdmin);
-        PaymentDto pendingPayment = requireOutstandingInstallment(contractId, request != null ? request.getInstallmentNo() : null);
+                                                                Long actorUserId) throws PayPalRESTException {
+        if (request == null) {
+            throw new IllegalArgumentException("Payment details are required");
+        }
+        requirePayableContract(contractId, actorUserId);
+        requireOwnOrigin(request.getSuccessUrl(), "Success URL");
+        requireOwnOrigin(request.getCancelUrl(), "Cancel URL");
+        PaymentDto pendingPayment = requireOutstandingInstallment(contractId, request.getInstallmentNo());
 
         PayPalPaymentRequest paypalRequest = PayPalPaymentRequest.builder()
                 .amount(pendingPayment.getAmountDue().doubleValue())
-                .currency(request != null && request.getCurrency() != null ? request.getCurrency() : "USD")
+                .currency(CURRENCY)
                 .description("Rent payment for contract #" + contractId + " installment #" + pendingPayment.getInstallmentNo())
-                .cancelUrl(request != null ? request.getCancelUrl() : null)
-                .successUrl(request != null ? request.getSuccessUrl() : null)
+                .cancelUrl(request.getCancelUrl())
+                .successUrl(request.getSuccessUrl())
                 .installmentNo(pendingPayment.getInstallmentNo())
                 .build();
 
@@ -114,8 +130,11 @@ public class ContractService {
 
     @Transactional
     public PayPalPaymentResponse executePayPalPaymentForContract(Long contractId, String paymentId, String payerId,
-                                                                 Integer installmentNo, Long actorUserId, boolean actorIsAdmin) throws PayPalRESTException {
-        Contract contract = requirePayableContract(contractId, actorUserId, actorIsAdmin);
+                                                                 Integer installmentNo, Long actorUserId) throws PayPalRESTException {
+        Contract contract = requirePayableContract(contractId, actorUserId);
+        // Checked before PayPal is asked to capture, so money never moves for an installment
+        // that is not owed.
+        requireOutstandingInstallment(contractId, installmentNo);
         Payment payment = payPalService.executePayment(paymentId, payerId);
         if (payment == null || payment.getState() == null) {
             throw new PaymentProcessingException("PayPal payment execution failed");
@@ -139,7 +158,7 @@ public class ContractService {
             notificationService.createNotification(
                     contract.getTenantId().intValue(),
                     PAYMENT_NOTIFICATION_TYPE,
-                    "Payment Received via PayPal",
+                    paymentTitle(contractId, targetPayment.getInstallmentNo()),
                     String.format("Your payment of $%.2f for installment #%d on contract #%d was successfully completed.",
                             targetPayment.getAmountDue(), targetPayment.getInstallmentNo(), contractId)
             );
@@ -152,7 +171,7 @@ public class ContractService {
 
     @Transactional
     public CreditCardPaymentResponse processCreditCardPaymentForContract(Long contractId, CreditCardPaymentRequest request,
-                                                                        Long actorUserId, boolean actorIsAdmin) {
+                                                                        Long actorUserId) {
         if (request == null) {
             throw new IllegalArgumentException("Credit card payment details are required");
         }
@@ -167,8 +186,11 @@ public class ContractService {
         if (request.getCvv() == null || !request.getCvv().matches("\\d{3,4}")) {
             throw new IllegalArgumentException("Invalid CVV code. Must be 3 or 4 digits.");
         }
+        if (isExpired(request.getExpiryMonth(), request.getExpiryYear())) {
+            throw new IllegalArgumentException("This card has expired.");
+        }
 
-        Contract contract = requirePayableContract(contractId, actorUserId, actorIsAdmin);
+        Contract contract = requirePayableContract(contractId, actorUserId);
         PaymentDto targetPayment = requireOutstandingInstallment(contractId, request.getInstallmentNo());
 
         String transactionRef = "CC-PAY-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
@@ -181,7 +203,7 @@ public class ContractService {
         notificationService.createNotification(
                 contract.getTenantId().intValue(),
                 PAYMENT_NOTIFICATION_TYPE,
-                "Payment Received via Credit Card",
+                paymentTitle(contractId, targetPayment.getInstallmentNo()),
                 String.format("Your payment of $%.2f for installment #%d on contract #%d was successfully processed via Credit Card (%s).",
                         targetPayment.getAmountDue(), targetPayment.getInstallmentNo(), contractId, transactionRef)
         );
@@ -198,14 +220,46 @@ public class ContractService {
                 .build();
     }
 
+    // Notifications are deduplicated per (recipient, type, title), so the title has to name the
+    // installment or a tenant would only ever be told about their first payment.
+    private static String paymentTitle(Long contractId, Integer installmentNo) {
+        return "Payment received: contract #" + contractId + ", installment #" + installmentNo;
+    }
+
+    // Expiry is optional on the request; when present it must not be in the past.
+    private static boolean isExpired(String month, String year) {
+        if (month == null || year == null || !month.matches("\\d{1,2}") || !year.matches("\\d{2}|\\d{4}")) {
+            return false;
+        }
+        int fullYear = year.length() == 2 ? 2000 + Integer.parseInt(year) : Integer.parseInt(year);
+        int monthValue = Integer.parseInt(month);
+        if (monthValue < 1 || monthValue > 12) {
+            return true;
+        }
+        return YearMonth.of(fullYear, monthValue).isBefore(YearMonth.now());
+    }
+
+    private void requireOwnOrigin(String url, String label) {
+        if (url == null || url.isBlank()) {
+            throw new IllegalArgumentException(label + " is required");
+        }
+        boolean allowed = Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(origin -> !origin.isEmpty())
+                .anyMatch(origin -> url.equals(origin) || url.startsWith(origin + "/"));
+        if (!allowed) {
+            throw new IllegalArgumentException(label + " must point back to this site");
+        }
+    }
+
     /**
-     * Only the tenant on the contract (or an administrator) may move money on it, and a
-     * cancelled or completed contract must never accept a payment.
+     * Only the tenant on the contract may move money on it, and a cancelled or completed
+     * contract must never accept a payment.
      */
-    private Contract requirePayableContract(Long contractId, Long actorUserId, boolean actorIsAdmin) {
+    private Contract requirePayableContract(Long contractId, Long actorUserId) {
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new ResourceNotFoundException("Contract not found: " + contractId));
-        if (!actorIsAdmin && !contract.getTenantId().equals(actorUserId)) {
+        if (!contract.getTenantId().equals(actorUserId)) {
             throw new AccessDeniedException("Contract #" + contractId + " does not belong to the authenticated user");
         }
         if (!"ACTIVE".equalsIgnoreCase(contract.getContractStatus())) {
@@ -235,6 +289,11 @@ public class ContractService {
                 || payment.getTransactions().get(0).getAmount().getTotal() == null) {
             throw new PaymentProcessingException("PayPal did not report a captured amount for payment " + payment.getId());
         }
+        String currency = payment.getTransactions().get(0).getAmount().getCurrency();
+        if (!CURRENCY.equalsIgnoreCase(currency)) {
+            throw new PaymentProcessingException("Payment " + payment.getId() + " was captured in "
+                    + currency + " but rent is due in " + CURRENCY);
+        }
         BigDecimal captured = new BigDecimal(payment.getTransactions().get(0).getAmount().getTotal());
         if (captured.compareTo(targetPayment.getAmountDue()) != 0) {
             throw new PaymentProcessingException(String.format(
@@ -249,16 +308,16 @@ public class ContractService {
         }
     }
 
-    public java.util.List<Contract> getContracts(String status, int limit, int offset) {
-        return contractRepository.findAll(status, limit, offset);
+    public java.util.List<Contract> getContracts(Long ownerId, String status, int limit, int offset) {
+        return contractRepository.findAllForOwner(ownerId, status, limit, offset);
     }
 
-    public int countContracts(String status) {
-        return contractRepository.countContracts(status);
+    public int countContracts(Long ownerId, String status) {
+        return contractRepository.countContractsForOwner(ownerId, status);
     }
 
-    public java.util.Map<String, Integer> contractStatusCounts() {
-        return contractRepository.countContractsByStatus();
+    public java.util.Map<String, Integer> contractStatusCounts(Long ownerId) {
+        return contractRepository.countContractsByStatusForOwner(ownerId);
     }
 
     public java.util.List<Contract> getContractsForTenant(Long tenantId) {
@@ -270,14 +329,13 @@ public class ContractService {
     }
 
     /**
-     * The payment schedule is visible to the tenant who owes it, the landlord whose rent it is,
-     * and administrators.
+     * The payment schedule is visible to the tenant who owes it and the landlord whose rent it is.
      */
-    public java.util.List<PaymentDto> getPaymentsByContractId(Long contractId, Long actorUserId, boolean actorIsAdmin) {
+    public java.util.List<PaymentDto> getPaymentsByContractId(Long contractId, Long actorUserId) {
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new ResourceNotFoundException("Contract not found: " + contractId));
         boolean party = contract.getTenantId().equals(actorUserId) || contract.getOwnerId().equals(actorUserId);
-        if (!actorIsAdmin && !party) {
+        if (!party) {
             throw new AccessDeniedException("Contract #" + contractId + " does not belong to the authenticated user");
         }
         return contractRepository.findPaymentsByContractId(contractId);

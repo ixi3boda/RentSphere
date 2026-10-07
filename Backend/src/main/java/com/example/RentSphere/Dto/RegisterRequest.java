@@ -14,7 +14,7 @@ public class RegisterRequest {
 
     @NotBlank
     @Email
-    @Size(max = 255)
+    @Size(max = 180)
     private String email;
 
     @NotBlank
@@ -23,15 +23,19 @@ public class RegisterRequest {
 
     @NotBlank
     @Size(min = 3, max = 100)
+    @Pattern(regexp = InputRules.NAME, message = "may only contain letters, digits, spaces and . , ' _ -")
     private String username;
 
     @NotBlank
-    @Size(max = 255)
+    @Size(max = 120)
+    @Pattern(regexp = InputRules.NAME, message = "may only contain letters, digits, spaces and . , ' _ -")
     private String full_name;
 
     @Size(max = 20)
+    @Pattern(regexp = InputRules.PHONE, message = "must be a valid phone number")
     private String mobile_number;
 
     @Size(max = 500)
+    @Pattern(regexp = InputRules.IMAGE_URL, message = "must be an https URL")
     private String avatar_url;
 }

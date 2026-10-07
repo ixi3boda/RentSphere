@@ -60,7 +60,7 @@ class CoreWorkflowIntegrationTest {
         CreateRentalRequest rentReq = CreateRentalRequest.builder()
                 .propertyId(newPropertyId)
                 .message("I want to rent this workflow villa")
-                .desiredStart(java.time.LocalDate.parse("2025-01-01"))
+                .desiredStart(java.time.LocalDate.now().plusDays(30))
                 .desiredMonths(12)
                 .build();
                 
@@ -86,15 +86,16 @@ class CoreWorkflowIntegrationTest {
     @DisplayName("Admin rejects request: Tenant requests -> Admin rejects")
     void rejectionWorkflow() {
         int adminUserId = 1; 
-        int tenantUserId = 2; 
-        
-        
+        // the seeded tenant already has a pending request on this listing, so the visitor applies
+        int tenantUserId = 3;
+
+
         int propertyId = 1; 
 
         CreateRentalRequest rentReq = CreateRentalRequest.builder()
                 .propertyId((long) propertyId)
                 .message("Lowball offer")
-                .desiredStart(java.time.LocalDate.parse("2024-10-01"))
+                .desiredStart(java.time.LocalDate.now().plusDays(30))
                 .desiredMonths(6)
                 .build();
                 

@@ -78,11 +78,13 @@ public class ContractRepository {
             .amountDue(rs.getBigDecimal("amount_due"))
             .build();
 
-    public List<Contract> findAll(String status, int limit, int offset) {
+    // The management view is always scoped to one owner's contracts.
+    public List<Contract> findAllForOwner(Long ownerId, String status, int limit, int offset) {
         List<Object> params = new ArrayList<>();
-        String sql = "SELECT * FROM contracts";
+        String sql = "SELECT * FROM contracts WHERE owner_id = ?";
+        params.add(ownerId);
         if (status != null && !status.isBlank()) {
-            sql += " WHERE contract_status = ?";
+            sql += " AND contract_status = ?";
             params.add(status.trim().toUpperCase());
         }
         sql += " ORDER BY created_at DESC, contract_id DESC LIMIT ? OFFSET ?";
@@ -91,24 +93,34 @@ public class ContractRepository {
         return jdbcTemplate.query(sql, contractMapper, params.toArray());
     }
 
-    public int countContracts(String status) {
-        if (status == null || status.isBlank()) {
-            Integer total = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM contracts", Integer.class);
-            return total == null ? 0 : total;
+    public int countContractsForOwner(Long ownerId, String status) {
+        List<Object> params = new ArrayList<>();
+        String sql = "SELECT COUNT(*) FROM contracts WHERE owner_id = ?";
+        params.add(ownerId);
+        if (status != null && !status.isBlank()) {
+            sql += " AND contract_status = ?";
+            params.add(status.trim().toUpperCase());
         }
-        Integer total = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM contracts WHERE contract_status = ?",
-                new Object[]{status.trim().toUpperCase()}, Integer.class);
+        Integer total = jdbcTemplate.queryForObject(sql, Integer.class, params.toArray());
         return total == null ? 0 : total;
     }
 
-    public Map<String, Integer> countContractsByStatus() {
+    public Map<String, Integer> countContractsByStatusForOwner(Long ownerId) {
         Map<String, Integer> counts = new HashMap<>();
         // Explicit RowCallbackHandler: a bare lambda here would bind to ResultSetExtractor, whose
         // cursor sits before the first row, and reading it throws "No data is available".
-        jdbcTemplate.query("SELECT contract_status, COUNT(*) AS c FROM contracts GROUP BY contract_status",
-                (RowCallbackHandler) rs -> counts.put(rs.getString("contract_status"), rs.getInt("c")));
+        jdbcTemplate.query(
+                "SELECT contract_status, COUNT(*) AS c FROM contracts WHERE owner_id = ? GROUP BY contract_status",
+                (RowCallbackHandler) rs -> counts.put(rs.getString("contract_status"), rs.getInt("c")),
+                ownerId);
         return counts;
+    }
+
+    // A listing goes back on the market once no active lease holds it.
+    public int releasePropertyIfUnleased(Long propertyId) {
+        String sql = "UPDATE properties SET is_available = TRUE WHERE property_id = ? " +
+                "AND NOT EXISTS (SELECT 1 FROM contracts c WHERE c.property_id = ? AND c.contract_status = 'ACTIVE')";
+        return jdbcTemplate.update(sql, propertyId, propertyId);
     }
 
     public List<Contract> findByTenantId(Long tenantId) {

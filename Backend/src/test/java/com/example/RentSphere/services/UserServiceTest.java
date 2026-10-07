@@ -283,4 +283,42 @@ class UserServiceTest {
 
         verify(userRepository).updateActiveState(user.getUser_id(), false);
     }
+
+    @Test
+    @DisplayName("updateCurrentUser - changing the password needs the current one")
+    void updateCurrentUser_passwordChangeWithoutCurrent_throws() {
+        when(userRepository.findByEmail("admin@test.com")).thenReturn(Optional.of(TestFixtures.adminUser()));
+        UpdateProfileRequest req = UpdateProfileRequest.builder().password_hash("a-new-password").build();
+
+        assertThatThrownBy(() -> userService.updateCurrentUser("admin@test.com", req))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Current password is required");
+        verify(userRepository, never()).update(any());
+    }
+
+    @Test
+    @DisplayName("updateCurrentUser - changing the email with a wrong current password is refused")
+    void updateCurrentUser_emailChangeWrongCurrent_throws() {
+        when(userRepository.findByEmail("admin@test.com")).thenReturn(Optional.of(TestFixtures.adminUser()));
+        when(passwordEncoder.matches(eq("guess"), any())).thenReturn(false);
+        UpdateProfileRequest req = UpdateProfileRequest.builder()
+                .email("attacker@evil.example").current_password("guess").build();
+
+        assertThatThrownBy(() -> userService.updateCurrentUser("admin@test.com", req))
+                .isInstanceOf(IllegalArgumentException.class);
+        verify(userRepository, never()).update(any());
+    }
+
+    @Test
+    @DisplayName("updateCurrentUser - a shared demo account cannot be edited")
+    void updateCurrentUser_demoAccount_isReadOnly() {
+        org.springframework.test.util.ReflectionTestUtils.setField(userService, "demoAccounts", "other@demo, admin@test.com");
+        when(userRepository.findByEmail("admin@test.com")).thenReturn(Optional.of(TestFixtures.adminUser()));
+        UpdateProfileRequest req = UpdateProfileRequest.builder().full_name("Defaced").build();
+
+        assertThatThrownBy(() -> userService.updateCurrentUser("admin@test.com", req))
+                .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
+                .hasMessageContaining("read-only");
+        verify(userRepository, never()).update(any());
+    }
 }

@@ -17,7 +17,8 @@ public class CreateRentalRequest {
     @NotNull
     private Long propertyId;
 
-    @Size(max = 2000)
+    @Size(max = 200)
+    @Pattern(regexp = InputRules.TEXT, message = "must be plain text")
     private String message;
 
     @NotNull

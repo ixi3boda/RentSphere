@@ -123,8 +123,8 @@ export function AuthProvider({ children }) {
       if (staySignedIn) {
         
         localStorage.setItem("token", token);
-        const maxAge = 60 * 60 * 24 * 30; 
-        document.cookie = `rentsphere_token=${encodeURIComponent(token)}; Path=/; max-age=${maxAge};`;
+        const maxAge = 60 * 60 * 24; 
+        document.cookie = `rentsphere_token=${encodeURIComponent(token)}; Path=/; max-age=${maxAge}; SameSite=Strict${window.location.protocol === 'https:' ? '; Secure' : ''}`;
         
         sessionStorage.removeItem("token");
       } else {
@@ -247,8 +247,8 @@ export function AuthProvider({ children }) {
       }
 
       if (storingInLocalStorage && token) {
-        const maxAge = 60 * 60 * 24 * 30;
-        document.cookie = `rentsphere_token=${encodeURIComponent(token)}; Path=/; max-age=${maxAge};`;
+        const maxAge = 60 * 60 * 24;
+        document.cookie = `rentsphere_token=${encodeURIComponent(token)}; Path=/; max-age=${maxAge}; SameSite=Strict${window.location.protocol === 'https:' ? '; Secure' : ''}`;
       }
 
       return { success: true };

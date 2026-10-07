@@ -103,8 +103,9 @@ class RentControllerTest {
     @DisplayName("GET /requests/all - 200 for ADMIN, paged envelope")
     @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
     void getAllRequests_asAdmin_returns200() throws Exception {
-        when(rentService.getRentalRequests(null, 20, 0)).thenReturn(List.of(TestFixtures.pendingRentalRequest()));
-        when(rentService.countRentalRequests(null)).thenReturn(30001);
+        when(userService.getCurrentUser("admin@test.com")).thenReturn(TestFixtures.adminUser());
+        when(rentService.getRentalRequests(1, null, 20, 0)).thenReturn(List.of(TestFixtures.pendingRentalRequest()));
+        when(rentService.countRentalRequests(1, null)).thenReturn(30001);
 
         mockMvc.perform(get("/api/rent/requests/all"))
                 .andExpect(status().isOk())
@@ -116,21 +117,23 @@ class RentControllerTest {
     @DisplayName("GET /requests/all - size is clamped and page drives the offset")
     @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
     void getAllRequests_clampsPage() throws Exception {
-        when(rentService.getRentalRequests(any(), anyInt(), anyInt())).thenReturn(List.of());
-        when(rentService.countRentalRequests(any())).thenReturn(0);
+        when(userService.getCurrentUser("admin@test.com")).thenReturn(TestFixtures.adminUser());
+        when(rentService.getRentalRequests(anyInt(), any(), anyInt(), anyInt())).thenReturn(List.of());
+        when(rentService.countRentalRequests(anyInt(), any())).thenReturn(0);
 
         mockMvc.perform(get("/api/rent/requests/all").param("page", "3").param("size", "5000"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size").value(100));
 
-        verify(rentService).getRentalRequests(null, 100, 300);
+        verify(rentService).getRentalRequests(1, null, 100, 300);
     }
 
     @Test
     @DisplayName("GET /requests/summary - every status key present, unknown ones zero")
     @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
     void requestSummary_returnsEveryStatus() throws Exception {
-        when(rentService.requestStatusCounts())
+        when(userService.getCurrentUser("admin@test.com")).thenReturn(TestFixtures.adminUser());
+        when(rentService.requestStatusCounts(1))
                 .thenReturn(java.util.Map.of("PENDING", 7500, "ACCEPTED", 7501));
 
         mockMvc.perform(get("/api/rent/requests/summary"))
@@ -164,7 +167,7 @@ class RentControllerTest {
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void getRequestById_found_returns200() throws Exception {
         when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());
-        when(rentService.getByIdForActor(1L, 2, false)).thenReturn(TestFixtures.pendingRentalRequest());
+        when(rentService.getByIdForActor(1L, 2)).thenReturn(TestFixtures.pendingRentalRequest());
 
         mockMvc.perform(get("/api/rent/requests/1"))
                 .andExpect(status().isOk())
@@ -176,7 +179,7 @@ class RentControllerTest {
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void getRequestById_notFound_returns404() throws Exception {
         when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());
-        when(rentService.getByIdForActor(999L, 2, false)).thenThrow(new com.example.RentSphere.Exception.ResourceNotFoundException("Rental request not found"));
+        when(rentService.getByIdForActor(999L, 2)).thenThrow(new com.example.RentSphere.Exception.ResourceNotFoundException("Rental request not found"));
 
         mockMvc.perform(get("/api/rent/requests/999"))
                 .andExpect(status().isNotFound());
@@ -232,9 +235,10 @@ class RentControllerTest {
     @DisplayName("GET /contracts/manage - returns the paged envelope")
     @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
     void manageContracts_returnsEnvelope() throws Exception {
-        when(contractService.getContracts("ACTIVE", 12, 12))
+        when(userService.getCurrentUser("admin@test.com")).thenReturn(TestFixtures.adminUser());
+        when(contractService.getContracts(1L, "ACTIVE", 12, 12))
                 .thenReturn(List.of(TestFixtures.activeContract()));
-        when(contractService.countContracts("ACTIVE")).thenReturn(7501);
+        when(contractService.countContracts(1L, "ACTIVE")).thenReturn(7501);
 
         mockMvc.perform(get("/api/rent/contracts/manage")
                         .param("status", "ACTIVE")
@@ -250,14 +254,15 @@ class RentControllerTest {
     @DisplayName("GET /contracts/manage - size is clamped to the server maximum")
     @WithMockUser(username = "admin@test.com", roles = {"ADMIN"})
     void manageContracts_clampsSize() throws Exception {
-        when(contractService.getContracts(null, 100, 300)).thenReturn(List.of());
-        when(contractService.countContracts(null)).thenReturn(0);
+        when(userService.getCurrentUser("admin@test.com")).thenReturn(TestFixtures.adminUser());
+        when(contractService.getContracts(1L, null, 100, 300)).thenReturn(List.of());
+        when(contractService.countContracts(1L, null)).thenReturn(0);
 
         mockMvc.perform(get("/api/rent/contracts/manage").param("page", "3").param("size", "5000"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size").value(100));
 
-        verify(contractService).getContracts(null, 100, 300);
+        verify(contractService).getContracts(1L, null, 100, 300);
     }
 
     @Test
@@ -275,7 +280,8 @@ class RentControllerTest {
         java.util.Map<String, Integer> byStatus = new java.util.HashMap<>();
         byStatus.put("ACTIVE", 3751);
         byStatus.put("COMPLETED", 3750);
-        when(contractService.contractStatusCounts()).thenReturn(byStatus);
+        when(userService.getCurrentUser("admin@test.com")).thenReturn(TestFixtures.adminUser());
+        when(contractService.contractStatusCounts(1L)).thenReturn(byStatus);
 
         mockMvc.perform(get("/api/rent/contracts/manage/summary"))
                 .andExpect(status().isOk())
@@ -305,7 +311,7 @@ class RentControllerTest {
     @WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
     void getContractPayments_returns200() throws Exception {
         when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());
-        when(contractService.getPaymentsByContractId(1L, 2L, false)).thenReturn(List.of());
+        when(contractService.getPaymentsByContractId(1L, 2L)).thenReturn(List.of());
 
         mockMvc.perform(get("/api/rent/contracts/1/payments"))
                 .andExpect(status().isOk())
@@ -319,7 +325,7 @@ class RentControllerTest {
         when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());
         PayPalPaymentResponse resp = new PayPalPaymentResponse();
         resp.setApprovalUrl("https://paypal.com/approve");
-        when(contractService.createPayPalPaymentForContract(eq(1L), any(), eq(2L), eq(false))).thenReturn(resp);
+        when(contractService.createPayPalPaymentForContract(eq(1L), any(), eq(2L))).thenReturn(resp);
 
         PayPalPaymentRequest req = new PayPalPaymentRequest();
         req.setCancelUrl("http://cancel");
@@ -340,7 +346,7 @@ class RentControllerTest {
         when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());
         PayPalPaymentResponse resp = new PayPalPaymentResponse();
         resp.setStatus("APPROVED");
-        when(contractService.executePayPalPaymentForContract(eq(1L), eq("pay123"), eq("payer123"), isNull(), eq(2L), eq(false))).thenReturn(resp);
+        when(contractService.executePayPalPaymentForContract(eq(1L), eq("pay123"), eq("payer123"), isNull(), eq(2L))).thenReturn(resp);
 
         mockMvc.perform(post("/api/rent/contracts/1/paypal/execute")
                         .with(csrf())

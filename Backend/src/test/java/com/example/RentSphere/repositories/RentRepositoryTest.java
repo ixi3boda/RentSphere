@@ -28,7 +28,7 @@ class RentRepositoryTest {
     @Test
     @DisplayName("findAll returns one page of rental requests, newest first")
     void findAll_returnsRequestsPage() {
-        List<RentalRequest> list = rentRepository.findAll(null, 12, 0);
+        List<RentalRequest> list = rentRepository.findAllForOwner(1, null, 12, 0);
         assertThat(list).isNotEmpty();
 
         assertThat(list.size()).isLessThanOrEqualTo(12);
@@ -37,19 +37,35 @@ class RentRepositoryTest {
     @Test
     @DisplayName("findAll filters by status and count agrees with the page")
     void findAll_filtersByStatus() {
-        List<RentalRequest> pending = rentRepository.findAll("pending", 12, 0);
+        List<RentalRequest> pending = rentRepository.findAllForOwner(1, "pending", 12, 0);
 
         assertThat(pending).isNotEmpty();
         assertThat(pending).allMatch(r -> "PENDING".equals(r.getReqStatus()));
-        assertThat(rentRepository.countRequests("PENDING"))
+        assertThat(rentRepository.countRequestsForOwner(1, "PENDING"))
                 .isGreaterThanOrEqualTo(pending.size());
     }
 
     @Test
     @DisplayName("countRequestsByStatus totals every row")
     void countRequestsByStatus_totalsEveryRow() {
-        assertThat(rentRepository.countRequestsByStatus().values().stream().mapToInt(Integer::intValue).sum())
-                .isEqualTo(rentRepository.countRequests(null));
+        assertThat(rentRepository.countRequestsByStatusForOwner(1).values().stream().mapToInt(Integer::intValue).sum())
+                .isEqualTo(rentRepository.countRequestsForOwner(1, null));
+    }
+
+    @Test
+    @DisplayName("an owner with no listings sees no requests")
+    void findAllForOwner_otherOwner_seesNothing() {
+        assertThat(rentRepository.findAllForOwner(2, null, 12, 0)).isEmpty();
+        assertThat(rentRepository.countRequestsForOwner(2, null)).isZero();
+        assertThat(rentRepository.countRequestsByStatusForOwner(2)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("pending-request lookups see the seeded request")
+    void pendingLookups() {
+        assertThat(rentRepository.existsPendingByTenantAndProperty(2, 1L)).isTrue();
+        assertThat(rentRepository.existsPendingByTenantAndProperty(3, 1L)).isFalse();
+        assertThat(rentRepository.countPendingByTenant(2)).isEqualTo(1);
     }
 
     @Test

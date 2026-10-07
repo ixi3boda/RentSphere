@@ -4,6 +4,7 @@ import com.example.RentSphere.Dto.Contract;
 import com.example.RentSphere.Dto.CreateRentalRequest;
 import com.example.RentSphere.Dto.PropertyDetails;
 import com.example.RentSphere.Dto.RentalRequest;
+import com.example.RentSphere.Exception.BadRequestException;
 import com.example.RentSphere.Exception.ResourceNotFoundException;
 import com.example.RentSphere.Repository.RentRepository;
 import jakarta.transaction.Transactional;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +37,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class RentService {
 
+    private static final int MAX_PENDING_REQUESTS_PER_TENANT = 10;
+
     private final RentRepository rentRepository;
     private final PropertyService propertyService;
     private final ContractService contractService;
@@ -53,6 +57,25 @@ public class RentService {
         if (request.getDesiredMonths() != null && (request.getDesiredMonths() < 1 || request.getDesiredMonths() > 24)) {
             throw new IllegalArgumentException("Desired months must be between 1 and 24");
         }
+        LocalDate today = LocalDate.now();
+        if (request.getDesiredStart().isBefore(today) || request.getDesiredStart().isAfter(today.plusYears(1))) {
+            throw new IllegalArgumentException("Desired start date must be within the next 12 months");
+        }
+
+        PropertyDetails property = propertyService.getById(request.getPropertyId());
+        if (property.getProperty().getOwnerId() != null && property.getProperty().getOwnerId() == tenantId) {
+            throw new IllegalArgumentException("You cannot request your own property");
+        }
+        if (Boolean.FALSE.equals(property.getProperty().getIsAvailable())) {
+            throw new IllegalArgumentException("This property is not available for rent");
+        }
+        if (rentRepository.existsPendingByTenantAndProperty(tenantId, request.getPropertyId())) {
+            throw new IllegalArgumentException("You already have a pending request for this property");
+        }
+        if (rentRepository.countPendingByTenant(tenantId) >= MAX_PENDING_REQUESTS_PER_TENANT) {
+            throw new IllegalArgumentException("You have too many pending requests; wait for the owners to answer");
+        }
+
         RentalRequest created = rentRepository.createRentalRequest(request, tenantId);
         notifyOwnerOfNewRequest(created);
         return created;
@@ -75,16 +98,16 @@ public class RentService {
         );
     }
 
-    public List<RentalRequest> getRentalRequests(String status, int limit, int offset) {
-        return rentRepository.findAll(status, limit, offset);
+    public List<RentalRequest> getRentalRequests(int ownerId, String status, int limit, int offset) {
+        return rentRepository.findAllForOwner(ownerId, status, limit, offset);
     }
 
-    public int countRentalRequests(String status) {
-        return rentRepository.countRequests(status);
+    public int countRentalRequests(int ownerId, String status) {
+        return rentRepository.countRequestsForOwner(ownerId, status);
     }
 
-    public Map<String, Integer> requestStatusCounts() {
-        return rentRepository.countRequestsByStatus();
+    public Map<String, Integer> requestStatusCounts(int ownerId) {
+        return rentRepository.countRequestsByStatusForOwner(ownerId);
     }
 
     public RentalRequest getById(Long id) {
@@ -93,14 +116,11 @@ public class RentService {
     }
 
     /**
-     * A request carries the applicant's message and dates, so only the tenant who filed it, the
-     * landlord who would answer it, or an administrator may read it.
+     * A request carries the applicant's message and dates, so only the tenant who filed it or
+     * the landlord who would answer it may read it.
      */
-    public RentalRequest getByIdForActor(Long id, int actorUserId, boolean actorIsAdmin) {
+    public RentalRequest getByIdForActor(Long id, int actorUserId) {
         RentalRequest request = getById(id);
-        if (actorIsAdmin) {
-            return request;
-        }
         long actor = actorUserId;
         if (request.getTenantId() != null && request.getTenantId() == actor) {
             return request;
@@ -129,6 +149,10 @@ public class RentService {
         if (propertyDetails.getProperty().getOwnerId() == null || propertyDetails.getProperty().getOwnerId().intValue() != currentUserId) {
             throw new IllegalArgumentException("Only the property owner can accept this rental request");
         }
+        // One listing, one lease: a second accept would create two active contracts on it.
+        if (Boolean.FALSE.equals(propertyDetails.getProperty().getIsAvailable())) {
+            throw new BadRequestException("This property is already leased; reject the request instead");
+        }
 
         int updated = rentRepository.updateStatus(id, "ACCEPTED");
         if (updated == 0) {
@@ -142,7 +166,9 @@ public class RentService {
                 "Your request was accepted and the rental contract is now active."
         );
 
-        return contractService.createContractForApprovedRequest(request, propertyDetails);
+        Contract contract = contractService.createContractForApprovedRequest(request, propertyDetails);
+        propertyService.setAvailability(request.getPropertyId(), false);
+        return contract;
     }
 
     public RentalRequest rejectRequest(Long id, int currentUserId) {

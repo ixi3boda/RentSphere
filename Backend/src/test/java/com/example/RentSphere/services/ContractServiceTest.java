@@ -87,7 +87,7 @@ class ContractServiceTest {
     @DisplayName("createPayPalPaymentForContract - throws when contract not found")
     void createPayPalPayment_contractNotFound_throws() {
         when(contractRepository.findById(999L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> contractService.createPayPalPaymentForContract(999L, new PayPalPaymentRequest(), TENANT_ID, false))
+        assertThatThrownBy(() -> contractService.createPayPalPaymentForContract(999L, new PayPalPaymentRequest(), TENANT_ID))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Contract not found");
     }
@@ -98,7 +98,7 @@ class ContractServiceTest {
         when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
         when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> contractService.createPayPalPaymentForContract(1L, new PayPalPaymentRequest(), TENANT_ID, false))
+        assertThatThrownBy(() -> contractService.createPayPalPaymentForContract(1L, payPalRequest(), TENANT_ID))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("No outstanding installment");
     }
@@ -116,12 +116,59 @@ class ContractServiceTest {
         PayPalPaymentResponse mockResponse = new PayPalPaymentResponse();
         when(payPalService.createPayment(any())).thenReturn(mockResponse);
 
-        PayPalPaymentRequest req = new PayPalPaymentRequest();
-        req.setCurrency("USD");
-        PayPalPaymentResponse response = contractService.createPayPalPaymentForContract(1L, req, TENANT_ID, false);
+        PayPalPaymentRequest req = payPalRequest();
+        // the client does not get to choose the currency
+        req.setCurrency("HUF");
+        PayPalPaymentResponse response = contractService.createPayPalPaymentForContract(1L, req, TENANT_ID);
 
         assertThat(response).isNotNull();
-        verify(payPalService).createPayment(any());
+        verify(payPalService).createPayment(argThat(sent -> "USD".equals(sent.getCurrency())));
+    }
+
+    @Test
+    @DisplayName("createPayPalPaymentForContract - refuses a return URL on another site")
+    void createPayPalPayment_foreignReturnUrl_throws() throws Exception {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+        PayPalPaymentRequest req = payPalRequest();
+        req.setSuccessUrl("https://evil.example/collect");
+
+        assertThatThrownBy(() -> contractService.createPayPalPaymentForContract(1L, req, TENANT_ID))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("must point back to this site");
+
+        verify(payPalService, never()).createPayment(any());
+    }
+
+    @Test
+    @DisplayName("executePayPalPaymentForContract - refuses a capture in another currency")
+    void executePayPalPayment_wrongCurrency_throws() throws Exception {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+        Payment payment = paypalPayment("approved", "1500.00");
+        payment.getTransactions().get(0).getAmount().setCurrency("HUF");
+        when(payPalService.executePayment("payId", "payerId")).thenReturn(payment);
+
+        PaymentDto pendingPayment = new PaymentDto();
+        pendingPayment.setAmountDue(new BigDecimal("1500.00"));
+        pendingPayment.setInstallmentNo(1);
+        when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.of(pendingPayment));
+
+        assertThatThrownBy(() -> contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null, TENANT_ID))
+                .isInstanceOf(PaymentProcessingException.class)
+                .hasMessageContaining("rent is due in USD");
+
+        verify(contractRepository, never()).markPaymentPaid(anyLong(), anyInt(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("card payment - an expired card is refused")
+    void processCreditCardPayment_expiredCard_throws() {
+        CreditCardPaymentRequest expired = validCardRequest().expiryMonth("01").expiryYear("2020").build();
+
+        assertThatThrownBy(() -> contractService.processCreditCardPaymentForContract(1L, expired, TENANT_ID))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("expired");
+
+        verify(contractRepository, never()).markPaymentPaid(anyLong(), anyInt(), any(), anyString());
     }
 
     @Test
@@ -130,7 +177,7 @@ class ContractServiceTest {
         when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
         CreditCardPaymentRequest cardReq = validCardRequest().build();
 
-        assertThatThrownBy(() -> contractService.processCreditCardPaymentForContract(1L, cardReq, 77L, false))
+        assertThatThrownBy(() -> contractService.processCreditCardPaymentForContract(1L, cardReq, 77L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessageContaining("does not belong");
 
@@ -144,7 +191,7 @@ class ContractServiceTest {
         cancelled.setContractStatus("CANCELLED");
         when(contractRepository.findById(1L)).thenReturn(Optional.of(cancelled));
 
-        assertThatThrownBy(() -> contractService.processCreditCardPaymentForContract(1L, validCardRequest().build(), TENANT_ID, false))
+        assertThatThrownBy(() -> contractService.processCreditCardPaymentForContract(1L, validCardRequest().build(), TENANT_ID))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessageContaining("cannot accept payments");
     }
@@ -155,7 +202,7 @@ class ContractServiceTest {
         when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
         when(contractRepository.findPaymentsByContractId(1L)).thenReturn(java.util.List.of());
 
-        assertThat(contractService.getPaymentsByContractId(1L, OWNER_ID, false)).isEmpty();
+        assertThat(contractService.getPaymentsByContractId(1L, OWNER_ID)).isEmpty();
     }
 
     @Test
@@ -163,7 +210,7 @@ class ContractServiceTest {
     void payments_hiddenFromStranger() {
         when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
 
-        assertThatThrownBy(() -> contractService.getPaymentsByContractId(1L, 77L, false))
+        assertThatThrownBy(() -> contractService.getPaymentsByContractId(1L, 77L))
                 .isInstanceOf(AccessDeniedException.class);
     }
 
@@ -171,9 +218,13 @@ class ContractServiceTest {
     @DisplayName("executePayPalPaymentForContract - throws when payment fails")
     void executePayPalPayment_paymentFails_throws() throws Exception {
         when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+        PaymentDto pendingPayment = new PaymentDto();
+        pendingPayment.setAmountDue(new BigDecimal("1500.00"));
+        pendingPayment.setInstallmentNo(1);
+        when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.of(pendingPayment));
         when(payPalService.executePayment(anyString(), anyString())).thenReturn(null);
 
-        assertThatThrownBy(() -> contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null, TENANT_ID, false))
+        assertThatThrownBy(() -> contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null, TENANT_ID))
                 .isInstanceOf(PaymentProcessingException.class)
                 .hasMessageContaining("execution failed");
     }
@@ -192,7 +243,7 @@ class ContractServiceTest {
         when(contractRepository.markPaymentPaid(eq(1L), eq(1), any(), anyString())).thenReturn(1);
         when(contractRepository.countUnsettledPayments(1L)).thenReturn(0);
 
-        PayPalPaymentResponse response = contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null, TENANT_ID, false);
+        PayPalPaymentResponse response = contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null, TENANT_ID);
 
         assertThat(response.getStatus()).isEqualTo("approved");
         verify(contractRepository).markPaymentPaid(eq(1L), eq(1), eq(new BigDecimal("1500.00")), eq("PAY-123"));
@@ -213,7 +264,7 @@ class ContractServiceTest {
         pendingPayment.setInstallmentNo(1);
         when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.of(pendingPayment));
 
-        assertThatThrownBy(() -> contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null, TENANT_ID, false))
+        assertThatThrownBy(() -> contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null, TENANT_ID))
                 .isInstanceOf(PaymentProcessingException.class)
                 .hasMessageContaining("Captured");
 
@@ -232,7 +283,7 @@ class ContractServiceTest {
         when(contractRepository.markPaymentPaid(eq(1L), eq(1), any(), anyString())).thenReturn(1);
 
         CreditCardPaymentResponse response =
-                contractService.processCreditCardPaymentForContract(1L, validCardRequest().build(), TENANT_ID, false);
+                contractService.processCreditCardPaymentForContract(1L, validCardRequest().build(), TENANT_ID);
 
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo("PAID");
@@ -247,6 +298,13 @@ class ContractServiceTest {
                 .expiryMonth("12")
                 .expiryYear("28")
                 .cvv("123");
+    }
+
+    private static PayPalPaymentRequest payPalRequest() {
+        PayPalPaymentRequest req = new PayPalPaymentRequest();
+        req.setSuccessUrl("http://localhost:3000/paypal/callback");
+        req.setCancelUrl("http://localhost:3000/contracts");
+        return req;
     }
 
     private static Payment paypalPayment(String state, String total) {

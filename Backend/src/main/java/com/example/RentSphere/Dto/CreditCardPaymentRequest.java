@@ -17,7 +17,8 @@ public class CreditCardPaymentRequest {
     private String cardNumber;
 
     @NotBlank
-    @Size(max = 255)
+    @Size(max = 100)
+    @Pattern(regexp = InputRules.NAME, message = "may only contain letters, digits, spaces and . , ' _ -")
     private String cardHolderName;
 
     @NotBlank

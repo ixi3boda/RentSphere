@@ -60,14 +60,31 @@ public class SecConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/user/register").permitAll()
-                        .requestMatchers("/api/user/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/properties/filter").permitAll()
-                        // Must precede the "/api/properties/*" wildcard, which would otherwise make it public.
-                        .requestMatchers(HttpMethod.GET, "/api/properties/my").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/user/register", "/api/user/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/properties/filter", "/api/properties/stats",
+                                "/api/properties/cities").permitAll()
+                        // Owner-only routes. Must precede the "/api/properties/*" wildcard, which would
+                        // otherwise make /my public.
+                        .requestMatchers(HttpMethod.GET, "/api/properties/my").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/properties/add", "/api/properties/*/images/add").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/properties/*/update").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/properties/*/delete").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/rent/requests/all", "/api/rent/requests/summary",
+                                "/api/rent/contracts/manage", "/api/rent/contracts/manage/summary").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/rent/requests/*/accept", "/api/rent/requests/*/reject").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/properties/*").permitAll()
-                        .requestMatchers("/actuator/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                        // Only the health probe is public; any other actuator endpoint a profile
+                        // exposes stays behind the owner role.
+                        .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())
+                .headers(headers -> headers
+                        .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000))
+                        .referrerPolicy(referrer -> referrer.policy(
+                                org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER)))
+                .sessionManagement(session -> session.sessionCreationPolicy(
+                        org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

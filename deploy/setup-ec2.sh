@@ -131,7 +131,7 @@ if [ $RETRIES -gt 0 ]; then
     source .env
     set +a
     sudo docker compose exec -T mysql mysql -u"${MYSQL_USER:-rentsphere}" -p"${MYSQL_PASSWORD}" \
-        "${MYSQL_DATABASE:-RentSphereSchema}" < Database/seed-demo.sql || warn "Seed failed or already populated."
+        "${MYSQL_DATABASE:-RentSphereSchema}" < Backend/src/main/resources/db/seed-demo.sql || warn "Seed failed or already populated."
     success "Demo dataset loaded successfully."
 else
     warn "MySQL took longer than expected to start; skipping automated demo seed."

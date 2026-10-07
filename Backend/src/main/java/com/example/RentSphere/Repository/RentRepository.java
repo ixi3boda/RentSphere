@@ -73,38 +73,60 @@ public class RentRepository {
                 .orElseThrow(() -> new RuntimeException("Failed to read new rental request"));
     }
 
-    public List<RentalRequest> findAll(String status, int limit, int offset) {
+    // The review queue is always scoped to one owner: a landlord sees the requests filed against
+    // their own listings and nobody else's.
+    private static final String OWNED_REQUESTS =
+            " FROM rental_requests r JOIN properties p ON p.property_id = r.property_id WHERE p.owner_id = ?";
+
+    public List<RentalRequest> findAllForOwner(int ownerId, String status, int limit, int offset) {
         List<Object> params = new ArrayList<>();
-        String sql = "SELECT * FROM rental_requests";
+        String sql = "SELECT r.*" + OWNED_REQUESTS;
+        params.add(ownerId);
         if (status != null && !status.isBlank()) {
-            sql += " WHERE req_status = ?";
+            sql += " AND r.req_status = ?";
             params.add(status.trim().toUpperCase());
         }
-        sql += " ORDER BY created_at DESC, rental_req_id DESC LIMIT ? OFFSET ?";
+        sql += " ORDER BY r.created_at DESC, r.rental_req_id DESC LIMIT ? OFFSET ?";
         params.add(limit);
         params.add(offset);
         return jdbcTemplate.query(sql, rentalRequestMapper, params.toArray());
     }
 
-    public int countRequests(String status) {
+    public int countRequestsForOwner(int ownerId, String status) {
         List<Object> params = new ArrayList<>();
-        String sql = "SELECT COUNT(*) FROM rental_requests";
+        String sql = "SELECT COUNT(*)" + OWNED_REQUESTS;
+        params.add(ownerId);
         if (status != null && !status.isBlank()) {
-            sql += " WHERE req_status = ?";
+            sql += " AND r.req_status = ?";
             params.add(status.trim().toUpperCase());
         }
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, params.toArray());
         return count == null ? 0 : count;
     }
 
-    public Map<String, Integer> countRequestsByStatus() {
+    public Map<String, Integer> countRequestsByStatusForOwner(int ownerId) {
         Map<String, Integer> counts = new HashMap<>();
         // Explicit RowCallbackHandler: a bare lambda here would bind to ResultSetExtractor, whose
         // cursor sits before the first row, and reading it throws "No data is available".
         jdbcTemplate.query(
-                "SELECT req_status, COUNT(*) AS c FROM rental_requests GROUP BY req_status",
-                (RowCallbackHandler) rs -> counts.put(rs.getString("req_status"), rs.getInt("c")));
+                "SELECT r.req_status, COUNT(*) AS c" + OWNED_REQUESTS + " GROUP BY r.req_status",
+                (RowCallbackHandler) rs -> counts.put(rs.getString("req_status"), rs.getInt("c")),
+                ownerId);
         return counts;
+    }
+
+    public boolean existsPendingByTenantAndProperty(int tenantId, long propertyId) {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM rental_requests WHERE tenant_id = ? AND property_id = ? AND req_status = 'PENDING'",
+                Integer.class, tenantId, propertyId);
+        return count != null && count > 0;
+    }
+
+    public int countPendingByTenant(int tenantId) {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM rental_requests WHERE tenant_id = ? AND req_status = 'PENDING'",
+                Integer.class, tenantId);
+        return count == null ? 0 : count;
     }
 
     public Optional<RentalRequest> findById(Long id) {

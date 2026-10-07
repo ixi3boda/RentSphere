@@ -7,9 +7,10 @@ payment schedule in one transaction.
 **Live demo:** https://rentsphere-5jpa.onrender.com
 · **API docs (Swagger):** https://rentsphere-api.onrender.com/swagger-ui/index.html
 
-It runs on Render's free plan, so the API sleeps when idle and the first request can take
-about a minute. Log in with `nour.elsayed@nilenest.demo` (owner) or
-`youssef.farouk@mail.demo` (tenant), password `RentSphereDemo2026`.
+Log in with `nour.elsayed@nilenest.demo` (owner) or `youssef.farouk@mail.demo` (tenant),
+password `RentSphereDemo2026`. The demo logins are shared, so their profiles are read-only.
+It runs on Render's free plan; a scheduled GitHub Action pings the health check to keep the
+API awake, and if it has slept anyway the first request takes about a minute.
 
 Java 17 · Spring Boot 3 · Spring Security · JdbcTemplate · MySQL 8 · React · Tailwind · Docker · Nginx · GitHub Actions
 
@@ -43,25 +44,40 @@ Test plan, seed script, raw results and JMeter screenshots: [Performance/](Perfo
 
 ## Security
 
-- Stateless JWT auth with BCrypt-hashed passwords and 3 roles (`ADMIN`, `TENANT`, `VISITOR`)
-- Role checks with `@PreAuthorize`, plus ownership checks in the service layer, so an owner
-  can only accept or reject requests on their own listings
-- All SQL is parameterized, and sort columns go through a whitelist instead of being
-  concatenated into `ORDER BY`
+- Stateless JWT auth (24-hour tokens) with BCrypt-hashed passwords and 3 roles (`ADMIN` for
+  listing owners, `TENANT`, `VISITOR`). Registration always creates a `VISITOR`
+- Least privilege: owner routes need the `ADMIN` role in both the filter chain and
+  `@PreAuthorize`, and every query behind them is scoped to the caller. An owner sees only
+  the requests and contracts on their own listings, only the tenant on a contract can pay it,
+  and no role can read another user's data
+- Changing an email or password needs the current password, so a stolen token is not enough
+  to take an account over
+- Per-IP rate limiting in the app (15 logins or sign-ups, 90 writes, 600 requests a minute)
+  and a 64 KB cap on request bodies; the Compose stack also rate-limits in Nginx
+- Every request DTO is validated against the column it is stored in, and free text rejects
+  markup and control characters. Image links must be `https` or a path under `/uploads`
+- All SQL is parameterized, sort columns go through a whitelist, and full-text search input
+  is reduced to words before it reaches `MATCH ... AGAINST`
+- PayPal payments are always created in USD with return URLs on this site, and the captured
+  amount and currency are checked before an instalment is marked paid
 - CORS only allows the configured frontend origin
-- One `@RestControllerAdvice` returns the same JSON error shape everywhere and never sends
-  SQL errors or stack traces to the client
-- Nginx in front rate-limits `/api/` to 10 req/s per IP (burst 20) and adds security headers
-  (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`)
+- Errors use one JSON shape and never include SQL or stack traces
+- HSTS, `X-Frame-Options`, `X-Content-Type-Options` and `Referrer-Policy` on the API, plus a
+  Content-Security-Policy on the frontend
+- Only `/actuator/health` is public, and it reports the status alone
 
 ## Data and transactions
 
 - 8 MySQL tables with foreign keys and `CHECK` constraints on every status/type column
 - `UNIQUE (contract_id, installment_no)` so the same instalment can't be paid twice
 - Accepting a request is one `@Transactional` call that creates the contract and one payment
-  row per month. Card and PayPal payments are transactional too
+  row per month and takes the listing off the market, so it cannot be let twice. Card and
+  PayPal payments are transactional too
+- A tenant can hold one pending request per listing, only for an available listing that is
+  not their own, starting within the next 12 months
 - A `@Scheduled` daily job sends reminders 3 days and 1 day before a due date, marks late
-  instalments overdue and cancels contracts that stay unpaid
+  instalments overdue, cancels contracts that stay unpaid and puts their listings back on
+  the market
 
 ## Observability and docs
 
@@ -88,7 +104,7 @@ Test plan, seed script, raw results and JMeter screenshots: [Performance/](Perfo
 
 ## Tests and CI
 
-- 207 backend tests (JUnit 5, Mockito, MockMvc, H2) with a JaCoCo coverage report (~70% lines)
+- 230 backend tests (JUnit 5, Mockito, MockMvc, H2) with a JaCoCo coverage report (~70% lines)
 - 67 frontend tests (Jest, React Testing Library, jest-axe)
 - GitHub Actions runs both suites and builds the Docker images on every push
 
@@ -127,19 +143,23 @@ The tables start empty. To load the demo data:
 ```bash
 set -a; source .env; set +a
 docker compose exec -T mysql mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" \
-  RentSphereSchema < Database/seed-demo.sql
+  RentSphereSchema < Backend/src/main/resources/db/seed-demo.sql
 ```
 
-Use `Database/seed-large-dataset.sql` instead for the 100k-row load-test data.
+The demo data uses dates relative to the day it is loaded, so leases and instalments are
+always current. Use `Database/seed-large-dataset.sql` instead for the 100k-row load-test data.
 
 ### Deploy your own copy on Render
 
 1. Create a free MySQL database on [Aiven](https://aiven.io) and load `Database/Schema.sql`
-   and `Database/seed-demo.sql` into it.
+   and `Backend/src/main/resources/db/seed-demo.sql` into it.
 2. In Render, choose **New → Blueprint** and pick this repo. Fill in the database URL,
    user and password, and the PayPal sandbox keys.
 3. If Render changes the service names, update `REACT_APP_API_URL` and
    `RENTSPHERE_CORS_ALLOWED_ORIGINS` to the real URLs.
+4. Optional, for a public demo only: set `RENTSPHERE_DEMO_RESET_ENABLED=true` on the API. It
+   reloads the demo data on every start and once a day, which **empties every table**, so
+   whatever visitors added or changed through the shared logins is gone within a day.
 
 ## Project layout
 

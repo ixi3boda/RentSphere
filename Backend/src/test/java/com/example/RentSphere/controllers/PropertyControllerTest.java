@@ -68,14 +68,59 @@ class PropertyControllerTest {
         }
 
         @Test
-        @DisplayName("GET /my - scoped to the caller, 401 without a token")
+        @DisplayName("GET /my - scoped to the calling owner")
+        @WithMockUser(username = "admin@test.com", roles = { "ADMIN" })
         void getMyProperties_authenticated_returnsOwnOnly() throws Exception {
-                when(userService.getCurrentUser("tenant@test.com")).thenReturn(TestFixtures.tenantUser());
-                when(propertyService.getByOwnerId(2)).thenReturn(List.of(buildPropertyDetails()));
+                when(userService.getCurrentUser("admin@test.com")).thenReturn(TestFixtures.adminUser());
+                when(propertyService.getByOwnerId(1)).thenReturn(List.of(buildPropertyDetails()));
 
-                mockMvc.perform(get("/api/properties/my").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("tenant@test.com")))
+                mockMvc.perform(get("/api/properties/my"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$[0].property.propertyId").value(1));
+        }
+
+        @Test
+        @DisplayName("GET /my - 403 for a tenant, who cannot own listings")
+        @WithMockUser(username = "tenant@test.com", roles = { "TENANT" })
+        void getMyProperties_asTenant_returns403() throws Exception {
+                mockMvc.perform(get("/api/properties/my"))
+                                .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("POST /{id}/images/add - 400 for a javascript: or data: URL")
+        @WithMockUser(username = "admin@test.com", roles = { "ADMIN" })
+        void addPropertyImage_unsafeUrl_returns400() throws Exception {
+                for (String url : List.of("javascript:alert(1)", "data:image/png;base64,AAAA", "http://plain.example/a.png")) {
+                        mockMvc.perform(post("/api/properties/1/images/add")
+                                        .with(csrf())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content("{\"image_url\":\"" + url + "\"}"))
+                                        .andExpect(status().isBadRequest());
+                }
+                verify(propertyService, never()).addImageByOwner(anyLong(), anyString(), anyBoolean(), anyInt());
+        }
+
+        @Test
+        @DisplayName("GET /filter - 400 for junk filter values")
+        void filter_junkValues_returns400() throws Exception {
+                mockMvc.perform(get("/api/properties/filter").param("minPrice", "-5"))
+                                .andExpect(status().isBadRequest());
+                mockMvc.perform(get("/api/properties/filter").param("maxPrice", "NaN"))
+                                .andExpect(status().isBadRequest());
+                mockMvc.perform(get("/api/properties/filter").param("search", "x".repeat(101)))
+                                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("GET /{id} - a database failure never reaches the response body")
+        void getById_databaseError_isNotLeaked() throws Exception {
+                when(propertyService.getById(5L)).thenThrow(
+                                new org.springframework.dao.DataAccessResourceFailureException("SELECT * FROM properties WHERE secret"));
+
+                mockMvc.perform(get("/api/properties/5"))
+                                .andExpect(status().isInternalServerError())
+                                .andExpect(jsonPath("$.message").value("Failed to fetch property"));
         }
 
         
@@ -93,7 +138,7 @@ class PropertyControllerTest {
         @Test
         @DisplayName("GET /{id} - 404 for non-existent property")
         void getById_notFound_returns404() throws Exception {
-                when(propertyService.getById(999L)).thenThrow(new RuntimeException("Property not found"));
+                when(propertyService.getById(999L)).thenThrow(new com.example.RentSphere.Exception.ResourceNotFoundException("Property not found"));
 
                 mockMvc.perform(get("/api/properties/999"))
                                 .andExpect(status().isNotFound());
@@ -270,7 +315,7 @@ class PropertyControllerTest {
                 when(userService.getCurrentUser("admin@test.com")).thenReturn(TestFixtures.adminUser());
                 doNothing().when(propertyService).addImageByOwner(eq(1L), anyString(), anyBoolean(), eq(1));
 
-                String body = "{\"image_url\":\"http://img.png\",\"is_cover\":true}";
+                String body = "{\"image_url\":\"https://img.example/a.png\",\"is_cover\":true}";
 
                 mockMvc.perform(post("/api/properties/1/images/add")
                                 .with(csrf())
@@ -287,7 +332,7 @@ class PropertyControllerTest {
                 doThrow(new IllegalArgumentException("Not owner"))
                                 .when(propertyService).addImageByOwner(anyLong(), anyString(), anyBoolean(), anyInt());
 
-                String body = "{\"image_url\":\"http://img.png\",\"is_cover\":true}";
+                String body = "{\"image_url\":\"https://img.example/a.png\",\"is_cover\":true}";
 
                 mockMvc.perform(post("/api/properties/1/images/add")
                                 .with(csrf())
@@ -301,10 +346,10 @@ class PropertyControllerTest {
         @WithMockUser(username = "admin@test.com", roles = { "ADMIN" })
         void addPropertyImage_notFound_returns404() throws Exception {
                 when(userService.getCurrentUser("admin@test.com")).thenReturn(TestFixtures.adminUser());
-                doThrow(new RuntimeException("Property not found"))
+                doThrow(new com.example.RentSphere.Exception.ResourceNotFoundException("Property not found"))
                                 .when(propertyService).addImageByOwner(anyLong(), anyString(), anyBoolean(), anyInt());
 
-                String body = "{\"image_url\":\"http://img.png\",\"is_cover\":true}";
+                String body = "{\"image_url\":\"https://img.example/a.png\",\"is_cover\":true}";
 
                 mockMvc.perform(post("/api/properties/1/images/add")
                                 .with(csrf())

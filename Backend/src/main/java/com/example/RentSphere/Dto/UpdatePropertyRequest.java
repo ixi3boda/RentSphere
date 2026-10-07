@@ -18,23 +18,29 @@ public class UpdatePropertyRequest {
             message = "must be one of APARTMENT, STUDIO, VILLA, DUPLEX, OFFICE, SHOP, WAREHOUSE")
     private String propertyType;
 
-    @Size(max = 255)
+    @Size(min = 3, max = 200)
+    @Pattern(regexp = InputRules.LINE, message = "must be plain single-line text")
     private String title;
 
-    @Size(max = 5000)
+    @Size(max = 200)
+    @Pattern(regexp = InputRules.TEXT, message = "must be plain text")
     private String propertyDescription;
 
     @DecimalMin(value = "0.01", message = "price per month must be greater than zero")
-    @Digits(integer = 8, fraction = 2)
+    @DecimalMax(value = "1000000.00", message = "price per month is unrealistically high")
+    @Digits(integer = 7, fraction = 2)
     private BigDecimal pricePerMonth;
 
-    @Size(max = 100)
+    @Size(min = 1, max = 100)
+    @Pattern(regexp = InputRules.LINE, message = "must be plain single-line text")
     private String city;
 
     @Size(max = 100)
+    @Pattern(regexp = InputRules.LINE, message = "must be plain single-line text")
     private String district;
 
-    @Size(max = 255)
+    @Size(min = 1, max = 300)
+    @Pattern(regexp = InputRules.LINE, message = "must be plain single-line text")
     private String address;
 
     @DecimalMin("-90.0") @DecimalMax("90.0")
@@ -46,7 +52,7 @@ public class UpdatePropertyRequest {
     @Min(0) @Max(100)
     private Integer numRooms;
 
-    @DecimalMin("0.0") @Digits(integer = 8, fraction = 2)
+    @DecimalMin("1.0") @DecimalMax("999999.99") @Digits(integer = 6, fraction = 2)
     private BigDecimal areaSqm;
 
     private Boolean isAvailable;

@@ -5,7 +5,9 @@ import com.example.RentSphere.Dto.ErrorResponse;
 import com.example.RentSphere.Dto.Favorite;
 import com.example.RentSphere.Dto.PropertyDetails;
 import com.example.RentSphere.Dto.UpdatePropertyRequest;
-import com.example.RentSphere.Dto.User;
+import com.example.RentSphere.Dto.InputRules;
+import com.example.RentSphere.Exception.BadRequestException;
+import com.example.RentSphere.Exception.ResourceNotFoundException;
 import com.example.RentSphere.Repository.PropertyRepository;
 import com.example.RentSphere.Service.ContractService;
 import com.example.RentSphere.Service.PropertyService;
@@ -15,6 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -45,6 +51,9 @@ import java.util.Map;
 public class PropertyController {
 
     private static final int MAX_PAGE_SIZE = 48;
+    // Deep enough for any real catalogue, and keeps page * size inside an int.
+    private static final int MAX_PAGE = 100_000;
+    private static final int MAX_FILTER_TEXT = 100;
 
     private final PropertyService propertyService;
     private final UserService userService;
@@ -87,12 +96,16 @@ public class PropertyController {
         }
     }
 
-    record AddImageRequest(String image_url, Boolean is_cover) {}
+    record AddImageRequest(
+            @NotBlank @Size(max = 500)
+            @Pattern(regexp = InputRules.IMAGE_URL, message = "must be an https URL") String image_url,
+            Boolean is_cover) {}
 
     @PostMapping("/{id}/images/add")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addPropertyImage(
             @PathVariable Long id,
-            @RequestBody AddImageRequest body,
+            @RequestBody @Valid AddImageRequest body,
             Principal principal
     ) {
         String image_url = body.image_url();
@@ -106,8 +119,10 @@ public class PropertyController {
             return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.FORBIDDEN);
-        } catch (RuntimeException e) {
+        } catch (ResourceNotFoundException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (BadRequestException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return buildErrorResponse("Failed to add image", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -136,6 +151,7 @@ public class PropertyController {
     }
 
     @GetMapping("/my")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getMyProperties(Principal principal) {
         try {
             String email = getPrincipalEmail(principal);
@@ -154,14 +170,17 @@ public class PropertyController {
             return ResponseEntity.ok(propertyService.getById(id));
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (RuntimeException e) {
+        } catch (ResourceNotFoundException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (BadRequestException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return buildErrorResponse("Failed to fetch property", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PutMapping("/{id}/update")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> update(
             @PathVariable Long id,
             @RequestBody @Valid UpdatePropertyRequest request,
@@ -176,26 +195,34 @@ public class PropertyController {
             return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.FORBIDDEN);
-        } catch (RuntimeException e) {
+        } catch (ResourceNotFoundException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (BadRequestException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return buildErrorResponse("Failed to update property", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @DeleteMapping("/{id}/delete")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> delete(@PathVariable Long id, Principal principal) {
         try {
             String email = getPrincipalEmail(principal);
             int currentUserId = userService.getCurrentUser(email).getUser_id();
             propertyService.deleteByOwner(id, currentUserId);
             return ResponseEntity.ok("Property deleted successfully");
+        } catch (DataIntegrityViolationException e) {
+            // contracts reference the listing with ON DELETE RESTRICT
+            return buildErrorResponse("A property with rental contracts cannot be deleted", HttpStatus.CONFLICT);
         } catch (IllegalStateException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.FORBIDDEN);
-        } catch (RuntimeException e) {
+        } catch (ResourceNotFoundException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (BadRequestException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return buildErrorResponse("Failed to delete property", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -238,11 +265,16 @@ public class PropertyController {
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "12") int size
     ) {
+        if (tooLong(search) || tooLong(city) || tooLong(district) || tooLong(propertyType) || tooLong(sortBy)
+                || badPrice(minPrice) || badPrice(maxPrice)
+                || (numRooms != null && (numRooms < 0 || numRooms > 100))) {
+            return buildErrorResponse("Invalid search filters", HttpStatus.BAD_REQUEST);
+        }
         try {
             PropertyRepository.PropertyFilter filter = new PropertyRepository.PropertyFilter(
                     search, city, district, propertyType, minPrice, maxPrice, numRooms, isAvailable);
 
-            int safePage = Math.max(0, page);
+            int safePage = Math.min(MAX_PAGE, Math.max(0, page));
             int safeSize = Math.min(MAX_PAGE_SIZE, Math.max(1, size));
             int total = propertyService.countFilterProperties(filter);
 
@@ -257,6 +289,14 @@ public class PropertyController {
         }
     }
 
+    private static boolean tooLong(String value) {
+        return value != null && value.length() > MAX_FILTER_TEXT;
+    }
+
+    private static boolean badPrice(Double value) {
+        return value != null && (value.isNaN() || value.isInfinite() || value < 0);
+    }
+
     @PostMapping("/{propertyId}/favorite")
     public ResponseEntity<?> favorite(
             @PathVariable int propertyId,
@@ -266,6 +306,8 @@ public class PropertyController {
             String email = getPrincipalEmail(principal);
             int tenantId = userService.getCurrentUser(email).getUser_id();
             return ResponseEntity.ok(propertyService.favorite(propertyId, tenantId));
+        } catch (ResourceNotFoundException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (IllegalStateException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {

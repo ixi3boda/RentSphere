@@ -146,4 +146,27 @@ class SecurityIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    @DisplayName("Actuator - only the health probe is public")
+    void actuator_onlyHealthIsPublic() throws Exception {
+        mockMvc.perform(get("/actuator/health"))
+                .andExpect(status().is(org.hamcrest.Matchers.not(403)));
+        for (String path : new String[]{"/actuator/metrics", "/actuator/env", "/actuator/prometheus", "/actuator/beans"}) {
+            mockMvc.perform(get(path)).andExpect(status().isForbidden());
+        }
+    }
+
+    @Test
+    @DisplayName("Owner-only routes refuse a tenant even with a valid session")
+    @org.springframework.security.test.context.support.WithMockUser(username = "tenant@test.com", roles = {"TENANT"})
+    void ownerRoutes_refuseTenant() throws Exception {
+        mockMvc.perform(get("/api/properties/my")).andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/rent/requests/all")).andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/rent/contracts/manage/summary")).andExpect(status().isForbidden());
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/rent/requests/1/accept"))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete("/api/properties/1/delete"))
+                .andExpect(status().isForbidden());
+    }
 }

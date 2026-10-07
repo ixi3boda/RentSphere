@@ -4,6 +4,8 @@ import com.example.RentSphere.Dto.*;
 import com.example.RentSphere.Repository.UserRepository;
 import com.example.RentSphere.SecurityConfig.JwtService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -11,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Locale;
 
 /**
@@ -38,6 +41,17 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+
+    // Accounts whose credentials are published (the README demo logins). Anyone can sign in to
+    // them, so their profile must not be editable or one visitor could lock out the rest.
+    @Value("${rentsphere.demo.accounts:}")
+    private String demoAccounts = "";
+
+    private boolean isDemoAccount(String email) {
+        return email != null && Arrays.stream(demoAccounts.split(","))
+                .map(String::trim)
+                .anyMatch(email::equalsIgnoreCase);
+    }
 
 
     /**
@@ -151,13 +165,28 @@ public class UserService {
      * @param currentEmail the user's current email, sourced from the JWT principal
      * @param request      partial update payload
      * @return an {@link UpdateProfileResponse} containing the updated user and a new JWT
-     * @throws IllegalArgumentException if the new email or username is already in use
+     * @throws IllegalArgumentException if the new email or username is already in use, or the
+     *         email or password is being changed without the current password
+     * @throws AccessDeniedException    if the account is one of the shared demo logins
      */
     public UpdateProfileResponse updateCurrentUser(String currentEmail, UpdateProfileRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Update payload is required");
         }
         User user = getCurrentUser(currentEmail);
+        if (isDemoAccount(user.getEmail())) {
+            throw new AccessDeniedException("Demo accounts are read-only. Register your own account to edit a profile.");
+        }
+
+        boolean changesPassword = request.getPassword_hash() != null && !request.getPassword_hash().isBlank();
+        boolean changesEmail = request.getEmail() != null
+                && !request.getEmail().trim().equalsIgnoreCase(user.getEmail());
+        // A stolen token alone must not be enough to take the account over.
+        if ((changesPassword || changesEmail)
+                && (request.getCurrent_password() == null
+                || !passwordEncoder.matches(request.getCurrent_password(), user.getPassword_hash()))) {
+            throw new IllegalArgumentException("Current password is required to change the email or password");
+        }
 
         if (request.getFull_name() != null) {
             user.setFull_name(request.getFull_name());
@@ -182,7 +211,7 @@ public class UserService {
             }
             user.setEmail(normalizedEmail);
         }
-        if (request.getPassword_hash() != null && !request.getPassword_hash().isBlank()) {
+        if (changesPassword) {
             user.setPassword_hash(passwordEncoder.encode(request.getPassword_hash()));
         }
         if (request.getMobile_number() != null) {

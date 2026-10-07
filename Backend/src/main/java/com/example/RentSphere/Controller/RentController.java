@@ -57,6 +57,10 @@ import com.example.RentSphere.Dto.CreditCardPaymentResponse;
 public class RentController {
 
     private static final int MAX_PAGE_SIZE = 100;
+    // Keeps page * size inside an int.
+    private static final int MAX_PAGE = 100_000;
+    // PayPal ids are short tokens such as PAYID-MXYZ... and never need other characters.
+    private static final String PAYPAL_ID = "[A-Za-z0-9_-]{1,64}";
 
     private final UserService userService;
     private final RentService rentService;
@@ -71,10 +75,6 @@ public class RentController {
 
     private User requireActor(Principal principal) {
         return userService.getCurrentUser(getPrincipalEmail(principal));
-    }
-
-    private boolean isAdmin(User actor) {
-        return "ADMIN".equalsIgnoreCase(actor.getRole_name());
     }
 
     private ResponseEntity<?> buildErrorResponse(String message, HttpStatus status) {
@@ -97,6 +97,8 @@ public class RentController {
             int tenantId = userService.getCurrentUser(email).getUser_id();
             RentalRequest created = rentService.createRentalRequest(request, tenantId);
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (ResourceNotFoundException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (IllegalStateException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
@@ -111,14 +113,16 @@ public class RentController {
     public ResponseEntity<?> getAllRequests(
             @RequestParam(required = false) String status,
             @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "20") int size
+            @RequestParam(required = false, defaultValue = "20") int size,
+            Principal principal
     ) {
         try {
-            int safePage = Math.max(0, page);
+            int ownerId = requireActor(principal).getUser_id();
+            int safePage = Math.min(MAX_PAGE, Math.max(0, page));
             int safeSize = Math.min(MAX_PAGE_SIZE, Math.max(1, size));
             return ResponseEntity.ok(Map.of(
-                    "items", rentService.getRentalRequests(status, safeSize, safePage * safeSize),
-                    "total", rentService.countRentalRequests(status),
+                    "items", rentService.getRentalRequests(ownerId, status, safeSize, safePage * safeSize),
+                    "total", rentService.countRentalRequests(ownerId, status),
                     "page", safePage,
                     "size", safeSize));
         } catch (Exception e) {
@@ -129,9 +133,9 @@ public class RentController {
     // One COUNT GROUP BY instead of shipping every request to the browser just to total them.
     @GetMapping("/requests/summary")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> requestSummary() {
+    public ResponseEntity<?> requestSummary(Principal principal) {
         try {
-            Map<String, Integer> byStatus = rentService.requestStatusCounts();
+            Map<String, Integer> byStatus = rentService.requestStatusCounts(requireActor(principal).getUser_id());
             Map<String, Integer> counts = new java.util.LinkedHashMap<>();
             int total = 0;
             for (String status : List.of("PENDING", "ACCEPTED", "REJECTED", "CANCELLED")) {
@@ -152,22 +156,24 @@ public class RentController {
     public ResponseEntity<?> getRequestById(@PathVariable Long id, Principal principal) {
         try {
             User actor = requireActor(principal);
-            return ResponseEntity.ok(rentService.getByIdForActor(id, actor.getUser_id(), isAdmin(actor)));
+            return ResponseEntity.ok(rentService.getByIdForActor(id, actor.getUser_id()));
         } catch (IllegalStateException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (AccessDeniedException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (RuntimeException e) {
+        } catch (ResourceNotFoundException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (BadRequestException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return buildErrorResponse("Failed to fetch rental request", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    // Every role reads only its own contracts here; the cross-tenant view is the admin-only
-    // /contracts/manage endpoint below, which is paged.
+    // Every role reads only its own contracts here; /contracts/manage below is the paged view
+    // of the same owner-scoped data for landlords.
     @GetMapping("/contracts/all")
     public ResponseEntity<?> getAllContracts(Principal principal) {
         try {
@@ -189,14 +195,16 @@ public class RentController {
     public ResponseEntity<?> manageContracts(
             @RequestParam(required = false) String status,
             @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "20") int size
+            @RequestParam(required = false, defaultValue = "20") int size,
+            Principal principal
     ) {
         try {
-            int safePage = Math.max(0, page);
+            Long ownerId = (long) requireActor(principal).getUser_id();
+            int safePage = Math.min(MAX_PAGE, Math.max(0, page));
             int safeSize = Math.min(MAX_PAGE_SIZE, Math.max(1, size));
             return ResponseEntity.ok(Map.of(
-                    "items", contractService.getContracts(status, safeSize, safePage * safeSize),
-                    "total", contractService.countContracts(status),
+                    "items", contractService.getContracts(ownerId, status, safeSize, safePage * safeSize),
+                    "total", contractService.countContracts(ownerId, status),
                     "page", safePage,
                     "size", safeSize));
         } catch (Exception e) {
@@ -207,9 +215,9 @@ public class RentController {
     // One COUNT GROUP BY instead of shipping every contract to the browser just to total them.
     @GetMapping("/contracts/manage/summary")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> contractSummary() {
+    public ResponseEntity<?> contractSummary(Principal principal) {
         try {
-            Map<String, Integer> byStatus = contractService.contractStatusCounts();
+            Map<String, Integer> byStatus = contractService.contractStatusCounts((long) requireActor(principal).getUser_id());
             Map<String, Object> body = new java.util.LinkedHashMap<>();
             int total = 0;
             for (String status : List.of("PENDING", "ACTIVE", "COMPLETED", "CANCELLED")) {
@@ -228,7 +236,7 @@ public class RentController {
     public ResponseEntity<?> getContractPayments(@PathVariable Long contractId, Principal principal) {
         try {
             User actor = requireActor(principal);
-            return ResponseEntity.ok(contractService.getPaymentsByContractId(contractId, (long) actor.getUser_id(), isAdmin(actor)));
+            return ResponseEntity.ok(contractService.getPaymentsByContractId(contractId, (long) actor.getUser_id()));
         } catch (IllegalStateException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (AccessDeniedException e) {
@@ -245,6 +253,7 @@ public class RentController {
     }
 
     @PutMapping("/requests/{id}/accept")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> acceptRequest(@PathVariable Long id, Principal principal) {
         try {
             String email = getPrincipalEmail(principal);
@@ -254,8 +263,10 @@ public class RentController {
             return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (RuntimeException e) {
+        } catch (ResourceNotFoundException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (BadRequestException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return buildErrorResponse("Failed to accept rental request", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -264,13 +275,13 @@ public class RentController {
     @PostMapping("/contracts/{contractId}/paypal")
     public ResponseEntity<?> createContractPayPalPayment(
             @PathVariable Long contractId,
-            @RequestBody PayPalPaymentRequest paymentRequest,
+            @RequestBody @Valid PayPalPaymentRequest paymentRequest,
             Principal principal
     ) {
         try {
             User actor = requireActor(principal);
             PayPalPaymentResponse response = contractService.createPayPalPaymentForContract(
-                    contractId, paymentRequest, (long) actor.getUser_id(), isAdmin(actor));
+                    contractId, paymentRequest, (long) actor.getUser_id());
             return ResponseEntity.ok(response);
         } catch (IllegalStateException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
@@ -296,10 +307,14 @@ public class RentController {
             @RequestParam(required = false) Integer installmentNo,
             Principal principal
     ) {
+        if (!paymentId.matches(PAYPAL_ID) || !payerId.matches(PAYPAL_ID)
+                || (installmentNo != null && installmentNo < 1)) {
+            return buildErrorResponse("Invalid PayPal callback parameters", HttpStatus.BAD_REQUEST);
+        }
         try {
             User actor = requireActor(principal);
             PayPalPaymentResponse response = contractService.executePayPalPaymentForContract(
-                    contractId, paymentId, payerId, installmentNo, (long) actor.getUser_id(), isAdmin(actor));
+                    contractId, paymentId, payerId, installmentNo, (long) actor.getUser_id());
             return ResponseEntity.ok(response);
         } catch (IllegalStateException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
@@ -326,7 +341,7 @@ public class RentController {
         try {
             User actor = requireActor(principal);
             CreditCardPaymentResponse response = contractService.processCreditCardPaymentForContract(
-                    contractId, paymentRequest, (long) actor.getUser_id(), isAdmin(actor));
+                    contractId, paymentRequest, (long) actor.getUser_id());
             return ResponseEntity.ok(response);
         } catch (IllegalStateException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
@@ -345,6 +360,7 @@ public class RentController {
     }
 
     @PutMapping("/requests/{id}/reject")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> rejectRequest(@PathVariable Long id, Principal principal) {
         try {
             String email = getPrincipalEmail(principal);
@@ -354,8 +370,10 @@ public class RentController {
             return buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (RuntimeException e) {
+        } catch (ResourceNotFoundException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (BadRequestException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return buildErrorResponse("Failed to reject rental request", HttpStatus.INTERNAL_SERVER_ERROR);
         }

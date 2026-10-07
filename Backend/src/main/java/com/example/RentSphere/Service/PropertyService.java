@@ -4,6 +4,7 @@ import com.example.RentSphere.Dto.CreatePropertyRequest;
 import com.example.RentSphere.Dto.Favorite;
 import com.example.RentSphere.Dto.PropertyDetails;
 import com.example.RentSphere.Dto.UpdatePropertyRequest;
+import com.example.RentSphere.Exception.BadRequestException;
 import com.example.RentSphere.Exception.ResourceNotFoundException;
 import com.example.RentSphere.Repository.PropertyRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class PropertyService {
+
+    private static final int MAX_IMAGES_PER_PROPERTY = 10;
 
     private final PropertyRepository propertyRepository;
 
@@ -121,11 +124,18 @@ public class PropertyService {
     public void addImageByOwner(Long propertyId, String imageUrl, boolean isCover, int currentUserId) {
         PropertyDetails propertyDetails = getById(propertyId);
         if (propertyDetails == null || propertyDetails.getProperty() == null) {
-            throw new RuntimeException("Property not found");
+            throw new ResourceNotFoundException("Property not found");
         }
         if (propertyDetails.getProperty().getOwnerId() == null ||
             !propertyDetails.getProperty().getOwnerId().equals((long) currentUserId)) {
             throw new IllegalArgumentException("You do not have permission to add images to this property");
+        }
+        if (imageUrl == null || imageUrl.isBlank()) {
+            throw new BadRequestException("Image URL is required");
+        }
+        if (propertyDetails.getPropertyImages() != null
+                && propertyDetails.getPropertyImages().size() >= MAX_IMAGES_PER_PROPERTY) {
+            throw new BadRequestException("A listing can have at most " + MAX_IMAGES_PER_PROPERTY + " images");
         }
         addImage(propertyId, imageUrl, isCover);
     }
@@ -145,7 +155,7 @@ public class PropertyService {
         }
         int rowsUpdated = propertyRepository.update(propertyId, request);
         if (rowsUpdated == 0) {
-            throw new RuntimeException("Property not found");
+            throw new ResourceNotFoundException("Property not found");
         }
     }
 
@@ -161,13 +171,23 @@ public class PropertyService {
     public void updateByOwner(Long propertyId, UpdatePropertyRequest request, int currentUserId) {
         PropertyDetails propertyDetails = getById(propertyId);
         if (propertyDetails == null || propertyDetails.getProperty() == null) {
-            throw new RuntimeException("Property not found");
+            throw new ResourceNotFoundException("Property not found");
         }
         if (propertyDetails.getProperty().getOwnerId() == null ||
             !propertyDetails.getProperty().getOwnerId().equals((long) currentUserId)) {
             throw new IllegalArgumentException("You do not have permission to update this property");
         }
         update(propertyId, request);
+    }
+
+    /**
+     * Takes a listing off the market or puts it back. Called when a lease starts or ends.
+     *
+     * @param propertyId the target property's ID
+     * @param available  the new availability flag
+     */
+    public void setAvailability(Long propertyId, boolean available) {
+        propertyRepository.updateAvailability(propertyId, available);
     }
 
     /**
@@ -180,7 +200,7 @@ public class PropertyService {
     public void delete(Long id) {
         int deleted = propertyRepository.delete(id);
         if (deleted == 0) {
-            throw new RuntimeException("Property not found");
+            throw new ResourceNotFoundException("Property not found");
         }
     }
 
@@ -195,7 +215,7 @@ public class PropertyService {
     public void deleteByOwner(Long id, int currentUserId) {
         PropertyDetails propertyDetails = getById(id);
         if (propertyDetails == null || propertyDetails.getProperty() == null) {
-            throw new RuntimeException("Property not found");
+            throw new ResourceNotFoundException("Property not found");
         }
         if (propertyDetails.getProperty().getOwnerId() == null ||
             !propertyDetails.getProperty().getOwnerId().equals((long) currentUserId)) {

@@ -73,7 +73,11 @@ public class ContractSchedulerService {
     private void createPaymentReminders(LocalDate dueDate, int daysLeft) {
         List<PaymentDueInfo> duePayments = contractRepository.findPaymentsDueOn(dueDate);
         for (PaymentDueInfo duePayment : duePayments) {
-            String title = daysLeft == 0 ? "⚠️ Rent Payment Due Today" : String.format("⏰ Rent Payment Due in %d Days", daysLeft);
+            // Deduplication is per title, so it names the installment: otherwise a tenant would
+            // get one reminder for their first month and none after it.
+            String when = daysLeft == 0 ? "today" : daysLeft == 1 ? "tomorrow" : "in " + daysLeft + " days";
+            String title = String.format("Rent due %s: contract #%d, installment #%d",
+                    when, duePayment.getContractId(), duePayment.getInstallmentNo());
             String body = String.format("Your rent installment #%d of $%.2f for contract #%d is due on %s. Please submit payment to prevent late penalties.",
                     duePayment.getInstallmentNo(), duePayment.getAmountDue(), duePayment.getContractId(), duePayment.getDueDate());
             notificationService.createNotification(duePayment.getTenantId(), "PAYMENT_REMINDER", title, body);
@@ -92,7 +96,8 @@ public class ContractSchedulerService {
         for (Contract contract : overdueContracts) {
             contractRepository.markPaymentsOverdueByContract(contract.getContractId());
             contractRepository.cancelContract(contract.getContractId());
-            String title = "Contract Cancelled - Overdue Rent";
+            contractRepository.releasePropertyIfUnleased(contract.getPropertyId());
+            String title = "Contract #" + contract.getContractId() + " cancelled: overdue rent";
             String body = String.format("Contract #%d has been automatically cancelled because a monthly installment was not settled by its due date.", contract.getContractId());
             notificationService.createNotification(contract.getTenantId().intValue(), "REQUEST_CANCELLED", title, body);
         }
@@ -110,7 +115,8 @@ public class ContractSchedulerService {
         List<Contract> completedContracts = contractRepository.findActiveContractsToComplete(today);
         for (Contract contract : completedContracts) {
             contractRepository.completeContract(contract.getContractId());
-            String title = "Contract Completed Successfully";
+            contractRepository.releasePropertyIfUnleased(contract.getPropertyId());
+            String title = "Contract #" + contract.getContractId() + " completed";
             String body = String.format("Contract #%d has concluded. All installments have been fully paid and the lease term has expired.", contract.getContractId());
             notificationService.createNotification(contract.getTenantId().intValue(), "CONTRACT_COMPLETED", title, body);
         }

@@ -20,16 +20,20 @@ import java.util.function.Function;
  * The token payload embeds the user's email as the subject and their role
  * as a custom claim; no server-side session or token store is maintained.
  *
- * <p>Token lifetime is hard-coded to 7 days. The expiration is checked on
- * every protected request by {@link JwtAuthenticationFilter}.
+ * <p>Token lifetime comes from {@code ${jwt.expiration}} in milliseconds (24 hours unless
+ * overridden). The expiration is checked on every protected request by
+ * {@link JwtAuthenticationFilter}.
  */
 @Service
 public class JwtService {
 
     private final String secretKey;
+    private final long expirationMillis;
 
-    public JwtService(@Value("${jwt.secret}") String secretKey) {
+    public JwtService(@Value("${jwt.secret}") String secretKey,
+                      @Value("${jwt.expiration:86400000}") long expirationMillis) {
         this.secretKey = secretKey;
+        this.expirationMillis = expirationMillis;
     }
 
     private Key getSigningKey() {
@@ -72,7 +76,7 @@ public class JwtService {
      * <ul>
      *   <li>{@code sub} - the user's email (used as the Spring Security principal name)</li>
      *   <li>{@code role} - the user's role name ({@code ADMIN}, {@code TENANT}, or {@code VISITOR})</li>
-     *   <li>{@code iat} / {@code exp} - issued-at and expiry timestamps (7-day lifetime)</li>
+     *   <li>{@code iat} / {@code exp} - issued-at and expiry timestamps ({@code jwt.expiration} lifetime)</li>
      * </ul>
      *
      * @param email the user's email address
@@ -84,7 +88,7 @@ public class JwtService {
                 .setSubject(email)
                 .claim("role", role)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 7))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
