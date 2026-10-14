@@ -1,0 +1,86 @@
+# Render Blueprint: free-tier demo deployment.
+#   rentsphere-api  Spring Boot container built from Backend/Dockerfile
+#   rentsphere      React build served from Render's CDN
+# MySQL is external (Aiven free plan) because Render has no managed MySQL.
+# Walkthrough: README.md, "Free-tier deployment".
+services:
+  - type: web
+    name: rentsphere-api
+    runtime: docker
+    plan: free
+    rootDir: Backend
+    healthCheckPath: /actuator/health
+    envVars:
+      # Production settings and JSON logs (application-prod.properties, logback-spring.xml)
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SERVER_PORT
+        value: 10000
+      # 512 MB instance: cap the heap and use the low-footprint collector
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=65 -XX:+UseSerialGC -Xss512k
+      - key: SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+        value: 5
+      # jdbc:mysql://<host>:<port>/defaultdb?sslMode=REQUIRED
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: PAYPAL_MODE
+        value: sandbox
+      # Must equal the static site's URL below; change both if Render suffixes the names
+      - key: RENTSPHERE_CORS_ALLOWED_ORIGINS
+        value: https://rentsphere-5jpa.onrender.com
+      # Render's edge sets these to the real visitor address; the rate limiter keys on it
+      - key: RENTSPHERE_RATELIMIT_CLIENT_IP_HEADERS
+        value: CF-Connecting-IP,True-Client-IP
+      # The published demo logins: their profiles are read-only so nobody can lock others out
+      - key: RENTSPHERE_DEMO_ACCOUNTS
+        value: nour.elsayed@nilenest.demo,youssef.farouk@mail.demo,salma.abdelnabi@mail.demo,mariam.elhosseiny@mail.demo
+      # Reloads db/seed-demo.sql on every start and daily at 03:00 UTC. This EMPTIES EVERY
+      # TABLE, which is the point on a demo anyone can write to. Remove it for real data.
+      - key: RENTSPHERE_DEMO_RESET_ENABLED
+        value: "true"
+
+  - type: web
+    name: rentsphere
+    runtime: static
+    rootDir: Frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: REACT_APP_API_URL
+        value: https://rentsphere-api.onrender.com
+      # No inline script in index.html, so the CSP below can forbid inline scripts outright
+      - key: INLINE_RUNTIME_CHUNK
+        value: "false"
+    headers:
+      - path: /*
+        name: Content-Security-Policy
+        value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://rentsphere-api.onrender.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /*
+        name: Permissions-Policy
+        value: camera=(), microphone=(), geolocation=(), payment=()
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

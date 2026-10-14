@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: rentsphere
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: rentsphere
+
+resources:
+  - namespace.yaml
+  - mysql.yaml
+  - backend.yaml
+  - frontend.yaml
+  - ingress.yaml
+  - network-policy.yaml
+
+# Non-secret settings for the API. Overlays merge their own values into it, and the name gets a
+# content hash, so changing a value rolls the pods that use it.
+configMapGenerator:
+  - name: backend-config
+    literals:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/RentSphereSchema?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=rentsphere
+      - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=10
+      - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=70
+      - PAYPAL_MODE=sandbox
+      # Traefik sets X-Real-Ip to the client address; the API is only reachable through it
+      - RENTSPHERE_RATELIMIT_CLIENT_IP_HEADERS=X-Real-Ip
+      - RENTSPHERE_DEMO_ACCOUNTS=nour.elsayed@nilenest.demo,youssef.farouk@mail.demo,salma.abdelnabi@mail.demo,mariam.elhosseiny@mail.demo
+
+images:
+  - name: ghcr.io/ixi3boda/rentsphere-backend
+    newTag: latest
+  - name: ghcr.io/ixi3boda/rentsphere-frontend
+    newTag: latest

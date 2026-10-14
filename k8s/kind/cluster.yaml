@@ -1,0 +1,10 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: rentsphere
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      # Traefik's NodePort, published on the host as http://rentsphere.localhost:8088
+      - containerPort: 30080
+        hostPort: 8088
+        protocol: TCP

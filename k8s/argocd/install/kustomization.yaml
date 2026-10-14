@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Argo CD "core": the controller, repo server and Redis without the web UI, API server or SSO,
+# which saves ~300 MB on a 2 GB node. Open the UI locally with `argocd admin dashboard`.
+namespace: argocd
+
+resources:
+  - namespace.yaml
+  - https://raw.githubusercontent.com/argoproj/argo-cd/v3.5.5/manifests/core-install.yaml

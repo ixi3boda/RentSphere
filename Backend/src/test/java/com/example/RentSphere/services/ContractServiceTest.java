@@ -1,0 +1,322 @@
+package com.example.RentSphere.services;
+
+import com.example.RentSphere.Dto.*;
+import com.example.RentSphere.Exception.BadRequestException;
+import com.example.RentSphere.Exception.PaymentProcessingException;
+import com.example.RentSphere.Exception.ResourceNotFoundException;
+import com.example.RentSphere.Repository.ContractRepository;
+import com.example.RentSphere.Repository.UserRepository;
+import com.example.RentSphere.Service.ContractService;
+import com.example.RentSphere.Service.NotificationService;
+import com.example.RentSphere.Service.PayPalService;
+import com.example.RentSphere.fixtures.TestFixtures;
+import com.paypal.api.payments.Amount;
+import com.paypal.api.payments.Payment;
+import com.paypal.api.payments.Transaction;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
+
+import java.math.BigDecimal;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+@DisplayName("ContractService Unit Tests")
+class ContractServiceTest {
+
+    private static final Long TENANT_ID = 2L;
+    private static final Long OWNER_ID = 1L;
+
+    @Mock
+    private ContractRepository contractRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private PayPalService payPalService;
+    @Mock
+    private NotificationService notificationService;
+
+    @InjectMocks
+    private ContractService contractService;
+
+    @Test
+    @DisplayName("createContractForApprovedRequest - throws when request is null")
+    void createContract_nullRequest_throws() {
+        assertThatThrownBy(() -> contractService.createContractForApprovedRequest(null, new PropertyDetails()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Rental request is required");
+    }
+
+    @Test
+    @DisplayName("createContractForApprovedRequest - throws when propertyDetails is null")
+    void createContract_nullPropertyDetails_throws() {
+        assertThatThrownBy(() -> contractService.createContractForApprovedRequest(new RentalRequest(), null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Property details are required");
+    }
+
+    @Test
+    @DisplayName("createContractForApprovedRequest - succeeds and delegates correctly")
+    void createContract_succeeds() {
+        RentalRequest req = TestFixtures.pendingRentalRequest();
+        req.setDesiredMonths(12);
+
+        PropertyDetails pd = new PropertyDetails();
+        pd.setProperty(TestFixtures.testProperty());
+
+        Contract savedContract = TestFixtures.activeContract();
+        savedContract.setContractId(1L);
+        when(contractRepository.createContract(any())).thenReturn(savedContract);
+
+        Contract result = contractService.createContractForApprovedRequest(req, pd);
+
+        assertThat(result.getContractStatus()).isEqualTo("ACTIVE");
+        verify(contractRepository).createContract(any());
+        verify(contractRepository).createPaymentSchedule(eq(1L), any(BigDecimal.class), eq(12), any());
+        verify(userRepository).promoteVisitorToTenant(2);
+    }
+
+    @Test
+    @DisplayName("createPayPalPaymentForContract - throws when contract not found")
+    void createPayPalPayment_contractNotFound_throws() {
+        when(contractRepository.findById(999L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> contractService.createPayPalPaymentForContract(999L, new PayPalPaymentRequest(), TENANT_ID))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Contract not found");
+    }
+
+    @Test
+    @DisplayName("createPayPalPaymentForContract - throws when no outstanding payments")
+    void createPayPalPayment_noPendingPayments_throws() {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+        when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> contractService.createPayPalPaymentForContract(1L, payPalRequest(), TENANT_ID))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("No outstanding installment");
+    }
+
+    @Test
+    @DisplayName("createPayPalPaymentForContract - succeeds and delegates to PayPalService")
+    void createPayPalPayment_succeeds() throws Exception {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+
+        PaymentDto paymentDto = new PaymentDto();
+        paymentDto.setAmountDue(new BigDecimal("1500.00"));
+        paymentDto.setInstallmentNo(1);
+        when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.of(paymentDto));
+
+        PayPalPaymentResponse mockResponse = new PayPalPaymentResponse();
+        when(payPalService.createPayment(any())).thenReturn(mockResponse);
+
+        PayPalPaymentRequest req = payPalRequest();
+        // the client does not get to choose the currency
+        req.setCurrency("HUF");
+        PayPalPaymentResponse response = contractService.createPayPalPaymentForContract(1L, req, TENANT_ID);
+
+        assertThat(response).isNotNull();
+        verify(payPalService).createPayment(argThat(sent -> "USD".equals(sent.getCurrency())));
+    }
+
+    @Test
+    @DisplayName("createPayPalPaymentForContract - refuses a return URL on another site")
+    void createPayPalPayment_foreignReturnUrl_throws() throws Exception {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+        PayPalPaymentRequest req = payPalRequest();
+        req.setSuccessUrl("https://evil.example/collect");
+
+        assertThatThrownBy(() -> contractService.createPayPalPaymentForContract(1L, req, TENANT_ID))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("must point back to this site");
+
+        verify(payPalService, never()).createPayment(any());
+    }
+
+    @Test
+    @DisplayName("executePayPalPaymentForContract - refuses a capture in another currency")
+    void executePayPalPayment_wrongCurrency_throws() throws Exception {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+        Payment payment = paypalPayment("approved", "1500.00");
+        payment.getTransactions().get(0).getAmount().setCurrency("HUF");
+        when(payPalService.executePayment("payId", "payerId")).thenReturn(payment);
+
+        PaymentDto pendingPayment = new PaymentDto();
+        pendingPayment.setAmountDue(new BigDecimal("1500.00"));
+        pendingPayment.setInstallmentNo(1);
+        when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.of(pendingPayment));
+
+        assertThatThrownBy(() -> contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null, TENANT_ID))
+                .isInstanceOf(PaymentProcessingException.class)
+                .hasMessageContaining("rent is due in USD");
+
+        verify(contractRepository, never()).markPaymentPaid(anyLong(), anyInt(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("card payment - an expired card is refused")
+    void processCreditCardPayment_expiredCard_throws() {
+        CreditCardPaymentRequest expired = validCardRequest().expiryMonth("01").expiryYear("2020").build();
+
+        assertThatThrownBy(() -> contractService.processCreditCardPaymentForContract(1L, expired, TENANT_ID))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("expired");
+
+        verify(contractRepository, never()).markPaymentPaid(anyLong(), anyInt(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("payments - a user who is not the tenant is refused before anything is charged")
+    void payments_foreignActor_denied() {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+        CreditCardPaymentRequest cardReq = validCardRequest().build();
+
+        assertThatThrownBy(() -> contractService.processCreditCardPaymentForContract(1L, cardReq, 77L))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("does not belong");
+
+        verify(contractRepository, never()).markPaymentPaid(anyLong(), anyInt(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("payments - a cancelled contract cannot accept money")
+    void payments_cancelledContract_denied() {
+        Contract cancelled = TestFixtures.activeContract();
+        cancelled.setContractStatus("CANCELLED");
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(cancelled));
+
+        assertThatThrownBy(() -> contractService.processCreditCardPaymentForContract(1L, validCardRequest().build(), TENANT_ID))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("cannot accept payments");
+    }
+
+    @Test
+    @DisplayName("getPaymentsByContractId - the landlord on the contract may read it")
+    void payments_visibleToOwner() {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+        when(contractRepository.findPaymentsByContractId(1L)).thenReturn(java.util.List.of());
+
+        assertThat(contractService.getPaymentsByContractId(1L, OWNER_ID)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("getPaymentsByContractId - an unrelated user is refused")
+    void payments_hiddenFromStranger() {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+
+        assertThatThrownBy(() -> contractService.getPaymentsByContractId(1L, 77L))
+                .isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
+    @DisplayName("executePayPalPaymentForContract - throws when payment fails")
+    void executePayPalPayment_paymentFails_throws() throws Exception {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+        PaymentDto pendingPayment = new PaymentDto();
+        pendingPayment.setAmountDue(new BigDecimal("1500.00"));
+        pendingPayment.setInstallmentNo(1);
+        when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.of(pendingPayment));
+        when(payPalService.executePayment(anyString(), anyString())).thenReturn(null);
+
+        assertThatThrownBy(() -> contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null, TENANT_ID))
+                .isInstanceOf(PaymentProcessingException.class)
+                .hasMessageContaining("execution failed");
+    }
+
+    @Test
+    @DisplayName("executePayPalPaymentForContract - updates DB when approved and amount matches")
+    void executePayPalPayment_approved_updatesDB() throws Exception {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+        when(payPalService.executePayment("payId", "payerId"))
+                .thenReturn(paypalPayment("approved", "1500.00"));
+
+        PaymentDto pendingPayment = new PaymentDto();
+        pendingPayment.setAmountDue(new BigDecimal("1500.00"));
+        pendingPayment.setInstallmentNo(1);
+        when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.of(pendingPayment));
+        when(contractRepository.markPaymentPaid(eq(1L), eq(1), any(), anyString())).thenReturn(1);
+        when(contractRepository.countUnsettledPayments(1L)).thenReturn(0);
+
+        PayPalPaymentResponse response = contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null, TENANT_ID);
+
+        assertThat(response.getStatus()).isEqualTo("approved");
+        verify(contractRepository).markPaymentPaid(eq(1L), eq(1), eq(new BigDecimal("1500.00")), eq("PAY-123"));
+        verify(contractRepository).completeContract(1L);
+        // must be a type chk_noti_type actually allows, or the whole transaction rolls back
+        verify(notificationService).createNotification(eq(2), eq("PAYMENT_RECEIVED"), anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("executePayPalPaymentForContract - refuses to mark paid when less was captured")
+    void executePayPalPayment_amountMismatch_throws() throws Exception {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+        when(payPalService.executePayment("payId", "payerId"))
+                .thenReturn(paypalPayment("approved", "1.00"));
+
+        PaymentDto pendingPayment = new PaymentDto();
+        pendingPayment.setAmountDue(new BigDecimal("1500.00"));
+        pendingPayment.setInstallmentNo(1);
+        when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.of(pendingPayment));
+
+        assertThatThrownBy(() -> contractService.executePayPalPaymentForContract(1L, "payId", "payerId", null, TENANT_ID))
+                .isInstanceOf(PaymentProcessingException.class)
+                .hasMessageContaining("Captured");
+
+        verify(contractRepository, never()).markPaymentPaid(anyLong(), anyInt(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("processCreditCardPaymentForContract - succeeds and updates payment status")
+    void processCreditCardPayment_succeeds() {
+        when(contractRepository.findById(1L)).thenReturn(Optional.of(TestFixtures.activeContract()));
+
+        PaymentDto pendingPayment = new PaymentDto();
+        pendingPayment.setAmountDue(new BigDecimal("1500.00"));
+        pendingPayment.setInstallmentNo(1);
+        when(contractRepository.findNextPendingPayment(1L)).thenReturn(Optional.of(pendingPayment));
+        when(contractRepository.markPaymentPaid(eq(1L), eq(1), any(), anyString())).thenReturn(1);
+
+        CreditCardPaymentResponse response =
+                contractService.processCreditCardPaymentForContract(1L, validCardRequest().build(), TENANT_ID);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo("PAID");
+        assertThat(response.getAmountPaid()).isEqualTo(new BigDecimal("1500.00"));
+        verify(contractRepository).markPaymentPaid(eq(1L), eq(1), eq(new BigDecimal("1500.00")), anyString());
+    }
+
+    private static CreditCardPaymentRequest.CreditCardPaymentRequestBuilder validCardRequest() {
+        return CreditCardPaymentRequest.builder()
+                .cardNumber("4111111111111111")
+                .cardHolderName("John Doe")
+                .expiryMonth("12")
+                .expiryYear("28")
+                .cvv("123");
+    }
+
+    private static PayPalPaymentRequest payPalRequest() {
+        PayPalPaymentRequest req = new PayPalPaymentRequest();
+        req.setSuccessUrl("http://localhost:3000/paypal/callback");
+        req.setCancelUrl("http://localhost:3000/contracts");
+        return req;
+    }
+
+    private static Payment paypalPayment(String state, String total) {
+        Amount amount = new Amount();
+        amount.setTotal(total);
+        amount.setCurrency("USD");
+        Transaction transaction = new Transaction();
+        transaction.setAmount(amount);
+        Payment payment = new Payment();
+        payment.setId("PAY-123");
+        payment.setState(state);
+        payment.setTransactions(java.util.List.of(transaction));
+        return payment;
+    }
+}

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Logback configuration for RentSphere.
+
+  Two appenders are defined:
+    CONSOLE_DEV  – Human-readable, colour-coded pattern for local development.
+                   Activated by the 'dev' Spring profile (or no active profile).
+    CONSOLE_JSON – Machine-readable JSON via Logstash encoder for production.
+                   Activated by the 'prod' Spring profile.
+
+  Both appenders emit the MDC correlationId field set by MdcLoggingFilter, so
+  every log line for a single HTTP request shares the same traceable ID.
+  In production this lets you reconstruct a complete request trace from a log
+  aggregator (ELK, Datadog, CloudWatch Logs, etc.) by filtering on one UUID.
+-->
+<configuration>
+
+    <!-- ── DEV: human-readable, colour-coded ─────────────────────────────── -->
+    <springProfile name="!prod">
+        <appender name="CONSOLE_DEV" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <!--
+                  %X{correlationId} inserts the MDC value set by MdcLoggingFilter.
+                  A dash is printed instead when no correlation ID is present
+                  (e.g., scheduled tasks that run outside an HTTP request).
+                -->
+                <pattern>
+                    %d{yyyy-MM-dd HH:mm:ss.SSS} [%X{correlationId:--}] %highlight(%-5level) %cyan(%logger{40}) - %msg%n
+                </pattern>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_DEV"/>
+        </root>
+
+        <!-- Reduce noise from framework internals in dev -->
+        <logger name="org.springframework.web" level="INFO"/>
+        <logger name="org.springframework.security" level="WARN"/>
+        <logger name="com.zaxxer.hikari" level="WARN"/>
+        <logger name="com.example.RentSphere" level="DEBUG"/>
+    </springProfile>
+
+    <!-- ── PROD: structured JSON via logstash-logback-encoder ────────────── -->
+    <springProfile name="prod">
+        <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
+            <!--
+              LogstashEncoder writes one JSON object per log line. Each object includes:
+                timestamp, level, logger, message, thread, correlationId (from MDC),
+                plus any key-value pairs added via StructuredArguments.
+
+              Example output:
+              {
+                "timestamp": "2026-10-01T09:00:00.000Z",
+                "level": "INFO",
+                "logger": "c.e.R.Service.PropertyService",
+                "message": "Filter returned 48 properties",
+                "correlationId": "3f7a2b1c-...",
+                "thread": "http-nio-8080-exec-1"
+              }
+            -->
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <!-- Include every MDC entry as a top-level JSON field -->
+                <includeMdcKeyName>correlationId</includeMdcKeyName>
+            </encoder>
+        </appender>
+
+        <root level="WARN">
+            <appender-ref ref="CONSOLE_JSON"/>
+        </root>
+
+        <logger name="com.example.RentSphere" level="INFO"/>
+    </springProfile>
+
+</configuration>

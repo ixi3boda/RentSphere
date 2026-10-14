@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# kind cluster on a laptop: images built locally and loaded with `make kind-load`
+# Generators below need the namespace too, or their Secret lands in "default"
+namespace: rentsphere
+
+resources:
+  - ../../base
+
+images:
+  - name: ghcr.io/ixi3boda/rentsphere-backend
+    newName: rentsphere-backend
+    newTag: local
+  - name: ghcr.io/ixi3boda/rentsphere-frontend
+    newName: rentsphere-frontend
+    newTag: local
+
+configMapGenerator:
+  - name: backend-config
+    behavior: merge
+    literals:
+      - RENTSPHERE_CORS_ALLOWED_ORIGINS=http://rentsphere.localhost:8088
+      # Load the demo dataset on start-up so the local cluster has something to show
+      - RENTSPHERE_DEMO_RESET_ENABLED=true
+
+# secrets.env is gitignored; `make kind-secrets` creates it with random values
+secretGenerator:
+  - name: rentsphere-secrets
+    envs:
+      - secrets.env

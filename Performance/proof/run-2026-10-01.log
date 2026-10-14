@@ -1,0 +1,141 @@
+RentSphere performance session - 2026-10-01 (JMeter GUI ladder on the redesigned read path)
+host: Darwin 25.5.0  Apple M5  10 cores
+git HEAD at session start: 4932f02 (working tree carries the UI/backend rework, uncommitted)
+
+java (host, used by -n runs): openjdk version "17.0.18" 2026-01-20
+java (GUI runs): 
+
+== containers ==
+rentsphere-backend	rentsphere-backend	0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp	Up 34 minutes
+rentsphere-frontend	rentsphere-frontend	0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp	Up 4 hours
+rentsphere-mysql	mysql:8.0	3306/tcp, 33060/tcp	Up 7 hours (healthy)
+backend image: sha256:85b8582baab9f4ded4e4f57b32013d5186c828bb81796db25f23fcd31c3f615c
+mysql: mysql:8.0
+
+== MySQL state ==
+general_log=0  slow_log=0
+users	5010
+properties	100001
+available	80001
+property_images	300000
+favorites	60000
+rental_requests	30001
+contracts	7501
+payments	22503
+notifications	40003
+explicit non-unique indexes: 12
+
+== single-request curl timings (current build, port 8080) ==
+properties/filter?city=Cairo&district=District-1&minPrice=1500&maxPrice=6500&sortBy=newest&page=2&size=9 200 0.006070s
+properties/filter?search=office&sortBy=newest&page=0&size=9                                      200 0.076915s
+properties/stats                                                                                 200 0.011824s
+properties/42424                                                                                 200 0.002230s
+
+== JMeter ==
+Version 5.6.3 (both -n and GUI runs); java.version=26, os=Mac OS X 26.5 aarch64
+plan: Performance/rentsphere-load-test.jmx, 5 samplers, think time 1000+0-1000ms, ramp 10s, duration 60s
+runs started from the GUI with 'Run > Start' are marked GUI; the rest are 'jmeter -n'.
+
+== EXPLAIN highlights (Performance/db-benchmark.sql, full output in that file's run) ==
+=== 2a. paged browse: filter + ORDER BY + LIMIT/OFFSET (load-test sampler "filter") ===
+1	SIMPLE	properties	NULL	ref	idx_properties_location	idx_properties_location	805	const,const	1666	11.11	Using where; Using filesort
+=== 2b. count half of the same request (the "total" the page returns) ===
+1	SIMPLE	properties	NULL	ref	idx_properties_location	idx_properties_location	805	const,const	1666	11.11	Using where
+=== 2c. free-text search: unanchored LIKE over title/city/district (sampler "filter?search") ===
+1	SIMPLE	properties	NULL	ALL	NULL	NULL	NULL	NULL	98821	100.00	Using where; Using filesort
+=== 2d. batched photo fetch: one IN-list per page instead of one query per row ===
+
+== per-run tables (tabulated from the .jtl files JMeter wrote) ==
+### before_50_cli  (pre-fix read path (unpaged + per-row images), 50 users, CLI)
+    start=2026-10-01 00:32:49 window=58s samples=886 errors=0 bytes=1626.9MB
+    TOTAL  avg=1808.4ms p90=8278 p95=10194 p99=12446 max=13414 throughput(window)=15.2/s
+      GET /api/properties/filter             n=  196 avg=   136.2ms p95=   272 max=   711 thr=   3.4/s
+      GET /api/properties/filter?search      n=  195 avg=  8036.3ms p95= 12270 max= 13414 thr=   3.3/s
+      GET /api/properties/stats              n=  196 avg=    28.5ms p95=    53 max=   151 thr=   3.4/s
+      GET /api/properties/{id}               n=  152 avg=     7.7ms p95=    18 max=    61 thr=   2.6/s
+      GET /api/user/me (authed)              n=  147 avg=    11.5ms p95=    23 max=    39 thr=   2.5/s
+
+### after_25_cli  (current code, 25 users, CLI)
+    start=2026-10-01 01:06:08 window=59s samples=893 errors=0 bytes=2.9MB
+    TOTAL  avg=23.5ms p90=83 p95=92 p99=100 max=136 throughput(window)=15.2/s
+      GET /api/properties/filter             n=  184 avg=     7.7ms p95=    12 max=    27 thr=   3.1/s
+      GET /api/properties/filter?search      n=  176 avg=    85.0ms p95=   100 max=   136 thr=   3.0/s
+      GET /api/properties/stats              n=  189 avg=    18.7ms p95=    27 max=    62 thr=   3.2/s
+      GET /api/properties/{id}               n=  173 avg=     2.5ms p95=     4 max=    11 thr=   3.0/s
+      GET /api/user/me (authed)              n=  171 avg=     3.7ms p95=     6 max=    22 thr=   2.9/s
+
+### after_50_cli  (current code, 50 users, CLI)
+    start=2026-10-01 00:35:16 window=59s samples=1789 errors=0 bytes=5.8MB
+    TOTAL  avg=22.3ms p90=80 p95=84 p99=96 max=175 throughput(window)=30.5/s
+      GET /api/properties/filter             n=  369 avg=     6.6ms p95=    11 max=    46 thr=   6.3/s
+      GET /api/properties/filter?search      n=  361 avg=    82.0ms p95=    96 max=   175 thr=   6.2/s
+      GET /api/properties/stats              n=  376 avg=    15.1ms p95=    25 max=    35 thr=   6.4/s
+      GET /api/properties/{id}               n=  349 avg=     2.7ms p95=     5 max=    38 thr=   6.0/s
+      GET /api/user/me (authed)              n=  334 avg=     3.9ms p95=     7 max=    39 thr=   5.7/s
+
+### after_100_gui  (current code, 100 users, GUI)
+    start=2026-10-01 01:04:06 window=59s samples=3578 errors=0 bytes=11.5MB
+    TOTAL  avg=18.9ms p90=73 p95=76 p99=85 max=253 throughput(window)=61.1/s
+      GET /api/properties/filter             n=  736 avg=     3.8ms p95=     6 max=    25 thr=  12.6/s
+      GET /api/properties/filter?search      n=  719 avg=    74.8ms p95=    85 max=   253 thr=  12.3/s
+      GET /api/properties/stats              n=  751 avg=    12.3ms p95=    17 max=    65 thr=  12.8/s
+      GET /api/properties/{id}               n=  697 avg=     1.2ms p95=     2 max=    55 thr=  11.9/s
+      GET /api/user/me (authed)              n=  675 avg=     1.6ms p95=     3 max=    40 thr=  11.5/s
+
+### after_100agg_gui  (current code, 100 users, GUI (Aggregate Graph session))
+    start=2026-10-01 01:24:20 window=59s samples=3555 errors=0 bytes=12.0MB
+    TOTAL  avg=19.1ms p90=74 p95=77 p99=85 max=200 throughput(window)=60.6/s
+      GET /api/properties/filter             n=  734 avg=     3.8ms p95=     6 max=    19 thr=  12.9/s
+      GET /api/properties/filter?search      n=  712 avg=    75.6ms p95=    85 max=   156 thr=  12.7/s
+      GET /api/properties/stats              n=  749 avg=    12.7ms p95=    18 max=   200 thr=  12.8/s
+      GET /api/properties/{id}               n=  694 avg=     1.0ms p95=     2 max=    14 thr=  12.8/s
+      GET /api/user/me (authed)              n=  666 avg=     1.5ms p95=     3 max=    16 thr=  12.5/s
+    screenshot 05 is this run: JMeter's own Graph Details table reads 19 / 4 / 74 / 77 / 85 /
+    200 / 0.00 % / 60.7 /sec for the same TOTAL row, so the table above and the picture agree
+    to the millisecond. An earlier Aggregate Graph session at 00:53 (3,586 samples, p95 77 ms)
+    is superseded: its capture showed the Summary Report panel, not the graph, so it is not
+    kept as proof.
+
+### after_200_gui  (current code, 200 users, GUI)
+    start=2026-10-01 00:56:17 window=59s samples=7125 errors=0 bytes=23.0MB
+    TOTAL  avg=21.9ms p90=81 p95=88 p99=108 max=565 throughput(window)=121.3/s
+      GET /api/properties/filter             n= 1470 avg=     4.4ms p95=     7 max=   100 thr=  25.0/s
+      GET /api/properties/filter?search      n= 1433 avg=    86.9ms p95=   108 max=   565 thr=  24.4/s
+      GET /api/properties/stats              n= 1502 avg=    13.5ms p95=    20 max=   108 thr=  25.6/s
+      GET /api/properties/{id}               n= 1382 avg=     1.5ms p95=     2 max=    59 thr=  23.5/s
+      GET /api/user/me (authed)              n= 1338 avg=     2.2ms p95=     3 max=   130 thr=  22.8/s
+
+### after_200_cli  (current code, 200 users, CLI)
+    start=2026-10-01 01:07:09 window=59s samples=7104 errors=0 bytes=22.9MB
+    TOTAL  avg=25.2ms p90=92 p95=102 p99=134 max=375 throughput(window)=120.6/s
+      GET /api/properties/filter             n= 1470 avg=     5.8ms p95=    11 max=    83 thr=  25.0/s
+      GET /api/properties/filter?search      n= 1423 avg=    97.4ms p95=   133 max=   375 thr=  24.2/s
+      GET /api/properties/stats              n= 1497 avg=    16.6ms p95=    29 max=   145 thr=  25.4/s
+      GET /api/properties/{id}               n= 1374 avg=     2.0ms p95=     4 max=   112 thr=  23.3/s
+      GET /api/user/me (authed)              n= 1340 avg=     2.9ms p95=     6 max=   100 thr=  22.8/s
+
+### paged_but_nplus1_50_cli  (paged with the N+1 restored, 50 users, CLI)
+    start=2026-10-01 00:23:22 window=58s samples=1774 errors=0 bytes=5.7MB
+    TOTAL  avg=22.6ms p90=80 p95=85 p99=99 max=295 throughput(window)=30.4/s
+      GET /api/properties/filter             n=  365 avg=     7.8ms p95=    14 max=   103 thr=   6.3/s
+      GET /api/properties/filter?search      n=  352 avg=    84.0ms p95=    99 max=   295 thr=   6.0/s
+      GET /api/properties/stats              n=  378 avg=    14.8ms p95=    25 max=    70 thr=   6.5/s
+      GET /api/properties/{id}               n=  343 avg=     2.7ms p95=     4 max=    88 thr=   5.9/s
+      GET /api/user/me (authed)              n=  336 avg=     3.6ms p95=     6 max=    64 thr=   5.8/s
+
+### paged_nplus1_48perpage_50_cli  (paged at the 48-row cap with the N+1 restored, 50 users, CLI)
+    start=2026-10-01 00:25:19 window=59s samples=1792 errors=0 bytes=21.0MB
+    TOTAL  avg=23.6ms p90=85 p95=89 p99=104 max=263 throughput(window)=30.6/s
+      GET /api/properties/filter (48)        n=  370 avg=    10.1ms p95=    20 max=    54 thr=   6.3/s
+      GET /api/properties/filter?search (48) n=  359 avg=    88.3ms p95=   104 max=   263 thr=   6.1/s
+      GET /api/properties/stats              n=  379 avg=    14.0ms p95=    24 max=    63 thr=   6.5/s
+      GET /api/properties/{id}               n=  346 avg=     2.0ms p95=     3 max=    18 thr=   5.9/s
+      GET /api/user/me (authed)              n=  338 avg=     2.7ms p95=     5 max=    16 thr=   5.8/s
+
+== notes ==
+* before_50_cli ran against a temporary build whose filterProperties had no LIMIT/OFFSET and built each
+  row with two image queries - the 2026-09-29 read path, recreated on today's code to re-measure the
+  before/after pair. It moved 1,626.9 MB of JSON in 58 s; the same plan on the current build moved 5.8 MB.
+* paged_but_nplus1_50_cli and paged_nplus1_48perpage_50_cli isolate the two halves of the fix: paging alone
+  already removes the regression at the page sizes the UI requests (9 and the 48-row cap).
+* GUI and CLI agree at 200 users (121.3 vs 120.6 /s window throughput, 21.9 vs 25.2 ms mean).

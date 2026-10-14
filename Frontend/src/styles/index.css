@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-800 font-outfit antialiased min-h-screen selection:bg-sky-700 selection:text-white;
+    scroll-behavior: smooth;
+  }
+
+  /* Headings set weight only. A colour here would outrank the inherited text colour of dark
+     surfaces (hero, footer, CTA band) and render near-black text invisible. */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+
+  /* Every interactive element gets the same visible ring; hover colour alone is not a focus
+     indicator for keyboard users. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-sky-600 ring-offset-2 ring-offset-white;
+  }
+}
+
+@layer components {
+  /* Surfaces are solid white: translucent panels over a tinted page are what made the text
+     read as washed out. */
+  .card {
+    @apply bg-white border border-slate-200 shadow-sm;
+  }
+
+  .card-hover {
+    @apply bg-white border border-slate-200 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-sky-300;
+  }
+
+  /* Dark is reserved for the hero and footer, where the text on it is near-white. */
+  .surface-dark {
+    @apply bg-slate-900 border border-slate-700 shadow-2xl;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-sky-700 to-sky-800 bg-clip-text text-transparent;
+  }
+
+  /* Same treatment for the dark hero band, where a dark gradient would disappear. */
+  .gradient-text-inverse {
+    @apply bg-gradient-to-r from-sky-300 to-sky-200 bg-clip-text text-transparent;
+  }
+
+  /* Primary button - sky-700 (#0369a1) holds white text at 5.9:1; sky-600 only reaches 4.1:1. */
+  .btn-primary {
+    @apply bg-sky-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200
+           hover:bg-sky-800 hover:shadow-lg hover:shadow-sky-700/25 active:scale-95
+           disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-slate-800 font-bold py-3 px-6 rounded-xl border-2 border-slate-300 transition-all duration-200
+           hover:bg-slate-50 hover:border-slate-400 hover:shadow-md active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply text-slate-700 font-bold py-3 px-6 rounded-xl transition-all duration-200
+           hover:bg-slate-100 active:scale-95;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3.5 rounded-xl border-2 border-slate-300 bg-white
+           focus:border-sky-500 focus:ring-4 focus:ring-sky-500/15 outline-none transition-all duration-200
+           placeholder:text-slate-500 font-medium text-slate-900;
+  }
+
+  .badge-primary {
+    @apply px-3 py-1 rounded-full bg-sky-50 text-sky-800 text-xs font-bold border border-sky-200 inline-flex items-center gap-1.5;
+  }
+
+  .badge-gold {
+    @apply px-3 py-1 rounded-full bg-amber-50 text-amber-800 text-xs font-bold border border-amber-200 inline-flex items-center gap-1.5;
+  }
+
+  .soft-shadow {
+    @apply shadow-[0_12px_40px_-15px_rgba(15,23,42,0.12)];
+  }
+
+  .nav-link {
+    @apply relative px-4 py-2 text-slate-700 font-semibold transition-colors duration-200 hover:text-sky-700;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { @apply bg-slate-100; }
+::-webkit-scrollbar-thumb { @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors; }

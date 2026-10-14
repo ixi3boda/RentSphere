@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Build output
+target/
+build/
+dist/
+coverage/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# JMeter output
+Performance/*.jtl
+Performance/reports/
+!Performance/proof/*.log
+
+
+# Local Kubernetes secrets (see k8s/overlays/local/secrets.env.example)
+k8s/overlays/*/secrets.env
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log

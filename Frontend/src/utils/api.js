@@ -1,0 +1,161 @@
+
+
+
+
+
+
+import axios from "axios";
+
+// Empty in Docker/dev, where nginx or the CRA proxy serves /api on the same origin. Set at build
+// time when the SPA is hosted apart from the API (see render.yaml).
+const BASE = process.env.REACT_APP_API_URL || "";
+
+
+
+
+const apiClient = axios.create({
+  baseURL: BASE,
+  headers: { "Content-Type": "application/json" },
+});
+
+apiClient.interceptors.request.use((config) => {
+  
+  const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// AuthContext registers a handler here so a rejected token can clear the stored session; without
+// it the app keeps rendering a logged-in shell whose every request then 401s.
+let onUnauthorized = null;
+export const setUnauthorizedHandler = (handler) => {
+  onUnauthorized = handler;
+};
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const hadToken = Boolean(error.config?.headers?.Authorization);
+    if (error.response?.status === 401 && hadToken && onUnauthorized) {
+      onUnauthorized();
+    }
+    return Promise.reject(error);
+  }
+);
+
+
+
+
+export const authApi = {
+  
+  register: (payload) => apiClient.post("/api/user/register", payload),
+
+  
+  login: (payload) => apiClient.post("/api/user/login", payload),
+
+  
+  updateProfile: (payload) => apiClient.put("/api/user/me", payload),
+
+  
+  logout: () => apiClient.post("/api/user/logout"),
+
+  
+  getMe: () => apiClient.get("/api/user/me"),
+};
+
+
+
+
+export const propertyApi = {
+  
+  getMarketplaceStats: () => apiClient.get("/api/properties/stats"),
+
+  
+  getMyProperties: () => apiClient.get("/api/properties/my"),
+
+  
+  getCities: () => apiClient.get("/api/properties/cities"),
+
+  
+  getById: (id) => apiClient.get(`/api/properties/${id}`),
+
+  
+  create: (data) => apiClient.post("/api/properties/add", data),
+
+  
+  update: (id, body) =>
+    apiClient.put(`/api/properties/${id}/update`, body),
+
+  
+  delete: (id) => apiClient.delete(`/api/properties/${id}/delete`),
+
+  
+  filter: (params = {}) => apiClient.get("/api/properties/filter", { params }),
+
+  
+  favorite: (propertyId) =>
+    apiClient.post(`/api/properties/${propertyId}/favorite`),
+
+  
+  getFavorites: () => apiClient.get("/api/properties/favorites/all"),
+
+  
+  // Sends image as JSON body — base64 strings are too large for URL query params
+  addImage: (id, image_url, is_cover = false) =>
+    apiClient.post(`/api/properties/${id}/images/add`, { image_url, is_cover }),
+};
+
+
+
+
+export const rentApi = {
+  
+  createRequest: (body) => apiClient.post("/api/rent/request", body),
+
+  
+  getAllRequests: (params = {}) => apiClient.get("/api/rent/requests/all", { params }),
+
+  
+  getRequestSummary: () => apiClient.get("/api/rent/requests/summary"),
+
+  
+  getRequestById: (id) => apiClient.get(`/api/rent/requests/${id}`),
+
+  
+  getAllContracts: () => apiClient.get("/api/rent/contracts/all"),
+
+  getManagedContracts: (params = {}) => apiClient.get("/api/rent/contracts/manage", { params }),
+
+  getContractSummary: () => apiClient.get("/api/rent/contracts/manage/summary"),
+  getContractPayments: (contractId) => apiClient.get(`/api/rent/contracts/${contractId}/payments`),
+
+  
+  acceptRequest: (id) => apiClient.put(`/api/rent/requests/${id}/accept`),
+
+  
+  rejectRequest: (id) => apiClient.put(`/api/rent/requests/${id}/reject`),
+
+  
+  createPayPalPayment: (contractId, body) =>
+    apiClient.post(`/api/rent/contracts/${contractId}/paypal`, body),
+
+  executePayPalPayment: (contractId, paymentId, payerId, installmentNo) =>
+    apiClient.post(`/api/rent/contracts/${contractId}/paypal/execute`, null, {
+      params: { paymentId, payerId, ...(installmentNo ? { installmentNo } : {}) },
+    }),
+
+  createCardPayment: (contractId, body) =>
+    apiClient.post(`/api/rent/contracts/${contractId}/card-payment`, body),
+};
+
+
+
+
+export const notificationApi = {
+  getMyNotifications: () => apiClient.get("/api/notifications/my"),
+  markAsRead: (id) => apiClient.put(`/api/notifications/${id}/read`),
+};
+
+export default apiClient;

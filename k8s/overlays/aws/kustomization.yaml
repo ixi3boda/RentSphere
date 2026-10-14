@@ -1,0 +1,108 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Single k3s node on EC2, deployed by Argo CD from the deploy/production branch
+namespace: rentsphere
+resources:
+  - ../../base
+  - external-secret.yaml
+  - https-redirect.yaml
+# CI rewrites these tags on deploy/production when a new image is published
+images:
+  - name: ghcr.io/ixi3boda/rentsphere-backend
+    newTag: sha-b0555b6
+  - name: ghcr.io/ixi3boda/rentsphere-frontend
+    newTag: sha-b0555b6
+configMapGenerator:
+  - name: cluster-config
+    envs:
+      - cluster.env
+    options:
+      disableNameSuffixHash: true
+  - name: backend-config
+    behavior: merge
+    literals:
+      # 2 GB node: one API replica and a smaller connection pool
+      - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=5
+      - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=65 -XX:+UseSerialGC -Xss512k
+      # Public demo with shared logins: reload the curated data daily
+      - RENTSPHERE_DEMO_RESET_ENABLED=true
+      # The host part is filled from cluster.env below
+      - RENTSPHERE_CORS_ALLOWED_ORIGINS=https://HOSTNAME_PLACEHOLDER
+patches:
+  - target:
+      kind: Deployment
+      name: backend
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 1
+  - target:
+      kind: Deployment
+      name: frontend
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 1
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: backend
+    patch: |
+      - op: replace
+        path: /spec/minReplicas
+        value: 1
+      - op: replace
+        path: /spec/maxReplicas
+        value: 2
+  # One replica must be allowed to restart during node maintenance
+  - target:
+      kind: PodDisruptionBudget
+    patch: |
+      - op: replace
+        path: /spec/minAvailable
+        value: 0
+  # HTTPS only, with a Let's Encrypt certificate shared by the three routers
+  - target:
+      kind: Ingress
+      name: auth|api|web
+    patch: |
+      - op: add
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.entrypoints
+        value: websecure
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts: [HOSTNAME_PLACEHOLDER]
+            secretName: rentsphere-tls
+  - target:
+      kind: Ingress
+      name: web
+    patch: |
+      - op: add
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: letsencrypt
+replacements:
+  - source:
+      kind: ConfigMap
+      name: cluster-config
+      fieldPath: data.HOSTNAME
+    targets:
+      - select:
+          kind: Ingress
+        fieldPaths:
+          - spec.rules.0.host
+        options:
+          create: true
+      - select:
+          kind: Ingress
+        reject:
+          - name: https-redirect
+        fieldPaths:
+          - spec.tls.0.hosts.0
+      - select:
+          kind: ConfigMap
+          name: backend-config
+        fieldPaths:
+          - data.RENTSPHERE_CORS_ALLOWED_ORIGINS
+        options:
+          delimiter: "//"
+          index: 1

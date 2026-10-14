@@ -1,0 +1,35 @@
+# The app follows deploy/production, which CI moves to each new image tag after the tests and
+# the image build pass on main. Rolling back is a `git revert` on that branch.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rentsphere
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/ixi3boda/RentSphere.git
+    targetRevision: deploy/production
+    path: k8s/overlays/aws
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: rentsphere
+  # The HorizontalPodAutoscaler owns the replica count
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - RespectIgnoreDifferences=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 15s
+        maxDuration: 3m
