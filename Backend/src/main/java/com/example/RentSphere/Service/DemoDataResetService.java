@@ -1,6 +1,7 @@
 package com.example.RentSphere.Service;
 
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -22,6 +23,9 @@ import javax.sql.DataSource;
  * <p>This <strong>empties every table</strong>, including accounts visitors registered, so it
  * is off unless {@code rentsphere.demo.reset-enabled=true}. Never enable it on a database
  * that holds real data.
+ *
+ * <p>The ShedLock lock {@code demo-data-reset} makes replicas that start together, or share the
+ * daily schedule, reload the data once rather than once per pod.
  */
 @Service
 @Slf4j
@@ -36,6 +40,7 @@ public class DemoDataResetService {
 
     @EventListener(ApplicationReadyEvent.class)
     @Scheduled(cron = "${rentsphere.demo.reset-cron:0 0 3 * * *}")
+    @SchedulerLock(name = "demo-data-reset", lockAtLeastFor = "PT2M", lockAtMostFor = "PT10M")
     public void reset() {
         // One connection for the whole script: it relies on session state (@today, FK checks).
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator(new ClassPathResource("db/seed-demo.sql"));

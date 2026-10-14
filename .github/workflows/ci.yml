@@ -73,11 +73,13 @@ jobs:
 
           start_api first
           $MYSQL -e "SELECT version, description, success FROM flyway_schema_history"
+          applied=$($MYSQL -N -e 'SELECT COUNT(*) FROM flyway_schema_history WHERE success = 1')
+          test "$applied" -eq "$(ls src/main/resources/db/migration/V*.sql | wc -l)"
           $MYSQL < src/main/resources/db/seed-demo.sql
           stop_api
 
           start_api second
-          test "$($MYSQL -N -e 'SELECT COUNT(*) FROM flyway_schema_history')" = "1"
+          test "$($MYSQL -N -e 'SELECT COUNT(*) FROM flyway_schema_history')" = "$applied"
           test "$($MYSQL -N -e 'SELECT COUNT(*) FROM properties')" -gt 0
           stop_api
 
@@ -130,6 +132,25 @@ jobs:
 
       - name: Validate Compose file
         run: docker compose config --quiet
+
+  kubernetes-manifests:
+    name: Validate Kubernetes manifests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install kubeconform
+        run: |
+          curl -fsSL https://github.com/yannh/kubeconform/releases/download/v0.7.0/kubeconform-linux-amd64.tar.gz \
+            | sudo tar -xz -C /usr/local/bin kubeconform
+
+      - name: Render and validate every overlay
+        run: |
+          # Secret generators read gitignored env files; the examples stand in for them here
+          for example in k8s/overlays/*/secrets.env.example; do cp "$example" "${example%.example}"; done
+          make k8s-validate
 
   # Builds each image once. On a push to main it is pushed to GHCR, tagged with the commit
   # (sha-<short sha>) and latest; every later stage deploys that exact image, never a rebuild.

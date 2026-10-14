@@ -1,0 +1,17 @@
+# Same ingress controller k3s ships, so manifests behave the same locally and on AWS
+service:
+  type: NodePort
+ports:
+  web:
+    nodePort: 30080
+  websecure:
+    expose:
+      default: false
+ingressClass:
+  enabled: true
+  isDefaultClass: true
+providers:
+  kubernetesCRD:
+    enabled: true
+  kubernetesIngress:
+    enabled: true

@@ -1,0 +1,110 @@
+# Three routers so each path gets the right Traefik middlewares: strict limits on sign-in,
+# a per-client limit on the API, and browser security headers on the web app.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: auth-ratelimit
+spec:
+  rateLimit:
+    average: 15
+    period: 1m
+    burst: 5
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: api-ratelimit
+spec:
+  rateLimit:
+    average: 10
+    burst: 20
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: security-headers
+spec:
+  headers:
+    frameDeny: true
+    contentTypeNosniff: true
+    referrerPolicy: strict-origin-when-cross-origin
+    permissionsPolicy: camera=(), microphone=(), geolocation=(), payment=()
+    contentSecurityPolicy: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: auth
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: rentsphere-auth-ratelimit@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - http:
+        paths:
+          - path: /api/user/login
+            pathType: Exact
+            backend:
+              service:
+                name: backend
+                port:
+                  name: http
+          - path: /api/user/register
+            pathType: Exact
+            backend:
+              service:
+                name: backend
+                port:
+                  name: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: rentsphere-api-ratelimit@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  name: http
+          - path: /swagger-ui
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  name: http
+          - path: /v3/api-docs
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  name: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: rentsphere-security-headers@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  name: http

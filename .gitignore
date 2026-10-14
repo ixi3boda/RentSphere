@@ -28,3 +28,6 @@ Performance/*.jtl
 Performance/reports/
 !Performance/proof/*.log
 
+
+# Local Kubernetes secrets (see k8s/overlays/local/secrets.env.example)
+k8s/overlays/*/secrets.env

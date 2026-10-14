@@ -4,6 +4,7 @@ import com.example.RentSphere.Dto.Contract;
 import com.example.RentSphere.Dto.PaymentDueInfo;
 import com.example.RentSphere.Repository.ContractRepository;
 import lombok.RequiredArgsConstructor;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,8 @@ import java.util.List;
  * recipient/type/title, so re-running the job manually is safe).
  *
  * <p>For the scheduler to fire, the application context must include
- * {@code @EnableScheduling} - this is declared on {@code RentSphereApplication}.
+ * {@code @EnableScheduling} - this is declared on {@code RentSphereApplication}. With several
+ * replicas, the ShedLock lock {@code contract-events} lets only one of them run each day's job.
  */
 @Service
 @RequiredArgsConstructor
@@ -46,6 +48,7 @@ public class ContractSchedulerService {
      * has a chance to cancel it (the overdue sweep targets past-due dates, not today's).
      */
     @Scheduled(cron = "0 0 9 * * *")
+    @SchedulerLock(name = "contract-events", lockAtLeastFor = "PT5M", lockAtMostFor = "PT30M")
     public void processContractEvents() {
         LocalDate today = LocalDate.now();
 
