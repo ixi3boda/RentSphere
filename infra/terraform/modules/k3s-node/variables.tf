@@ -57,7 +57,7 @@ variable "admin_cidrs" {
 }
 
 variable "secrets_path" {
-  description = "SSM Parameter Store path the node may read, e.g. /rentsphere/production"
+  description = "SSM Parameter Store prefix the node may read, e.g. /rentsphere"
   type        = string
 }
 

@@ -26,6 +26,9 @@ configMapGenerator:
       - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=10
       - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=70
       - PAYPAL_MODE=sandbox
+      # Actuator on its own cluster-internal port, with metrics for Prometheus
+      - MANAGEMENT_SERVER_PORT=8081
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,prometheus
       # Traefik sets X-Real-Ip to the client address; the API is only reachable through it
       - RENTSPHERE_RATELIMIT_CLIENT_IP_HEADERS=X-Real-Ip
       - RENTSPHERE_DEMO_ACCOUNTS=nour.elsayed@nilenest.demo,youssef.farouk@mail.demo,salma.abdelnabi@mail.demo,mariam.elhosseiny@mail.demo

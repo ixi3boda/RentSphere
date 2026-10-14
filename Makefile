@@ -9,8 +9,9 @@ TF_PROD := infra/terraform/environments/production
 
 TRAEFIK_CHART_VERSION        := 41.7.1
 METRICS_SERVER_CHART_VERSION := 3.14.0
+KPS_CHART_VERSION            := 92.7.0
 
-.PHONY: help kind-up kind-secrets kind-images kind-deploy kind kind-down k8s-validate aws-config aws-kubeconfig
+.PHONY: help kind-up kind-secrets kind-images kind-deploy kind kind-down k8s-validate kind-monitoring aws-config aws-kubeconfig
 
 help: ## List the targets
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -41,6 +42,17 @@ kind-deploy: kind-secrets ## Apply the local overlay and wait for the rollout
 	kubectl -n $(NAMESPACE) rollout status deployment/backend --timeout=5m
 	kubectl -n $(NAMESPACE) rollout status deployment/frontend --timeout=2m
 	@echo "RentSphere is up at http://rentsphere.localhost:8088"
+
+kind-monitoring: ## Install Prometheus, Alertmanager and Grafana (http://grafana.localhost:8088)
+	kubectl get namespace monitoring >/dev/null 2>&1 || kubectl create namespace monitoring
+	kubectl -n monitoring get secret grafana-admin >/dev/null 2>&1 || \
+	  kubectl -n monitoring create secret generic grafana-admin \
+	    --from-literal=admin-user=admin --from-literal=admin-password="$$(openssl rand -hex 12)"
+	helm upgrade --install monitoring kube-prometheus-stack --repo https://prometheus-community.github.io/helm-charts \
+	  --version $(KPS_CHART_VERSION) --namespace monitoring \
+	  --values k8s/monitoring/kube-prometheus-stack.values.yaml --wait --timeout 10m
+	@echo "Grafana: http://grafana.localhost:8088  user admin, password:"
+	@kubectl -n monitoring get secret grafana-admin -o jsonpath='{.data.admin-password}' | base64 -d; echo
 
 kind: kind-up kind-images kind-deploy ## Everything: cluster, images, app
 
