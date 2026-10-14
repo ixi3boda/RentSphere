@@ -1,16 +1,5 @@
-SET FOREIGN_KEY_CHECKS = 0;
-
-DROP TABLE IF EXISTS notifications;
-DROP TABLE IF EXISTS payments;
-DROP TABLE IF EXISTS contracts;
-DROP TABLE IF EXISTS rental_requests;
-DROP TABLE IF EXISTS favorites;
-DROP TABLE IF EXISTS property_images;
-DROP TABLE IF EXISTS properties;
-DROP TABLE IF EXISTS user_roles;
-DROP TABLE IF EXISTS users;
-
-SET FOREIGN_KEY_CHECKS = 1;
+-- Baseline: the schema as it stood when migrations were introduced. Never edit an applied
+-- migration; change the schema with a new V<n>__description.sql file instead.
 
 -- users
 CREATE TABLE users (
