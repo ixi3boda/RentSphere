@@ -6,7 +6,7 @@ metadata:
   name: root
   namespace: argocd
 spec:
-  project: default
+  project: rentsphere
   source:
     repoURL: https://github.com/ixi3boda/RentSphere.git
     targetRevision: main

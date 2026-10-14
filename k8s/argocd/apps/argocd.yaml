@@ -7,7 +7,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-2"
 spec:
-  project: default
+  project: rentsphere
   source:
     repoURL: https://github.com/ixi3boda/RentSphere.git
     targetRevision: main

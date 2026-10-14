@@ -1,12 +1,16 @@
 # ---- Cluster bootstrap: install Argo CD, then hand everything else to git ----
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
-apt-get install -y --no-install-recommends git
+retry() { for i in 1 2 3 4 5; do "$@" && return 0; sleep $((i * 10)); done; return 1; }
 
-kubectl apply --server-side -k "https://github.com/${repository}//k8s/argocd/install?ref=main"
+apt-get install -y --no-install-recommends git
+retry git clone --depth 1 "https://github.com/${repository}.git" /opt/rentsphere
+
+retry kubectl apply --server-side -k /opt/rentsphere/k8s/argocd/install
 kubectl -n argocd rollout status deployment/argocd-repo-server --timeout=10m
 kubectl -n argocd rollout status statefulset/argocd-application-controller --timeout=10m
 
 # The app of apps; Argo CD syncs cert-manager, External Secrets, the platform config and
 # RentSphere from here on
-kubectl apply -f "https://raw.githubusercontent.com/${repository}/main/k8s/argocd/root.yaml"
+kubectl apply -f /opt/rentsphere/k8s/argocd/root.yaml
+rm -rf /opt/rentsphere
