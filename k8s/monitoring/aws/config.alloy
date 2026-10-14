@@ -1,0 +1,95 @@
+// Grafana Alloy on the AWS node: scrapes the API and the container metrics, and sends them to
+// Grafana Cloud's free tier, so the 2 GB node does not have to run Prometheus and Grafana.
+
+// ---- API metrics (Actuator on the management port) ----
+discovery.kubernetes "pods" {
+  role = "pod"
+  namespaces {
+    names = ["rentsphere"]
+  }
+}
+
+discovery.relabel "backend" {
+  targets = discovery.kubernetes.pods.targets
+
+  rule {
+    source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name", "__meta_kubernetes_pod_container_port_name"]
+    regex         = "backend;management"
+    action        = "keep"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_namespace"]
+    target_label  = "namespace"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_name"]
+    target_label  = "pod"
+  }
+  // Same labels the ServiceMonitor produces locally, so the dashboard and alerts work as-is
+  rule {
+    replacement  = "backend"
+    target_label = "service"
+  }
+}
+
+prometheus.scrape "backend" {
+  targets         = discovery.relabel.backend.output
+  metrics_path    = "/actuator/prometheus"
+  scrape_interval = "30s"
+  forward_to      = [prometheus.remote_write.grafana_cloud.receiver]
+}
+
+// ---- Container CPU and memory from the kubelet (cAdvisor) ----
+discovery.kubernetes "nodes" {
+  role = "node"
+}
+
+discovery.relabel "cadvisor" {
+  targets = discovery.kubernetes.nodes.targets
+
+  rule {
+    replacement  = "/metrics/cadvisor"
+    target_label = "__metrics_path__"
+  }
+}
+
+prometheus.scrape "cadvisor" {
+  targets           = discovery.relabel.cadvisor.output
+  scheme            = "https"
+  bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+  scrape_interval   = "60s"
+  tls_config {
+    insecure_skip_verify = true
+  }
+  forward_to = [prometheus.relabel.cadvisor.receiver]
+}
+
+// Keep only what the dashboard uses; cAdvisor exposes thousands of series
+prometheus.relabel "cadvisor" {
+  rule {
+    source_labels = ["__name__"]
+    regex         = "container_cpu_usage_seconds_total|container_memory_working_set_bytes"
+    action        = "keep"
+  }
+  rule {
+    source_labels = ["namespace"]
+    regex         = "rentsphere"
+    action        = "keep"
+  }
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+}
+
+prometheus.remote_write "grafana_cloud" {
+  endpoint {
+    url = sys.env("GRAFANA_CLOUD_PROMETHEUS_URL")
+
+    basic_auth {
+      username = sys.env("GRAFANA_CLOUD_PROMETHEUS_USER")
+      password = sys.env("GRAFANA_CLOUD_API_TOKEN")
+    }
+  }
+
+  external_labels = {
+    cluster = "rentsphere-aws",
+  }
+}

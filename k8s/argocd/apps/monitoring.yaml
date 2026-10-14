@@ -1,0 +1,47 @@
+# Grafana Alloy plus its config and credentials. Needs the grafana_cloud_* Terraform variables;
+# without them the Alloy pod waits for its secret and the rest of the cluster is unaffected.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: rentsphere
+  sources:
+    - repoURL: https://github.com/ixi3boda/RentSphere.git
+      targetRevision: main
+      path: k8s/monitoring/aws
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: alloy
+      targetRevision: 1.13.1
+      helm:
+        valuesObject:
+          controller:
+            type: daemonset
+          alloy:
+            configMap:
+              create: false
+              name: alloy-config
+              key: config.alloy
+            envFrom:
+              - secretRef:
+                  name: grafana-cloud
+            resources:
+              requests: { cpu: 20m, memory: 96Mi }
+              limits: { memory: 256Mi }
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 15s
+        maxDuration: 3m

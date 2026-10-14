@@ -2,6 +2,7 @@ package com.example.RentSphere.SecurityConfig;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -40,6 +41,10 @@ public class SecConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService myUserDetailsService;
 
+    /** Actuator's own port when it is split from the API (-1 when it is not). */
+    @Value("${management.server.port:-1}")
+    private int managementPort;
+
     /**
      * Defines the security filter chain applied to every HTTP request.
      *
@@ -76,6 +81,10 @@ public class SecConfig {
                         // Only the health probe is public; any other actuator endpoint a profile
                         // exposes stays behind the owner role.
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                        // The separate management port (Kubernetes only) is cluster-internal and
+                        // scraped by Prometheus, which has no token
+                        .requestMatchers(request -> managementPort > 0
+                                && request.getLocalPort() == managementPort).permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())

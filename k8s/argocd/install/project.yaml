@@ -11,6 +11,7 @@ spec:
     - https://github.com/ixi3boda/RentSphere.git
     - https://charts.jetstack.io
     - https://charts.external-secrets.io
+    - https://grafana.github.io/helm-charts
   destinations:
     - server: https://kubernetes.default.svc
       namespace: argocd
@@ -23,6 +24,8 @@ spec:
       namespace: external-secrets
     - server: https://kubernetes.default.svc
       namespace: rentsphere
+    - server: https://kubernetes.default.svc
+      namespace: monitoring
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"

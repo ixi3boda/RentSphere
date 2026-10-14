@@ -66,3 +66,43 @@ variable "enable_rds" {
   type        = bool
   default     = false
 }
+
+variable "grafana_cloud_api_token" {
+  description = "Grafana Cloud access policy token with metrics, logs and traces write scopes"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "grafana_cloud_prometheus_url" {
+  description = "e.g. https://prometheus-prod-01-eu-west-0.grafana.net/api/prom/push. Empty skips Grafana Cloud"
+  type        = string
+  default     = ""
+}
+
+variable "grafana_cloud_prometheus_user" {
+  type    = string
+  default = ""
+}
+
+variable "grafana_cloud_loki_url" {
+  description = "e.g. https://logs-prod-eu-west-0.grafana.net/loki/api/v1/push"
+  type        = string
+  default     = ""
+}
+
+variable "grafana_cloud_loki_user" {
+  type    = string
+  default = ""
+}
+
+variable "grafana_cloud_otlp_url" {
+  description = "e.g. https://otlp-gateway-prod-eu-west-0.grafana.net/otlp"
+  type        = string
+  default     = ""
+}
+
+variable "grafana_cloud_otlp_user" {
+  type    = string
+  default = ""
+}

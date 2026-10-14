@@ -1,0 +1,42 @@
+# Local monitoring stack for kind: Prometheus, Alertmanager, Grafana, kube-state-metrics and
+# node-exporter, sized for a laptop
+prometheus:
+  prometheusSpec:
+    retention: 3d
+    # Pick up ServiceMonitors and rules from every namespace, not only the chart's own
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    resources:
+      requests: { cpu: 100m, memory: 400Mi }
+
+alertmanager:
+  alertmanagerSpec:
+    resources:
+      requests: { cpu: 10m, memory: 32Mi }
+
+grafana:
+  admin:
+    existingSecret: grafana-admin
+    userKey: admin-user
+    passwordKey: admin-password
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts: [grafana.localhost]
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      searchNamespace: ALL
+  defaultDashboardsTimezone: browser
+
+# kind does not expose these control-plane components to scraping
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeProxy:
+  enabled: false

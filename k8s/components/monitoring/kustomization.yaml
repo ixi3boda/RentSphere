@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+# For clusters running the Prometheus Operator (kube-prometheus-stack): scrape config, alert
+# rules and the Grafana dashboard, all kept next to the app they describe
+resources:
+  - service-monitor.yaml
+  - prometheus-rules.yaml
+
+configMapGenerator:
+  - name: rentsphere-api-dashboard
+    files:
+      - rentsphere-api-dashboard.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        # Grafana's sidecar loads every ConfigMap with this label as a dashboard
+        grafana_dashboard: "1"

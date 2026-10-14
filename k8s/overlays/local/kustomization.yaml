@@ -8,6 +8,10 @@ namespace: rentsphere
 resources:
   - ../../base
 
+# Scrape config, alerts and dashboard for the local kube-prometheus-stack (make kind-monitoring)
+components:
+  - ../../components/monitoring
+
 images:
   - name: ghcr.io/ixi3boda/rentsphere-backend
     newName: rentsphere-backend

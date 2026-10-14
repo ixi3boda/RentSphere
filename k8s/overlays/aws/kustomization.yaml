@@ -9,9 +9,9 @@ resources:
 # CI rewrites these tags on deploy/production when a new image is published
 images:
   - name: ghcr.io/ixi3boda/rentsphere-backend
-    newTag: sha-4d72ca9
+    newTag: sha-a67b091
   - name: ghcr.io/ixi3boda/rentsphere-frontend
-    newTag: sha-4d72ca9
+    newTag: sha-a67b091
 configMapGenerator:
   - name: cluster-config
     envs:

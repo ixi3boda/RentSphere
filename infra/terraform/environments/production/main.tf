@@ -1,7 +1,8 @@
 data "aws_caller_identity" "current" {}
 
 locals {
-  secrets_path = "/${var.name}/production"
+  secrets_path    = "/${var.name}/production"
+  monitoring_path = "/${var.name}/monitoring"
   # sslip.io resolves 1-2-3-4.sslip.io to 1.2.3.4, which gives Let's Encrypt a hostname
   # without buying a domain
   hostname = coalesce(var.hostname, "${replace(module.node.public_ip, ".", "-")}.sslip.io")
@@ -23,7 +24,7 @@ module "node" {
   instance_type     = var.instance_type
   k3s_version       = var.k3s_version
   admin_cidrs       = var.admin_cidrs
-  secrets_path      = local.secrets_path
+  secrets_path      = "/${var.name}"
   backup_bucket_arn = aws_s3_bucket.backups.arn
 
   bootstrap_script = templatefile("${path.module}/bootstrap-cluster.sh.tftpl", {
@@ -137,5 +138,38 @@ resource "aws_ssm_parameter" "paypal_client_secret" {
   name             = "${local.secrets_path}/PAYPAL_CLIENT_SECRET"
   type             = "SecureString"
   value_wo         = var.paypal_client_secret
+  value_wo_version = var.secrets_version
+}
+
+# ---- Grafana Cloud (optional) ----
+# Alloy in the cluster ships metrics, logs and traces here. Leave the variables empty to skip it.
+
+locals {
+  # Keyed off a non-secret value: Terraform cannot branch on a sensitive one
+  grafana_cloud_enabled = var.grafana_cloud_prometheus_url != ""
+  grafana_cloud = local.grafana_cloud_enabled ? {
+    GRAFANA_CLOUD_PROMETHEUS_URL  = var.grafana_cloud_prometheus_url
+    GRAFANA_CLOUD_PROMETHEUS_USER = var.grafana_cloud_prometheus_user
+    GRAFANA_CLOUD_LOKI_URL        = var.grafana_cloud_loki_url
+    GRAFANA_CLOUD_LOKI_USER       = var.grafana_cloud_loki_user
+    GRAFANA_CLOUD_OTLP_URL        = var.grafana_cloud_otlp_url
+    GRAFANA_CLOUD_OTLP_USER       = var.grafana_cloud_otlp_user
+  } : {}
+}
+
+resource "aws_ssm_parameter" "grafana_cloud" {
+  for_each = local.grafana_cloud
+
+  name  = "${local.monitoring_path}/${each.key}"
+  type  = "String"
+  value = each.value
+}
+
+resource "aws_ssm_parameter" "grafana_cloud_token" {
+  count = local.grafana_cloud_enabled ? 1 : 0
+
+  name             = "${local.monitoring_path}/GRAFANA_CLOUD_API_TOKEN"
+  type             = "SecureString"
+  value_wo         = var.grafana_cloud_api_token
   value_wo_version = var.secrets_version
 }
