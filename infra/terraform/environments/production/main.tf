@@ -25,6 +25,10 @@ module "node" {
   admin_cidrs       = var.admin_cidrs
   secrets_path      = local.secrets_path
   backup_bucket_arn = aws_s3_bucket.backups.arn
+
+  bootstrap_script = templatefile("${path.module}/bootstrap-cluster.sh.tftpl", {
+    repository = var.github_repository
+  })
 }
 
 # ---- Database backups ----

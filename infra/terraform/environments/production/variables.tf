@@ -8,6 +8,12 @@ variable "region" {
   default = "us-east-1"
 }
 
+variable "github_repository" {
+  description = "Repository Argo CD deploys from"
+  type        = string
+  default     = "ixi3boda/RentSphere"
+}
+
 variable "instance_type" {
   type    = string
   default = "t3.small"

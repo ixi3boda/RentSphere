@@ -204,46 +204,42 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image }}
 
-  deploy-to-ec2:
-    name: Continuous Deployment to AWS EC2
-    needs: [compose-config, docker-images]
-    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && github.event_name == 'push'
+  # GitOps release: deploy/production mirrors main with the new image tags written into the
+  # AWS overlay. Argo CD in the cluster watches that branch and rolls the change out.
+  release-production:
+    name: Release to production (GitOps)
+    needs: [docker-images, kubernetes-manifests, compose-config]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: release-production
+      cancel-in-progress: false
 
     steps:
-      - name: Deploy to AWS EC2 via SSH
-        env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-          EC2_USER: ${{ secrets.EC2_USER }}
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Write the new image tags to deploy/production
         run: |
-          if [ -z "$EC2_HOST" ] || [ -z "$EC2_SSH_KEY" ]; then
-            echo "::notice ::AWS EC2 secrets (EC2_HOST, EC2_SSH_KEY) not configured in GitHub Secrets. Skipping automated deploy step."
-            exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git ls-remote --exit-code --heads origin deploy/production >/dev/null; then
+            git switch -c deploy/production origin/deploy/production
+          else
+            git switch --orphan deploy/production
           fi
+          # The branch gets main's exact tree, then only the image tags change
+          git read-tree -u --reset "$GITHUB_SHA"
 
-          SSH_USER="${EC2_USER:-ubuntu}"
-          mkdir -p ~/.ssh
-          echo "$EC2_SSH_KEY" > ~/.ssh/ec2_key.pem
-          chmod 600 ~/.ssh/ec2_key.pem
-          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
-
-          ssh -i ~/.ssh/ec2_key.pem -o StrictHostKeyChecking=no "${SSH_USER}@${EC2_HOST}" << 'EOF'
-            set -e
-            PROJECT_DIR="$HOME/RentSphere"
-            if [ ! -d "$PROJECT_DIR" ]; then
-              git clone https://github.com/ixi3boda/RentSphere.git "$PROJECT_DIR"
-              cd "$PROJECT_DIR"
-              chmod +x deploy/setup-ec2.sh
-              ./deploy/setup-ec2.sh
-            else
-              cd "$PROJECT_DIR"
-              git fetch origin main
-              git reset --hard origin/main
-              docker compose build --parallel
-              docker compose up -d --remove-orphans
-              docker system prune -f
-            fi
-            sleep 5
-            curl -fsSL http://localhost/actuator/health || true
-          EOF
+          export TAG="sha-${GITHUB_SHA::7}"
+          yq -i '(.images[] | select(.name == "ghcr.io/ixi3boda/rentsphere-*")).newTag = strenv(TAG)' \
+            k8s/overlays/aws/kustomization.yaml
+          git add -A
+          git commit -m "Release $TAG" -m "Built from ${GITHUB_SHA}"
+          git push origin deploy/production
+          echo "Released \`$TAG\` to deploy/production" >> "$GITHUB_STEP_SUMMARY"
