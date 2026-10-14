@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# First-boot setup, run once by cloud-init: swap, k3s, then the cluster bootstrap.
+set -euxo pipefail
+exec > >(tee /var/log/rentsphere-bootstrap.log) 2>&1
+
+# Swap gives the JVM and MySQL headroom on a small instance
+if [ ! -f /swapfile ] && [ "${swap_gb}" -gt 0 ]; then
+  fallocate -l ${swap_gb}G /swapfile
+  chmod 600 /swapfile
+  mkswap /swapfile
+  swapon /swapfile
+  echo '/swapfile none swap sw 0 0' >> /etc/fstab
+  sysctl -w vm.swappiness=10
+  echo 'vm.swappiness=10' > /etc/sysctl.d/99-swappiness.conf
+fi
+
+apt-get update -y
+apt-get install -y --no-install-recommends curl unzip jq
+
+# k3s ships Traefik, CoreDNS, a local-path storage class and the metrics server
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${k3s_version}" sh -s - server \
+  --write-kubeconfig-mode 0600 \
+  --tls-san "${public_ip}" \
+  --secrets-encryption
+
+until /usr/local/bin/kubectl get nodes >/dev/null 2>&1; do sleep 5; done
+/usr/local/bin/kubectl wait --for=condition=Ready node --all --timeout=5m
+
+${bootstrap}
