@@ -7,3 +7,9 @@ AWS-0104
 # S3 buckets use SSE-S3 (AES-256) instead of a customer-managed KMS key, which costs $1/month
 # per key; the buckets are private, versioned and block all public access
 AWS-0132
+
+# spring-webmvc 6.2.x: fixed only in Spring Framework 7.0.9, which needs the Spring Boot 4
+# migration; no 6.2 release has the fix. The expiry makes the build fail again on that date so
+# the exception is revisited rather than forgotten.
+CVE-2026-47884 exp:2027-01-31
+CVE-2026-47890 exp:2027-01-31

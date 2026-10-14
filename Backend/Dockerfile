@@ -15,6 +15,9 @@ RUN mvn -B clean package -DskipTests \
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
+# Pick up Ubuntu security fixes released since the base image was published
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && rm -rf /var/lib/apt/lists/*
+
 # Run as an unprivileged user; Kubernetes can then enforce runAsNonRoot
 RUN groupadd --system --gid 10001 app \
  && useradd --system --uid 10001 --gid app --no-create-home --shell /usr/sbin/nologin app
