@@ -29,7 +29,7 @@ OpenTelemetry · Trivy · CodeQL · cosign
 ## Architecture
 
 ```mermaid
-flowchart LR
+flowchart TB
     dev([git push to main]) --> ci
 
     subgraph ci [GitHub Actions]
