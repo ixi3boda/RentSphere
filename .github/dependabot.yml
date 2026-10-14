@@ -1,0 +1,41 @@
+# Weekly, grouped dependency updates so the queue stays reviewable
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /Backend
+    schedule:
+      interval: weekly
+    groups:
+      spring:
+        patterns: ["org.springframework*", "io.micrometer*", "io.opentelemetry*"]
+      other:
+        patterns: ["*"]
+        exclude-patterns: ["org.springframework*", "io.micrometer*", "io.opentelemetry*"]
+
+  - package-ecosystem: npm
+    directory: /Frontend
+    schedule:
+      interval: weekly
+    groups:
+      production:
+        dependency-type: production
+      development:
+        dependency-type: development
+
+  - package-ecosystem: docker
+    directories: ["/Backend", "/Frontend"]
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: terraform
+    directories: ["/infra/terraform/bootstrap", "/infra/terraform/environments/production"]
+    schedule:
+      interval: weekly

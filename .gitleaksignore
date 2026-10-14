@@ -1,0 +1,11 @@
+# Findings in commits from before secrets moved to environment variables (April-May 2026).
+# They are kept out of CI failures here, but any of those values still in use must be rotated.
+0ea1dcb5b89bf94d5a7caf270286c1387c199bf7:Backend/src/test/resources/application-test.properties:generic-api-key:22
+b75c8fc27578495f800bd68251464dfd2f7f908e:Backend/src/main/resources/application.properties:generic-api-key:13
+b75c8fc27578495f800bd68251464dfd2f7f908e:Backend/src/main/resources/application.properties:generic-api-key:6
+ed38485ddba57488cb05304f7760bb6fc2915c82:Backend/src/test/resources/application-test.properties:generic-api-key:23
+f7b383c0c12920abca9c2f284f3fe309450f4f00:src/main/java/com/example/RentSphere/SecurityConfig/JwtService.java:generic-api-key:16
+f7b383c0c12920abca9c2f284f3fe309450f4f00:src/main/resources/application.properties:generic-api-key:12
+f7b383c0c12920abca9c2f284f3fe309450f4f00:src/main/resources/application.properties:generic-api-key:5
+f7b383c0c12920abca9c2f284f3fe309450f4f00:target/classes/application.properties:generic-api-key:12
+f7b383c0c12920abca9c2f284f3fe309450f4f00:target/classes/application.properties:generic-api-key:5

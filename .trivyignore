@@ -1,0 +1,9 @@
+# Accepted findings from `trivy config`, each a deliberate trade-off for a $0 deployment.
+
+# The k3s node pulls images, OS updates and Helm charts and calls AWS APIs and PayPal; there is
+# no NAT gateway or egress proxy to narrow it to (that would be ~$32/month)
+AWS-0104
+
+# S3 buckets use SSE-S3 (AES-256) instead of a customer-managed KMS key, which costs $1/month
+# per key; the buckets are private, versioned and block all public access
+AWS-0132
