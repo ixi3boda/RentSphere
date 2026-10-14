@@ -15,7 +15,7 @@ TEMPO_CHART_VERSION          := 1.24.4
 ALLOY_CHART_VERSION          := 1.13.1
 GRAFANA_CHARTS               := https://grafana.github.io/helm-charts
 
-.PHONY: help kind-up kind-secrets kind-images kind-deploy kind kind-down k8s-validate kind-monitoring kind-observability aws-config aws-kubeconfig db-backup db-backups db-restore
+.PHONY: help kind-up kind-secrets kind-images kind-deploy kind kind-down k8s-validate kind-monitoring kind-observability aws-config aws-kubeconfig
 
 help: ## List the targets
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -102,21 +102,3 @@ aws-kubeconfig: ## Tunnel the Kubernetes API through SSM to localhost:6443 and w
 	echo "export KUBECONFIG=$$HOME/.kube/rentsphere-aws  (keep this tunnel open)"; \
 	aws ssm start-session --target $$id --document-name AWS-StartPortForwardingSession \
 	  --parameters '{"portNumber":["6443"],"localPortNumber":["6443"]}'
-
-# ---- Database backups (run against the current kube context, e.g. after make aws-kubeconfig) ----
-
-db-backup: ## Take a backup now, from the nightly CronJob's template
-	@job=mysql-backup-manual-$$(date +%s); \
-	kubectl -n $(NAMESPACE) create job --from=cronjob/mysql-backup $$job; \
-	kubectl -n $(NAMESPACE) wait --for=condition=complete job/$$job --timeout=15m; \
-	kubectl -n $(NAMESPACE) logs job/$$job -c upload
-
-db-backups: ## List the backups in S3
-	@kubectl -n $(NAMESPACE) run backup-list-$$(date +%s) --rm -i --restart=Never --quiet \
-	  --image=amazon/aws-cli:2.38.1 --env=HOME=/tmp --overrides='{"spec":{"automountServiceAccountToken":false,"securityContext":{"runAsNonRoot":true,"runAsUser":65534,"seccompProfile":{"type":"RuntimeDefault"}},"containers":[{"name":"list","image":"amazon/aws-cli:2.38.1","args":["s3","ls","s3://'"$$(kubectl -n $(NAMESPACE) get configmap cluster-config -o jsonpath='{.data.BACKUP_BUCKET}')"'/mysql/"],"env":[{"name":"HOME","value":"/tmp"}],"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]}}}]}}'
-
-db-restore: ## Restore BACKUP=<file name> (default: the newest backup) into MySQL
-	@job=$$(sed 's|$${BACKUP_KEY}|$(BACKUP)|' k8s/jobs/mysql-restore.yaml | kubectl create -f - -o name); \
-	echo "$$job"; \
-	kubectl -n $(NAMESPACE) wait --for=condition=complete $$job --timeout=15m; \
-	kubectl -n $(NAMESPACE) logs $$job -c download; kubectl -n $(NAMESPACE) logs $$job -c restore
