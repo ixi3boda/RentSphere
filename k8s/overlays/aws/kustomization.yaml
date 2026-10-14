@@ -9,6 +9,10 @@ resources:
   - external-secret.yaml
   - https-redirect.yaml
 
+# Nightly mysqldump to the S3 bucket Terraform created
+components:
+  - ../../components/backup
+
 # CI rewrites these tags on deploy/production when a new image is published
 images:
   - name: ghcr.io/ixi3boda/rentsphere-backend
