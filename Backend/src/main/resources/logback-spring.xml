@@ -25,7 +25,7 @@
                   (e.g., scheduled tasks that run outside an HTTP request).
                 -->
                 <pattern>
-                    %d{yyyy-MM-dd HH:mm:ss.SSS} [%X{correlationId:--}] %highlight(%-5level) %cyan(%logger{40}) - %msg%n
+                    %d{yyyy-MM-dd HH:mm:ss.SSS} [%X{correlationId:--}] [%X{traceId:--}] %highlight(%-5level) %cyan(%logger{40}) - %msg%n
                 </pattern>
             </encoder>
         </appender>
@@ -62,6 +62,9 @@
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                 <!-- Include every MDC entry as a top-level JSON field -->
                 <includeMdcKeyName>correlationId</includeMdcKeyName>
+                <!-- Set by Micrometer Tracing; Grafana links a log line to its trace by traceId -->
+                <includeMdcKeyName>traceId</includeMdcKeyName>
+                <includeMdcKeyName>spanId</includeMdcKeyName>
             </encoder>
         </appender>
 

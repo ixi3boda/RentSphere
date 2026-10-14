@@ -1,0 +1,93 @@
+// Grafana Alloy on kind: pod logs to Loki and OpenTelemetry traces to Tempo. Metrics are
+// scraped by the kube-prometheus-stack Prometheus through the ServiceMonitor.
+
+// ---- Logs ----
+discovery.kubernetes "pods" {
+  role = "pod"
+  namespaces {
+    names = ["rentsphere"]
+  }
+}
+
+discovery.relabel "pod_logs" {
+  targets = discovery.kubernetes.pods.targets
+
+  rule {
+    source_labels = ["__meta_kubernetes_namespace"]
+    target_label  = "namespace"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_name"]
+    target_label  = "pod"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_container_name"]
+    target_label  = "container"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+    target_label  = "app"
+  }
+}
+
+// Reads logs through the Kubernetes API, so no host paths are mounted
+loki.source.kubernetes "pods" {
+  targets    = discovery.relabel.pod_logs.output
+  forward_to = [loki.process.json.receiver]
+}
+
+// The API logs one JSON object per line: promote the level to a label and keep the trace ID
+// as structured metadata, so a log line links to its trace without exploding label cardinality
+loki.process "json" {
+  stage.json {
+    expressions = {
+      level   = "level",
+      traceId = "traceId",
+    }
+  }
+  stage.labels {
+    values = {
+      level = "",
+    }
+  }
+  stage.structured_metadata {
+    values = {
+      traceId = "",
+    }
+  }
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
+  }
+}
+
+// ---- Traces ----
+otelcol.receiver.otlp "default" {
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
+  output {
+    traces = [otelcol.processor.batch.default.input]
+  }
+}
+
+otelcol.processor.batch "default" {
+  output {
+    traces = [otelcol.exporter.otlp.tempo.input]
+  }
+}
+
+otelcol.exporter.otlp "tempo" {
+  client {
+    endpoint = "tempo.monitoring.svc.cluster.local:4317"
+    tls {
+      insecure = true
+    }
+  }
+}

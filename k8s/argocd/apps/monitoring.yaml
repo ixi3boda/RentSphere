@@ -1,5 +1,6 @@
-# Grafana Alloy plus its config and credentials. Needs the grafana_cloud_* Terraform variables;
-# without them the Alloy pod waits for its secret and the rest of the cluster is unaffected.
+# Grafana Alloy (metrics, logs and traces to Grafana Cloud) plus its config and credentials.
+# Needs the grafana_cloud_* Terraform variables; without them the Alloy pod waits for its
+# secret and the rest of the cluster is unaffected.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -10,27 +11,22 @@ metadata:
 spec:
   project: rentsphere
   sources:
+    # Alloy's config and credentials, plus the shared chart values (referenced as $values)
     - repoURL: https://github.com/ixi3boda/RentSphere.git
       targetRevision: main
       path: k8s/monitoring/aws
+      ref: values
     - repoURL: https://grafana.github.io/helm-charts
       chart: alloy
       targetRevision: 1.13.1
       helm:
+        valueFiles:
+          - $values/k8s/monitoring/alloy.values.yaml
         valuesObject:
-          controller:
-            type: daemonset
           alloy:
-            configMap:
-              create: false
-              name: alloy-config
-              key: config.alloy
             envFrom:
               - secretRef:
                   name: grafana-cloud
-            resources:
-              requests: { cpu: 20m, memory: 96Mi }
-              limits: { memory: 256Mi }
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
