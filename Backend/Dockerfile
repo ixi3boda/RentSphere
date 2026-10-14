@@ -12,7 +12,7 @@ RUN mvn -B clean package -DskipTests \
  && java -Djarmode=tools -jar app.jar extract --layers --launcher --destination extracted
 
 # ---- Runtime stage: JRE only, no Maven, no source code ----
-FROM eclipse-temurin:17-jre-jammy
+FROM eclipse-temurin:25-jre-jammy
 WORKDIR /app
 
 # Pick up Ubuntu security fixes released since the base image was published
