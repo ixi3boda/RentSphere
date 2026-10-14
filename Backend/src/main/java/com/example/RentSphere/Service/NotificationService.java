@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
  * controllers or the scheduler) and are read or acknowledged by the recipient through
  * the REST API. The underlying storage is a plain {@code notifications} table with a
  * CHECK constraint that limits {@code notification_type} to a fixed enum defined in
- * {@code Database/Schema.sql}. Any call to
+ * {@code db/migration/V1__baseline.sql}. Any call to
  * {@link #createNotification(int, String, String, String)} with an unknown type will
  * cause a {@code DataIntegrityViolationException} at the JDBC layer, which bubbles up
  * through {@code GlobalExceptionHandler} as a 400 - this is intentional, as an unknown

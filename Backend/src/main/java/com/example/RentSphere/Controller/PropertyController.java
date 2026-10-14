@@ -43,7 +43,7 @@ import java.util.Map;
  * <p>The browse/filter endpoint ({@code GET /filter}) caps the page size at
  * {@value #MAX_PAGE_SIZE} to prevent unbounded responses on large datasets.
  * Search is handled via MySQL {@code MATCH...AGAINST} on the {@code idx_properties_fulltext}
- * index (defined in {@code Database/Schema.sql}) when the term is two or more characters.
+ * index (defined in {@code db/migration/V1__baseline.sql}) when the term is two or more characters.
  */
 @RestController
 @RequestMapping("/api/properties")

@@ -38,15 +38,48 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Initialize Database Schema
-        run: |
-          mysql -h 127.0.0.1 -P 3306 -u rentsphere -pci_test_password RentSphereSchema < Database/Schema.sql
-
       - name: Run Backend Unit & Integration Tests
         run: |
           cd Backend
           chmod +x mvnw
           ./mvnw clean test
+
+      # Unit tests run on H2, so this boots the real jar against MySQL 8: Flyway must create the
+      # schema from scratch, the demo seed must load into it, and a restart must apply nothing.
+      - name: Apply Flyway migrations to MySQL
+        env:
+          SPRING_PROFILES_ACTIVE: prod
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/RentSphereSchema?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+          SPRING_DATASOURCE_USERNAME: rentsphere
+          SPRING_DATASOURCE_PASSWORD: ci_test_password
+          JWT_SECRET: ci-only-jwt-secret-not-a-real-credential-0123456789
+          PAYPAL_CLIENT_ID: ci-placeholder
+          PAYPAL_CLIENT_SECRET: ci-placeholder
+        run: |
+          cd Backend
+          ./mvnw -B -q -DskipTests -Djacoco.skip=true package
+          MYSQL="mysql -h 127.0.0.1 -P 3306 -u rentsphere -pci_test_password RentSphereSchema"
+
+          start_api() {
+            java -jar target/*.jar > "api-$1.log" 2>&1 &
+            echo $! > api.pid
+            for i in $(seq 1 60); do
+              curl -fsS http://127.0.0.1:8080/actuator/health && return 0
+              sleep 2
+            done
+            cat "api-$1.log"; return 1
+          }
+          stop_api() { kill "$(cat api.pid)"; wait "$(cat api.pid)" 2>/dev/null || true; }
+
+          start_api first
+          $MYSQL -e "SELECT version, description, success FROM flyway_schema_history"
+          $MYSQL < src/main/resources/db/seed-demo.sql
+          stop_api
+
+          start_api second
+          test "$($MYSQL -N -e 'SELECT COUNT(*) FROM flyway_schema_history')" = "1"
+          test "$($MYSQL -N -e 'SELECT COUNT(*) FROM properties')" -gt 0
+          stop_api
 
       - name: Upload JaCoCo Coverage Report
         uses: actions/upload-artifact@v4

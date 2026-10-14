@@ -58,7 +58,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ContractService {
 
-    // chk_noti_type in Database/Schema.sql rejects anything outside its enum, and the check runs
+    // chk_noti_type in V1__baseline.sql rejects anything outside its enum, and the check runs
     // inside the payment transaction - an unknown type rolls the paid installment back.
     private static final String PAYMENT_NOTIFICATION_TYPE = "PAYMENT_RECEIVED";
 

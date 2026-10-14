@@ -83,6 +83,16 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Versioned schema migrations (db/migration), applied at startup -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-mysql</artifactId>
+		</dependency>
+
 		<!-- MySQL Connector -->
 		<dependency>
 			<groupId>mysql</groupId>

@@ -1,5 +1,5 @@
-// Mirrors the property_type CHECK constraint in Database/Schema.sql, so a type the database can
-// store always has a label here.
+// Mirrors the property_type CHECK constraint in the V1__baseline.sql migration, so a type the
+// database can store always has a label here.
 export const PROPERTY_TYPE_OPTIONS = [
   { value: 'apartment', label: 'Apartment' },
   { value: 'studio',    label: 'Studio' },

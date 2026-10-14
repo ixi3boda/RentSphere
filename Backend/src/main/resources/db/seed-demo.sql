@@ -1,7 +1,6 @@
 -- RentSphere demo dataset (small, realistic, hand-planned).
 --
--- Load Schema.sql first, then this file:
---   docker compose exec -T mysql mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" RentSphereSchema < Database/Schema.sql
+-- The API creates the schema with Flyway on startup (db/migration); then load this file:
 --   docker compose exec -T mysql mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" RentSphereSchema < Backend/src/main/resources/db/seed-demo.sql
 --
 -- What it contains: 1 listing owner (ADMIN) and 3 tenants, 9 listings across Cairo,
