@@ -1,0 +1,18 @@
+# gitleaks: default rules, plus allowances for values that are public on purpose
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Published demo logins and test-only placeholders"
+paths = [
+  '''(^|/)\.env\.example$''',
+  '''\.tfvars\.example$''',
+  '''secrets\.env\.example$''',
+]
+regexes = [
+  # Shared demo password shown in the README for the live demo
+  '''RentSphereDemo2026''',
+  # Test and CI placeholders
+  '''test-only-jwt-secret-key-not-a-real-credential''',
+  '''ci-only-jwt-secret-not-a-real-credential''',
+]
