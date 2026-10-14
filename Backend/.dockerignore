@@ -1,0 +1,14 @@
+# Only pom.xml and src/ are needed to build the image
+target/
+.mvn/
+mvnw
+mvnw.cmd
+.m2/
+.idea/
+.vscode/
+*.iml
+*.log
+.env
+.env.*
+Dockerfile
+.dockerignore

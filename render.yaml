@@ -11,6 +11,9 @@ services:
     rootDir: Backend
     healthCheckPath: /actuator/health
     envVars:
+      # Production settings and JSON logs (application-prod.properties, logback-spring.xml)
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
       - key: SERVER_PORT
         value: 10000
       # 512 MB instance: cap the heap and use the low-footprint collector

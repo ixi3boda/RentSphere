@@ -28,5 +28,3 @@ Performance/*.jtl
 Performance/reports/
 !Performance/proof/*.log
 
-# Local Maven cache from docker-compose.test.yml
-Backend/.m2/
