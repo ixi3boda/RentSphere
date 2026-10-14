@@ -21,3 +21,8 @@ spec:
       selfHeal: true
     syncOptions:
       - ServerSideApply=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 15s
+        maxDuration: 3m
