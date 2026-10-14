@@ -16,6 +16,9 @@ spec:
       namespace: argocd
     - server: https://kubernetes.default.svc
       namespace: cert-manager
+    # cert-manager's leader-election Roles live here
+    - server: https://kubernetes.default.svc
+      namespace: kube-system
     - server: https://kubernetes.default.svc
       namespace: external-secrets
     - server: https://kubernetes.default.svc
