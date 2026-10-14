@@ -30,6 +30,36 @@ grafana:
       label: grafana_dashboard
       searchNamespace: ALL
   defaultDashboardsTimezone: browser
+  # Logs and traces, linked both ways: a traceId in a log line opens the trace, and a span
+  # opens the log lines written while it ran
+  additionalDataSources:
+    - name: Loki
+      uid: loki
+      type: loki
+      url: http://loki.monitoring.svc.cluster.local:3100
+      jsonData:
+        derivedFields:
+          - name: traceId
+            matcherType: label
+            matcherRegex: traceId
+            datasourceUid: tempo
+            url: "$${__value.raw}"
+    - name: Tempo
+      uid: tempo
+      type: tempo
+      url: http://tempo.monitoring.svc.cluster.local:3200
+      jsonData:
+        tracesToLogsV2:
+          datasourceUid: loki
+          filterByTraceID: true
+          spanStartTimeShift: -1m
+          spanEndTimeShift: 1m
+          customQuery: true
+          query: '{namespace="rentsphere"} | traceId="$${__trace.traceId}"'
+        serviceMap:
+          datasourceUid: prometheus
+        nodeGraph:
+          enabled: true
 
 # kind does not expose these control-plane components to scraping
 kubeControllerManager:

@@ -10,8 +10,12 @@ TF_PROD := infra/terraform/environments/production
 TRAEFIK_CHART_VERSION        := 41.7.1
 METRICS_SERVER_CHART_VERSION := 3.14.0
 KPS_CHART_VERSION            := 92.7.0
+LOKI_CHART_VERSION           := 7.3.0
+TEMPO_CHART_VERSION          := 1.24.4
+ALLOY_CHART_VERSION          := 1.13.1
+GRAFANA_CHARTS               := https://grafana.github.io/helm-charts
 
-.PHONY: help kind-up kind-secrets kind-images kind-deploy kind kind-down k8s-validate kind-monitoring aws-config aws-kubeconfig
+.PHONY: help kind-up kind-secrets kind-images kind-deploy kind kind-down k8s-validate kind-monitoring kind-observability aws-config aws-kubeconfig
 
 help: ## List the targets
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -35,6 +39,8 @@ kind-images: ## Build both images and load them into the cluster
 	docker build -t rentsphere-backend:local Backend
 	docker build -t rentsphere-frontend:local Frontend
 	kind load docker-image rentsphere-backend:local rentsphere-frontend:local --name $(CLUSTER)
+	@# Same tag, new image: restart running pods so they pick it up
+	@kubectl -n $(NAMESPACE) rollout restart deployment/backend deployment/frontend 2>/dev/null || true
 
 kind-deploy: kind-secrets ## Apply the local overlay and wait for the rollout
 	kubectl apply -k $(LOCAL)
@@ -53,6 +59,16 @@ kind-monitoring: ## Install Prometheus, Alertmanager and Grafana (http://grafana
 	  --values k8s/monitoring/kube-prometheus-stack.values.yaml --wait --timeout 10m
 	@echo "Grafana: http://grafana.localhost:8088  user admin, password:"
 	@kubectl -n monitoring get secret grafana-admin -o jsonpath='{.data.admin-password}' | base64 -d; echo
+
+kind-observability: kind-monitoring ## Add Loki (logs), Tempo (traces) and the Alloy collector
+	helm upgrade --install loki loki --repo $(GRAFANA_CHARTS) --version $(LOKI_CHART_VERSION) \
+	  --namespace monitoring --values k8s/monitoring/loki.values.yaml --wait --timeout 10m
+	helm upgrade --install tempo tempo --repo $(GRAFANA_CHARTS) --version $(TEMPO_CHART_VERSION) \
+	  --namespace monitoring --values k8s/monitoring/tempo.values.yaml --wait --timeout 10m
+	kubectl apply -k k8s/monitoring/local
+	helm upgrade --install alloy alloy --repo $(GRAFANA_CHARTS) --version $(ALLOY_CHART_VERSION) \
+	  --namespace monitoring --values k8s/monitoring/alloy.values.yaml --wait --timeout 5m
+	kubectl -n monitoring rollout restart daemonset/alloy
 
 kind: kind-up kind-images kind-deploy ## Everything: cluster, images, app
 

@@ -1,0 +1,21 @@
+# Shared by kind (make kind-observability) and the AWS Argo CD app
+controller:
+  type: daemonset
+alloy:
+  configMap:
+    create: false
+    name: alloy-config
+    key: config.alloy
+  # OTLP receivers for the API's traces
+  extraPorts:
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+      protocol: TCP
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+      protocol: TCP
+  resources:
+    requests: { cpu: 20m, memory: 96Mi }
+    limits: { memory: 256Mi }

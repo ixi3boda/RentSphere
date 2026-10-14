@@ -1,5 +1,6 @@
-// Grafana Alloy on the AWS node: scrapes the API and the container metrics, and sends them to
-// Grafana Cloud's free tier, so the 2 GB node does not have to run Prometheus and Grafana.
+// Grafana Alloy on the AWS node: API and container metrics, pod logs and OpenTelemetry traces,
+// all sent to Grafana Cloud's free tier, so the 2 GB node does not run Prometheus, Loki,
+// Tempo or Grafana itself. The pipelines match the local ones (k8s/monitoring/local).
 
 // ---- API metrics (Actuator on the management port) ----
 discovery.kubernetes "pods" {
@@ -91,5 +92,94 @@ prometheus.remote_write "grafana_cloud" {
 
   external_labels = {
     cluster = "rentsphere-aws",
+  }
+}
+
+// ---- Logs ----
+discovery.relabel "pod_logs" {
+  targets = discovery.kubernetes.pods.targets
+
+  rule {
+    source_labels = ["__meta_kubernetes_namespace"]
+    target_label  = "namespace"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_name"]
+    target_label  = "pod"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_container_name"]
+    target_label  = "container"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+    target_label  = "app"
+  }
+}
+
+loki.source.kubernetes "pods" {
+  targets    = discovery.relabel.pod_logs.output
+  forward_to = [loki.process.json.receiver]
+}
+
+loki.process "json" {
+  stage.json {
+    expressions = {
+      level   = "level",
+      traceId = "traceId",
+    }
+  }
+  stage.labels {
+    values = {
+      level = "",
+    }
+  }
+  stage.structured_metadata {
+    values = {
+      traceId = "",
+    }
+  }
+  forward_to = [loki.write.grafana_cloud.receiver]
+}
+
+loki.write "grafana_cloud" {
+  endpoint {
+    url = sys.env("GRAFANA_CLOUD_LOKI_URL")
+
+    basic_auth {
+      username = sys.env("GRAFANA_CLOUD_LOKI_USER")
+      password = sys.env("GRAFANA_CLOUD_API_TOKEN")
+    }
+  }
+  external_labels = {
+    cluster = "rentsphere-aws",
+  }
+}
+
+// ---- Traces ----
+otelcol.receiver.otlp "default" {
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+  output {
+    traces = [otelcol.processor.batch.default.input]
+  }
+}
+
+otelcol.processor.batch "default" {
+  output {
+    traces = [otelcol.exporter.otlphttp.grafana_cloud.input]
+  }
+}
+
+otelcol.auth.basic "grafana_cloud" {
+  username = sys.env("GRAFANA_CLOUD_OTLP_USER")
+  password = sys.env("GRAFANA_CLOUD_API_TOKEN")
+}
+
+otelcol.exporter.otlphttp "grafana_cloud" {
+  client {
+    endpoint = sys.env("GRAFANA_CLOUD_OTLP_URL")
+    auth     = otelcol.auth.basic.grafana_cloud.handler
   }
 }

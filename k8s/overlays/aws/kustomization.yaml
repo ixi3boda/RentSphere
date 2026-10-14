@@ -30,6 +30,8 @@ configMapGenerator:
       - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=65 -XX:+UseSerialGC -Xss512k
       # Public demo with shared logins: reload the curated data daily
       - RENTSPHERE_DEMO_RESET_ENABLED=true
+      # Keep 20% of traces; the free tier caps trace volume
+      - TRACING_SAMPLING_PROBABILITY=0.2
       # The host part is filled from cluster.env below
       - RENTSPHERE_CORS_ALLOWED_ORIGINS=https://HOSTNAME_PLACEHOLDER
 
