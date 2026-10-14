@@ -1,0 +1,25 @@
+# Core installs have no API server to create the "default" project, and an explicit project is
+# tighter anyway: only these sources, and only these namespaces, can be deployed
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: rentsphere
+  namespace: argocd
+spec:
+  description: RentSphere and the platform components it needs
+  sourceRepos:
+    - https://github.com/ixi3boda/RentSphere.git
+    - https://charts.jetstack.io
+    - https://charts.external-secrets.io
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: argocd
+    - server: https://kubernetes.default.svc
+      namespace: cert-manager
+    - server: https://kubernetes.default.svc
+      namespace: external-secrets
+    - server: https://kubernetes.default.svc
+      namespace: rentsphere
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"

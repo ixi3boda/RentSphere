@@ -6,13 +6,15 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "0"
 spec:
-  project: default
+  project: rentsphere
   source:
     repoURL: https://github.com/ixi3boda/RentSphere.git
     targetRevision: main
     path: k8s/platform
   destination:
     server: https://kubernetes.default.svc
+    # Everything here is cluster-scoped; the namespace only satisfies the project's rules
+    namespace: cert-manager
   syncPolicy:
     automated:
       prune: true

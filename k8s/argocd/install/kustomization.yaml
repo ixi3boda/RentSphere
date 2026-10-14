@@ -7,4 +7,5 @@ namespace: argocd
 
 resources:
   - namespace.yaml
+  - project.yaml
   - https://raw.githubusercontent.com/argoproj/argo-cd/v3.5.5/manifests/core-install.yaml
