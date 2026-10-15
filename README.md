@@ -20,7 +20,7 @@ password `RentSphereDemo2026`. The demo logins are shared, so their profiles are
 The demo runs on Render's free plan. If the API has gone to sleep, the first request takes
 about a minute.
 
-Java 17 · Spring Boot 3.5 · MySQL 8.4 · React · Docker · Kubernetes (k3s, kind) · Kustomize ·
+Java 17 · Spring Boot 4.0 · MySQL 8.4 · React · Docker · Kubernetes (k3s, kind) · Kustomize ·
 Argo CD · Terraform · AWS · GitHub Actions · Prometheus · Grafana · Loki · Tempo ·
 OpenTelemetry · Trivy · CodeQL · cosign
 

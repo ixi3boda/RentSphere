@@ -2,7 +2,7 @@ package com.example.RentSphere.integration;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
+import org.springframework.boot.micrometer.metrics.test.autoconfigure.AutoConfigureMetrics;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalManagementPort;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         properties = "management.endpoints.web.exposure.include=health,prometheus")
 @ActiveProfiles("test")
 // Tests switch metrics export off by default; this keeps the Prometheus registry
-@AutoConfigureObservability(tracing = false)
+@AutoConfigureMetrics
 @DisplayName("Management port")
 class ManagementPortTest {
 

@@ -8,8 +8,8 @@ import com.example.RentSphere.fixtures.TestFixtures;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -29,10 +29,10 @@ class NotificationControllerTest {
 
     @Autowired private MockMvc mockMvc;
 
-    @MockBean private NotificationService notificationService;
-    @MockBean private UserService userService;
-    @MockBean private JwtService jwtService;
-    @MockBean private org.springframework.security.core.userdetails.UserDetailsService myUserDetailsService;
+    @MockitoBean private NotificationService notificationService;
+    @MockitoBean private UserService userService;
+    @MockitoBean private JwtService jwtService;
+    @MockitoBean private org.springframework.security.core.userdetails.UserDetailsService myUserDetailsService;
 
     @Test
     @DisplayName("GET /my - 200 for authenticated user")
