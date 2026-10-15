@@ -6,12 +6,12 @@ import com.example.RentSphere.Service.RentService;
 import com.example.RentSphere.Service.UserService;
 import com.example.RentSphere.SecurityConfig.JwtService;
 import com.example.RentSphere.fixtures.TestFixtures;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -32,11 +32,11 @@ class RentControllerTest {
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
 
-    @MockBean private RentService rentService;
-    @MockBean private ContractService contractService;
-    @MockBean private UserService userService;
-    @MockBean private JwtService jwtService;
-    @MockBean private org.springframework.security.core.userdetails.UserDetailsService myUserDetailsService;
+    @MockitoBean private RentService rentService;
+    @MockitoBean private ContractService contractService;
+    @MockitoBean private UserService userService;
+    @MockitoBean private JwtService jwtService;
+    @MockitoBean private org.springframework.security.core.userdetails.UserDetailsService myUserDetailsService;
 
     
 

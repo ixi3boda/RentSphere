@@ -100,8 +100,7 @@ public class SecConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(myUserDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(myUserDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }

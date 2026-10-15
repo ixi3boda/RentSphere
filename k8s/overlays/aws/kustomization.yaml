@@ -12,9 +12,9 @@ components:
 # CI rewrites these tags on deploy/production when a new image is published
 images:
   - name: ghcr.io/ixi3boda/rentsphere-backend
-    newTag: sha-01de9cd
+    newTag: sha-63e5ecd
   - name: ghcr.io/ixi3boda/rentsphere-frontend
-    newTag: sha-01de9cd
+    newTag: sha-63e5ecd
 configMapGenerator:
   - name: cluster-config
     envs:

@@ -4,13 +4,13 @@ import com.example.RentSphere.Dto.*;
 import com.example.RentSphere.SecurityConfig.JwtService;
 import com.example.RentSphere.Service.UserService;
 import com.example.RentSphere.fixtures.TestFixtures;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -32,8 +32,8 @@ class LoginWorkflowTest {
     @Autowired private ObjectMapper objectMapper;
     @Autowired private JwtService jwtService;
 
-    @MockBean private UserService userService;
-    @MockBean private org.springframework.security.core.userdetails.UserDetailsService myUserDetailsService;
+    @MockitoBean private UserService userService;
+    @MockitoBean private org.springframework.security.core.userdetails.UserDetailsService myUserDetailsService;
 
     @Test
     @DisplayName("POST /login - returns JWT token for valid admin credentials")
