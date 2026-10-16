@@ -39,3 +39,6 @@ k8s/overlays/*/secrets.env
 *.tfvars
 !*.tfvars.example
 crash.log
+
+# Personal files kept next to the repo (CV, outreach tracker, drafts)
+Claude outputs/
