@@ -1,5 +1,5 @@
 # ---- Build stage: JDK + Maven, thrown away after the build ----
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM maven:3.9-eclipse-temurin-26 AS build
 WORKDIR /build
 
 # Cache dependencies separately so this layer is reused on src-only changes
