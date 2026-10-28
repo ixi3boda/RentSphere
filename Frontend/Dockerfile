@@ -10,7 +10,7 @@ RUN npm run build
 
 # Serve it with nginx; no Node process or dev server in the running image. The unprivileged
 # variant runs as the nginx user (uid 101) and keeps its pid and temp files under /tmp.
-FROM nginxinc/nginx-unprivileged:1.30-alpine
+FROM nginxinc/nginx-unprivileged:1.31-alpine
 
 # Pick up Alpine security fixes released since the base image was published
 USER root
